@@ -92,11 +92,11 @@ module.exports = {
         }),
         new HtmlWebpackPlugin({
             title: 'Monitor admin',
-            favicon: './td_icon.ico',
+            favicon: './cllogos.png',
             template: '!!ejs-loader!./src/template/index.ejs',
         }),
         new CopyWebpackPlugin([{
-                from: 'td_icon.ico'
+                from: 'cllogos.png'
             }, {
                 from: 'src/styles/fonts',
                 to: 'fonts'
