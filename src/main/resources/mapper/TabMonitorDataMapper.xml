@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.all580.monitor.mapper.TabMonitorDataMapper">
+  <resultMap id="BaseResultMap" type="com.all580.monitor.entity.TabMonitorData">
+    <!--
+      WARNING - @mbg.generated
+    -->
+    <id column="id" jdbcType="INTEGER" property="id" />
+    <result column="metric" jdbcType="VARCHAR" property="metric" />
+    <result column="key" jdbcType="VARCHAR" property="key" />
+    <result column="value" jdbcType="VARCHAR" property="value" />
+    <result column="host" jdbcType="VARCHAR" property="host" />
+    <result column="memo" jdbcType="VARCHAR" property="memo" />
+    <result column="upload_time" jdbcType="TIMESTAMP" property="uploadTime" />
+    <result column="resource" jdbcType="VARCHAR" property="resource" />
+  </resultMap>
+</mapper>
