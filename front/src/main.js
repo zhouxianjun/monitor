@@ -8,9 +8,12 @@ import '@/locale';
 import 'iview/dist/styles/iview.css';
 import VueI18n from 'vue-i18n';
 import axios from 'axios';
+import VueSlimScroll from 'vue-slimscroll';
+import Common from './libs/common';
 
 Vue.use(VueI18n);
 Vue.use(iView);
+Vue.use(VueSlimScroll);
 
 const BASE_URL = baseURL;
 
@@ -35,6 +38,7 @@ Vue.prototype.fetch = async (url, config, showError = true, error) => {
             throw new Error(`fetch ${url} data ${JSON.stringify(config)} error`);
         }
         iView['LoadingBar'].finish();
+        Common.stringToNumber(result);
         return result;
     } catch (err) {
         iView['LoadingBar'].error();

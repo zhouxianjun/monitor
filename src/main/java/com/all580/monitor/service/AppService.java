@@ -15,7 +15,8 @@ public interface AppService extends IService<TabApp> {
      * 获取引用list
      * @param spot 景区ID
      * @param name 应用名称
+     * @param normal 是否正常
      * @return
      */
-    List<TabApp> list(Integer spot, String name);
+    List<?> list(Integer spot, String name, Boolean normal);
 }

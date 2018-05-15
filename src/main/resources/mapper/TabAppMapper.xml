@@ -1,15 +1,48 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.all580.monitor.mapper.TabAppMapper">
-  <resultMap id="BaseResultMap" type="com.all580.monitor.entity.TabApp">
-    <!--
-      WARNING - @mbg.generated
-    -->
-    <id column="id" jdbcType="INTEGER" property="id" />
-    <result column="spot_id" jdbcType="INTEGER" property="spotId" />
-    <result column="name" jdbcType="VARCHAR" property="name" />
-    <result column="hosts" jdbcType="VARCHAR" property="hosts" />
-    <result column="alarm" jdbcType="BIT" property="alarm" />
-    <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
-  </resultMap>
+    <resultMap id="BaseResultMap" type="com.all580.monitor.entity.TabApp">
+        <!--
+          WARNING - @mbg.generated
+        -->
+        <id column="id" jdbcType="INTEGER" property="id"/>
+        <result column="spot_id" jdbcType="INTEGER" property="spotId"/>
+        <result column="name" jdbcType="VARCHAR" property="name"/>
+        <result column="hosts" jdbcType="VARCHAR" property="hosts"/>
+        <result column="alarm" jdbcType="BIT" property="alarm"/>
+        <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
+    </resultMap>
+
+    <select id="search" resultType="map">
+        SELECT
+        ts.`name` spot_name,
+        ta.*,
+        t.alert_count
+        FROM
+        tab_app ta
+        LEFT JOIN tab_spot ts ON ts.id = ta.spot_id
+        LEFT JOIN (
+        SELECT
+        tar.app_id,
+        count( * ) alert_count
+        FROM
+        tab_alarm_rule tar
+        LEFT JOIN tab_alarm_history tah ON tah.id = tar.last_history
+        WHERE
+        tah.`status` = 2
+        GROUP BY
+        tar.app_id
+        ) t ON t.app_id = ta.id
+        WHERE 1=1
+        <if test="normal != null">
+            AND (t.alert_count IS NULL
+            OR t.alert_count &lt;= 0)
+        </if>
+        <if test="name != null">
+            AND ta.`name` like concat('%', #{name}, '%')
+        </if>
+        <if test="spot != null">
+            AND ta.spot_id = #{spot}
+        </if>
+    </select>
 </mapper>

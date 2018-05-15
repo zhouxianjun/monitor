@@ -9,6 +9,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Date;
+
 /**
  * @author zhouxianjun(Alone)
  * @ClassName:
@@ -32,16 +34,17 @@ public class AppController {
     @ApiImplicitParams({
             @ApiImplicitParam(name = "spot", value = "景区ID"),
             @ApiImplicitParam(name = "name", value = "应用名称(模糊匹配)"),
+            @ApiImplicitParam(name = "normal", value = "是否正常（没有正在报警的规则）"),
             @ApiImplicitParam(name = "pageNum", value = "页总数"),
             @ApiImplicitParam(name = "pageSize", value = "页总数"),
     })
     @GetMapping("list")
-    public Result<?> list(Integer spot, String name, Integer pageNum, Integer pageSize) {
+    public Result<?> list(Integer spot, String name, Boolean normal, Integer pageNum, Integer pageSize) {
         Object value;
         if (pageNum != null && pageSize != null) {
-            value = PageHelper.startPage(pageNum, pageSize).doSelectPageInfo(() -> appService.list(spot, name));
+            value = PageHelper.startPage(pageNum, pageSize).doSelectPageInfo(() -> appService.list(spot, name, normal));
         } else {
-            value = appService.list(spot, name);
+            value = appService.list(spot, name, normal);
         }
         return Result.builder().code(Result.SUCCESS).value(value).build();
     }
@@ -49,6 +52,7 @@ public class AppController {
     @ApiOperation(value = "新增应用", produces = MediaType.APPLICATION_JSON_VALUE)
     @PostMapping("add")
     public Result<?> add(@ApiParam(required = true) @RequestBody TabApp app) {
+        app.setCreateTime(new Date());
         int ret = appService.save(app);
         if (ret <= 0) {
             return Result.fail();
@@ -60,6 +64,16 @@ public class AppController {
     @PostMapping("update")
     public Result<?> update(@ApiParam(required = true) @RequestBody TabApp app) {
         int ret = appService.updateNotNull(app);
+        if (ret <= 0) {
+            return Result.fail();
+        }
+        return Result.ok();
+    }
+
+    @ApiOperation(value = "删除应用", produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping("remove")
+    public Result<?> remove(@ApiParam(required = true) @RequestBody TabApp app) {
+        int ret = appService.delete(app.getId());
         if (ret <= 0) {
             return Result.fail();
         }
