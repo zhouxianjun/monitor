@@ -1,5 +1,7 @@
 package com.all580.monitor.entity;
 
+import com.all580.monitor.Constant;
+import com.all580.monitor.annotation.NoticeType;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
@@ -25,16 +27,19 @@ public class TabAlarmContacts implements Serializable {
     /**
      * 邮箱地址
      */
+    @NoticeType(Constant.NoticeType.EMAIL)
     private String email;
 
     /**
      * 钉钉机器人
      */
+    @NoticeType(Constant.NoticeType.DING)
     private String ding;
 
     /**
      * 微信关注公众号的openid
      */
+    @NoticeType(Constant.NoticeType.WX)
     private String openid;
 
     private static final long serialVersionUID = 1L;

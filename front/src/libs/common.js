@@ -1,4 +1,6 @@
 import dayjs from 'dayjs';
+import {getAttribute} from './dic';
+
 const Common = {
     valid: {
         ip(rule, value, callback) {
@@ -39,14 +41,10 @@ const Common = {
             return h('span', Common.dateFormat(params.row[params.column.key]));
         },
         DATE_RANGE(h, params) {
-            return function (start, end) {
-                return h('span', `${Common.dateFormat(params.row[start])}~${Common.dateFormat(params.row[end])}`);
-            };
+            return (start, end) => h('span', `${Common.dateFormat(params.row[start])}~${Common.dateFormat(params.row[end])}`);
         },
         APPEND(h, params) {
-            return function (append) {
-                return h('span', `${params.row[params.column.key]}${append}`);
-            };
+            return append => h('span', `${params.row[params.column.key]}${append}`);
         },
         STATUS(h, params) {
             let status = params.row[params.column.key];
@@ -67,6 +65,15 @@ const Common = {
                     }
                 }, value === true ? trueTxt : falseTxt);
             };
+        },
+        STATUS_DIC(h, params) {
+            let status = params.row[params.column.key];
+            return (color, dic) => h('Tag', {
+                props: {
+                    type: 'border',
+                    color: color[status]
+                }
+            }, getAttribute(dic, 'id', status).name);
         },
         POPTIP(h, params) {
             return h('Poptip', {
@@ -105,6 +112,9 @@ const Common = {
                     }))
                 ])
             ]);
+        },
+        JOIN(h, params) {
+            return (...args) => h('span', args.map(arg => params.row[arg]).join('/'));
         }
     },
     tableSplitCount(params) {

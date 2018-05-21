@@ -1,14 +1,48 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.all580.monitor.mapper.TabAlarmHistoryMapper">
-  <resultMap id="BaseResultMap" type="com.all580.monitor.entity.TabAlarmHistory">
-    <!--
-      WARNING - @mbg.generated
-    -->
-    <id column="id" jdbcType="INTEGER" property="id" />
-    <result column="rule_id" jdbcType="INTEGER" property="ruleId" />
-    <result column="duration" jdbcType="INTEGER" property="duration" />
-    <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
-    <result column="status" jdbcType="INTEGER" property="status" />
-  </resultMap>
+    <resultMap id="BaseResultMap" type="com.all580.monitor.entity.TabAlarmHistory">
+        <!--
+          WARNING - @mbg.generated
+        -->
+        <id column="id" jdbcType="INTEGER" property="id"/>
+        <result column="rule_id" jdbcType="INTEGER" property="ruleId"/>
+        <result column="duration" jdbcType="INTEGER" property="duration"/>
+        <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
+        <result column="status" jdbcType="INTEGER" property="status"/>
+    </resultMap>
+    <select id="search" resultType="map">
+        SELECT
+            ts.`name` spot_name,
+            ta.`name` app_name,
+            tar.`name` rule_name,
+            tar.metric,
+            tar.resource,
+            tah.*
+        FROM
+            tab_alarm_history tah
+        LEFT JOIN tab_alarm_rule tar ON tar.id = tah.rule_id
+        LEFT JOIN tab_app ta ON ta.id = tar.app_id
+        LEFT JOIN tab_spot ts ON ts.id = ta.spot_id
+        where 1=1
+        <if test="spot != null">
+            AND ts.id = #{spot}
+        </if>
+        <if test="app != null">
+            AND ta.id = #{app}
+        </if>
+        <if test="name != null">
+            AND tar.`name` like concat('%', #{name}, '%')
+        </if>
+        <if test="status != null">
+            AND tah.status = #{status}
+        </if>
+        <if test="start != null">
+            AND tah.create_time &gt;= #{start}
+        </if>
+        <if test="end != null">
+            AND tah.create_time &lt;= #{end}
+        </if>
+        order by tah.create_time desc
+    </select>
 </mapper>

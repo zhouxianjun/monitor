@@ -44,5 +44,6 @@
         <if test="spot != null">
             AND ta.spot_id = #{spot}
         </if>
+        order by ta.create_time desc
     </select>
 </mapper>

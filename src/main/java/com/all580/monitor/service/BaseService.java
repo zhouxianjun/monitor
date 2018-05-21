@@ -1,6 +1,7 @@
 package com.all580.monitor.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 import tk.mybatis.mapper.common.Mapper;
 
 import java.util.List;
@@ -22,21 +23,25 @@ public class BaseService<T> implements IService<T> {
     }
 
     @Override
+    @Transactional(rollbackFor = {Exception.class, RuntimeException.class})
     public int save(T entity) {
         return mapper.insertSelective(entity);
     }
 
     @Override
+    @Transactional(rollbackFor = {Exception.class, RuntimeException.class})
     public int delete(Object key) {
         return mapper.deleteByPrimaryKey(key);
     }
 
     @Override
+    @Transactional(rollbackFor = {Exception.class, RuntimeException.class})
     public int updateAll(T entity) {
         return mapper.updateByPrimaryKey(entity);
     }
 
     @Override
+    @Transactional(rollbackFor = {Exception.class, RuntimeException.class})
     public int updateNotNull(T entity) {
         return mapper.updateByPrimaryKeySelective(entity);
     }

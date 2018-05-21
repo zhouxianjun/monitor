@@ -1,25 +1,55 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.all580.monitor.mapper.TabAlarmRuleMapper">
-  <resultMap id="BaseResultMap" type="com.all580.monitor.entity.TabAlarmRule">
-    <!--
-      WARNING - @mbg.generated
-    -->
-    <id column="id" jdbcType="INTEGER" property="id" />
-    <result column="app_id" jdbcType="INTEGER" property="appId" />
-    <result column="name" jdbcType="VARCHAR" property="name" />
-    <result column="metric" jdbcType="VARCHAR" property="metric" />
-    <result column="count" jdbcType="INTEGER" property="count" />
-    <result column="current_count" jdbcType="INTEGER" property="currentCount" />
-    <result column="resource" jdbcType="VARCHAR" property="resource" />
-    <result column="interval" jdbcType="INTEGER" property="interval" />
-    <result column="script" jdbcType="VARCHAR" property="script" />
-    <result column="silence_interval" jdbcType="INTEGER" property="silenceInterval" />
-    <result column="alarm_group_id" jdbcType="INTEGER" property="alarmGroupId" />
-    <result column="alarm_callback" jdbcType="VARCHAR" property="alarmCallback" />
-    <result column="nodata" jdbcType="BIT" property="nodata" />
-    <result column="status" jdbcType="BIT" property="status" />
-    <result column="last_history" jdbcType="INTEGER" property="lastHistory" />
-    <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
-  </resultMap>
+    <resultMap id="BaseResultMap" type="com.all580.monitor.entity.TabAlarmRule">
+        <!--
+          WARNING - @mbg.generated
+        -->
+        <id column="id" jdbcType="INTEGER" property="id"/>
+        <result column="app_id" jdbcType="INTEGER" property="appId"/>
+        <result column="name" jdbcType="VARCHAR" property="name"/>
+        <result column="metric" jdbcType="VARCHAR" property="metric"/>
+        <result column="count" jdbcType="INTEGER" property="count"/>
+        <result column="current_count" jdbcType="INTEGER" property="currentCount"/>
+        <result column="resource" jdbcType="VARCHAR" property="resource"/>
+        <result column="interval" jdbcType="INTEGER" property="interval"/>
+        <result column="script" jdbcType="VARCHAR" property="script"/>
+        <result column="silence_interval" jdbcType="INTEGER" property="silenceInterval"/>
+        <result column="alarm_group_id" jdbcType="INTEGER" property="alarmGroupId"/>
+        <result column="alarm_callback" jdbcType="VARCHAR" property="alarmCallback"/>
+        <result column="nodata" jdbcType="BIT" property="nodata"/>
+        <result column="status" jdbcType="BIT" property="status"/>
+        <result column="last_history" jdbcType="INTEGER" property="lastHistory"/>
+        <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
+    </resultMap>
+
+    <select id="search" resultType="map">
+        SELECT
+            ts.`name` spot_name,
+            ta.`name` app_name,
+            tah.`status` last_status,
+            tar.*
+        FROM
+            tab_alarm_rule tar
+            LEFT JOIN tab_app ta ON ta.id = tar.app_id
+            LEFT JOIN tab_spot ts ON ts.id = ta.spot_id
+            LEFT JOIN tab_alarm_history tah ON tah.id = tar.last_history
+        where 1=1
+        <if test="spot != null">
+            AND ts.id = #{spot}
+        </if>
+        <if test="app != null">
+            AND ta.id = #{app}
+        </if>
+        <if test="name != null">
+            AND tar.`name` like concat('%', #{name}, '%')
+        </if>
+        <if test="alarm != null">
+            AND tah.status in(1, 2)
+        </if>
+        <if test="status != null">
+            AND tar.status = #{status}
+        </if>
+        order by tar.create_time desc
+    </select>
 </mapper>

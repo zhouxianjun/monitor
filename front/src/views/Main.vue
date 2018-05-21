@@ -52,7 +52,7 @@
                 </div>
             </div>
             <div class="tags-con">
-                <tags-page-opened :pageTagsList="pageTagsList"></tags-page-opened>
+                <tags-page-opened ref="tags" :pageTagsList="pageTagsList"></tags-page-opened>
             </div>
         </div>
         <div class="single-page-con" :style="{left: shrink?'60px':'200px'}">
