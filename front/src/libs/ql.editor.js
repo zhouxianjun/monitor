@@ -95,7 +95,7 @@ export default () => {
             let text = model.getValueInRange({startLineNumber: position.lineNumber, startColumn: 1, endLineNumber: position.lineNumber, endColumn: position.column});
             if (text.endsWith('.')) {
                 text = text.substring(0, text.length - 1);
-                let result = Reflect.ownKeys(provide[text]).map(k => Object.create({label: k, kind: monaco.languages.CompletionItemKind[provide[text][k]]}));
+                let result = Reflect.ownKeys(provide[text] || {}).map(k => Object.create({label: k, kind: monaco.languages.CompletionItemKind[provide[text][k]]}));
                 if (result && result.length) {
                     return result;
                 }
