@@ -6,7 +6,6 @@ import com.all580.monitor.entity.TabMonitorData;
 import com.all580.monitor.manager.AlarmRuleManager;
 import com.all580.monitor.service.AlarmHistoryService;
 import com.all580.monitor.service.MonitorDataService;
-import io.netty.util.HashedWheelTimer;
 import io.netty.util.Timeout;
 import io.netty.util.TimerTask;
 import lombok.Setter;
@@ -15,7 +14,6 @@ import org.apache.commons.lang.time.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
 import java.util.List;
@@ -33,8 +31,6 @@ import java.util.concurrent.TimeUnit;
 public class AlarmRuleTask implements TimerTask {
     @Setter
     private TabAlarmRule rule;
-    @Setter
-    private HashedWheelTimer timer;
     private Timeout timeout;
     private boolean run = true;
     private TabAlarmHistory history;
@@ -46,9 +42,8 @@ public class AlarmRuleTask implements TimerTask {
     private AlarmRuleManager alarmRuleManager;
 
     @Override
-    @Transactional(rollbackFor = {RuntimeException.class, Exception.class})
     public void run(Timeout timeout) throws Exception {
-        log.debug("执行报警规则任务: {}", rule);
+        log.debug("---开始报警规则任务: {}---", rule);
         try {
             Date curDate = new Date();
             getHistory();
@@ -60,9 +55,9 @@ public class AlarmRuleTask implements TimerTask {
         } catch (Throwable e) {
             log.warn("报警规则任务: {} 执行异常", rule, e);
         } finally {
-            log.debug("报警任务:{} 执行完毕: {}", rule, history);
+            log.debug("---结束报警任务:{} - {}---", rule, history);
             if (this.run) {
-                this.timeout = timer.newTimeout(this, rule.getInterval(), TimeUnit.MINUTES);
+                this.timeout = timeout.timer().newTimeout(this, rule.getInterval(), TimeUnit.MINUTES);
             }
         }
     }

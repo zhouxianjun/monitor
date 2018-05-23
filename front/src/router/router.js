@@ -53,7 +53,8 @@ export const otherRouter = {
         { path: 'home', title: {i18n: 'home'}, name: 'home_index', component: () => import('@/views/home/home.vue') },
         { path: 'ownspace', title: '个人中心', name: 'ownspace_index', component: () => import('@/views/own-space/own-space.vue') },
         { path: 'message', title: '消息中心', name: 'message_index', component: () => import('@/views/message/message.vue') },
-        { path: 'alarm/rule/edit', title: '编辑报警规则', name: 'alarm-rule-edit', component: () => import('@/views/alarm/rule/edit.vue') }
+        { path: 'alarm/rule/edit', title: '编辑报警规则', name: 'alarm-rule-edit', component: () => import('@/views/alarm/rule/edit.vue') },
+        { path: 'monitor/http/edit', title: '编辑HTTP监控', name: 'monitor-http-edit', component: () => import('@/views/site-monitor/http/edit.vue') }
     ]
 };
 
@@ -76,6 +77,15 @@ export const appRouter = [{
     children: [
         { path: 'rule', title: '报警规则', name: 'rule_index', component: () => import('@/views/alarm/rule/index.vue') },
         { path: 'history', title: '报警历史', name: 'history_index', component: () => import('@/views/alarm/history/index.vue') }
+    ]
+}, {
+    path: '/site-monitor',
+    icon: 'key',
+    name: 'site-monitor',
+    title: '站点监控',
+    component: Main,
+    children: [
+        { path: 'index', title: '站点列表', name: 'index', component: () => import('@/views/site-monitor/index.vue') }
     ]
 }];
 

@@ -81,6 +81,11 @@ public class TabAlarmRule implements Serializable {
     private Boolean nodata;
 
     /**
+     * 是否定时任务
+     */
+    private Boolean timer;
+
+    /**
      * 状态：0--禁用；1--启用;
      */
     private Boolean status;

@@ -40,3 +40,20 @@ exports.NoticeType = [{
     id: 4,
     name: '钉钉机器人'
 }];
+exports.SiteType = [{
+    id: 1,
+    name: 'HTTP'
+}, {
+    id: 2,
+    name: '上报'
+}];
+exports.MethodType = [{
+    id: 'GET',
+    name: 'GET'
+}, {
+    id: 'POST',
+    name: 'POST'
+}, {
+    id: 'HEAD',
+    name: 'HEAD'
+}];

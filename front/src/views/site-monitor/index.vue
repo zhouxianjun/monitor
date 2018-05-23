@@ -1,10 +1,11 @@
 <template>
     <div>
         <Row>
-            <Button type="primary" @click="add"><Icon type="plus"></Icon>创建规则</Button>
+            <Button type="primary" @click="addHttp"><Icon type="plus"></Icon>创建HTTP</Button>
+            <Button type="primary" @click="addReported"><Icon type="plus"></Icon>创建上报</Button>
         </Row>
         <Row class="margin-top-10">
-            <Input v-model="table.query.name" placeholder="规则名称" clearable style="width: 200px" />
+            <Input v-model="table.query.name" placeholder="站点名称" clearable style="width: 200px" />
             <label class="margin-left-10">景区：</label>
             <Select v-model="table.query.spot" style="width: 200px">
                 <Option value="">全部</Option>
@@ -14,6 +15,11 @@
             <Select v-model="table.query.app" style="width: 200px">
                 <Option value="">全部</Option>
                 <Option v-for="item in apps" :value="item.id" :key="item.id">{{ item.name }}</Option>
+            </Select>
+            <label class="margin-left-10">类型：</label>
+            <Select v-model="table.query.type" style="width: 200px">
+                <Option value="">全部</Option>
+                <Option v-for="item in SiteType" :value="item.id" :key="item.id">{{ item.name }}</Option>
             </Select>
             <label class="margin-left-10">状态：</label>
             <Select v-model="table.query.status" style="width: 200px">
@@ -33,31 +39,18 @@
                 </div>
             </Col>
         </Row>
-
-        <Modal v-model="removeModal" width="360" @on-cancel="cancel">
-            <p slot="header" style="color:#f60;text-align:center">
-                <Icon type="information-circled"></Icon>
-                <span>删除确认</span>
-            </p>
-            <div style="text-align:center">
-                <p>确定删除 {{removeItem ? removeItem.name : ''}} 吗?，删除后将无法恢复。</p>
-                <p>是否继续删除？</p>
-            </div>
-            <div slot="footer">
-                <Button type="error" size="large" @click="remove">删除</Button>
-            </div>
-        </Modal>
     </div>
 </template>
 
 <script>
-    import Common from '../../../libs/common';
-    import {Status} from '../../../libs/dic';
+    import Common from '../../libs/common';
+    import {Status, SiteType} from '../../libs/dic';
     export default {
-        name: "alarm-rule-index",
+        name: "site-monitor-index",
         data() {
             return {
                 Status,
+                SiteType,
                 table: {
                     col: [{
                         title: '景区',
@@ -66,7 +59,7 @@
                         title: '应用',
                         key: 'appName'
                     }, {
-                        title: '规则名称',
+                        title: '站点名称',
                         key: 'name'
                     }, {
                         title: '报警状态',
@@ -77,33 +70,13 @@
                         },
                         width: 140
                     }, {
-                        title: '监控项',
-                        key: 'metric'
-                    }, {
-                        title: '资源标识',
-                        key: 'resource',
-                        render: Common.RENDER.POPTIP
-                    }, {
                         title: '频率',
                         key: 'interval',
                         render: (h, params) => Common.RENDER.APPEND(h, params)('分钟')
                     }, {
-                        title: '沉默',
-                        key: 'silenceInterval',
-                        render: (h, params) => Common.RENDER.APPEND(h, params)('分钟')
-                    }, {
-                        title: '次数',
-                        key: 'count',
-                        render: (h, params) => Common.RENDER.APPEND(h, params)('次')
-                    }, {
                         title: '状态',
                         key: 'status',
                         render: Common.RENDER.STATUS
-                    }, {
-                        title: '创建时间',
-                        key: 'createTime',
-                        render: Common.RENDER.DATE,
-                        width: 148
                     }, {
                         title: '操作',
                         key: 'action',
@@ -123,26 +96,32 @@
                                     on: {
                                         click: async () => {
                                             this.$router.push({
-                                                name: 'alarm-rule-edit',
+                                                name: 'monitor-http-edit',
                                                 params: params.row
                                             });
                                         }
                                     }
                                 }, '修改'),
-                                h('Button', {
+                                h('Poptip', {
                                     props: {
-                                        type: 'error',
-                                        size: 'small',
-                                        loading: this.loadingBtn
+                                        confirm: true,
+                                        title: '您确定要删除这条数据吗?',
+                                        placement: 'top',
+                                        transfer: true
                                     },
                                     on: {
-                                        click: async () => {
-                                            this.removeModal = true;
-                                            this.removeItem = params.row;
-                                            this.loadingBtn = true;
+                                        'on-ok': async () => {
+                                            await this.remove(params.row);
                                         }
                                     }
-                                }, '删除')
+                                }, [
+                                    h('Button', {
+                                        props: {
+                                            type: 'error',
+                                            size: 'small'
+                                        }
+                                    }, '删除')
+                                ])
                             ]);
                         }
                     }],
@@ -153,15 +132,13 @@
                         name: null,
                         status: null,
                         alarm: null,
+                        type: 1,
                         pageNum: 1,
                         pageSize: 10
                     }
                 },
                 spots: [],
                 apps: [],
-                removeModal: false,
-                removeItem: null,
-                loadingBtn: false
             }
         },
         async mounted() {
@@ -175,7 +152,7 @@
         },
         methods: {
             async doQuery() {
-                let list = await this.fetch('/api/alarm/rule/list', {params: this.table.query});
+                let list = await this.fetch(this.table.query.type === 1 ? '/api/monitor/http/list' : '/api/monitor/reported/list', {params: this.table.query});
                 list && (this.table.data = list.value.size === 0 ? [] : list.value.list);
                 list && (this.table.total = list.value.total);
                 this.loadingBtn = false;
@@ -196,34 +173,30 @@
                 let list = await this.fetch('/api/app/list', {params: {spot}});
                 return list.value ? list.value : [];
             },
-            add() {
+            addHttp() {
                 this.$router.push({
-                    name: 'alarm-rule-edit',
+                    name: 'monitor-http-edit',
                     params: {}
                 });
             },
-            async remove() {
-                if (!this.removeItem) return;
-                let success = await this.fetch('/api/alarm/rule/remove', {method: 'post', data: {id: this.removeItem.id}});
+            addReported() {
+                this.$router.push({
+                    name: 'monitor-reported-edit',
+                    params: {}
+                });
+            },
+            async remove(item) {
+                if (!item) return;
+                let success = await this.fetch(this.table.query.type === 1 ? '/api/monitor/http/remove' : '/api/monitor/reported/remove', {method: 'post', data: {id: item.id}});
                 if (success === false) {
-                    this.resetLoadingBtn();
                     return;
                 }
-                this.removeItem = null;
-                this.removeModal = false;
                 setTimeout(() => this.doQuery(), 500);
-            },
-            cancel() {
-                this.loadingBtn = false;
-            },
-            resetLoadingBtn() {
-                this.loadingBtn = false;
-                this.$nextTick(() => this.loadingBtn = true);
             }
         }
     }
 </script>
 
 <style lang="less">
-    @import '../../../styles/common.less';
+    @import '../../styles/common.less';
 </style>

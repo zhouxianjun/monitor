@@ -34,14 +34,9 @@ public class TabHttpMonitor implements Serializable {
     private String url;
 
     /**
-     * 监控频率(间隔)单位为分钟
+     * 请求方式: GET；POST；HEAD
      */
-    private Integer interval;
-
-    /**
-     * 请求方式: 1--GET；2--POST；3--HEAD
-     */
-    private Integer method;
+    private String method;
 
     /**
      * cookie信息:JSON key:value格式
@@ -52,6 +47,12 @@ public class TabHttpMonitor implements Serializable {
      * 头信息:JSON key:value格式
      */
     private String header;
+
+    /**
+     * 认证 user:password
+     */
+    @Column(name = "basic_auth")
+    private String basicAuth;
 
     /**
      * 状态

@@ -41,7 +41,7 @@
     import {HistoryStatus} from '../../../libs/dic';
 
     export default {
-        name: "index",
+        name: "alarm-history-index",
         data() {
             return {
                 HistoryStatus,

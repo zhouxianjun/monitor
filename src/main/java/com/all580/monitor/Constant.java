@@ -43,4 +43,18 @@ public class Constant {
          */
         public static final int DING = 4;
     }
+
+    /**
+     * 指标
+     */
+    public static final class Metric {
+        /**
+         * HTTP心跳
+         */
+        public static final String HTTP_HEARTBEAT = "http.heartbeat";
+        /**
+         * 上报心跳
+         */
+        public static final String REPORTED_HEARTBEAT = "reported.heartbeat";
+    }
 }

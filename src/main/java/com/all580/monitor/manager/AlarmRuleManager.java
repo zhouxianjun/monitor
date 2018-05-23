@@ -20,12 +20,14 @@ import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.commons.lang.time.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
 import java.lang.reflect.Field;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * @author zhouxianjun(Alone)
@@ -65,13 +67,17 @@ public class AlarmRuleManager {
      * @param curDate 当前时间
      * @throws Throwable
      */
+    @Transactional(rollbackFor = {RuntimeException.class, Exception.class})
     public TabAlarmHistory judge(List<TabMonitorData> data, TabAlarmRule rule, TabAlarmHistory history, Date curDate) throws Throwable {
         if (CollectionUtils.isEmpty(data) && rule.getNodata()) {
             return process(rule, history, false, curDate);
         }
         // 执行脚本
         if (StringUtils.isNotEmpty(rule.getScript())) {
-            Map context = MapUtil.builder().put("rule", rule).put("history", history).put("data", data).build();
+            Map context = MapUtil.builder().put("rule", rule).put("history", history).put("data", data).put("log", log).build();
+            if (!CollectionUtils.isEmpty(data)) {
+                context.put("dataBatch", data.stream().collect(Collectors.groupingBy(TabMonitorData::getBatch)));
+            }
             Object result = qlExpressMgr.execute(rule.getScript(), context);
             if (result instanceof Boolean && !(Boolean) result) {
                 return process(rule, history, false, curDate);

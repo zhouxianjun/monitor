@@ -11,6 +11,7 @@
     <result column="value" jdbcType="VARCHAR" property="value" />
     <result column="host" jdbcType="VARCHAR" property="host" />
     <result column="memo" jdbcType="VARCHAR" property="memo" />
+    <result column="batch" jdbcType="VARCHAR" property="batch" />
     <result column="upload_time" jdbcType="TIMESTAMP" property="uploadTime" />
     <result column="resource" jdbcType="VARCHAR" property="resource" />
   </resultMap>

@@ -100,6 +100,9 @@ module.exports = {
             }, {
                 from: 'src/styles/fonts',
                 to: 'fonts'
+            }, {
+                from: 'node_modules/monaco-editor/min/vs',
+                to: 'vs',
             }
         ], {
             ignore: [

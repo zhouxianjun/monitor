@@ -1,7 +1,10 @@
 package com.all580.monitor.task;
 
+import cn.hutool.core.lang.Validator;
 import com.all580.monitor.entity.TabAlarmRule;
+import com.all580.monitor.entity.TabHttpMonitor;
 import com.all580.monitor.service.AlarmRuleService;
+import com.all580.monitor.service.HttpMonitorService;
 import io.netty.util.HashedWheelTimer;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,38 +23,38 @@ import java.util.concurrent.TimeUnit;
 /**
  * @author zhouxianjun(Alone)
  * @ClassName:
- * @Description: 初始化报警规则扫描任务
- * @date 2018/5/15 16:31
+ * @Description: HTTP心跳任务
+ * @date 2018/5/22 9:03
  */
 @Component
 @Slf4j
-public class AlarmRuleTimer implements CommandLineRunner, ApplicationListener<ContextClosedEvent> {
+public class HttpHeartbeatTimer implements CommandLineRunner, ApplicationListener<ContextClosedEvent> {
+    @Autowired
+    private HttpMonitorService httpMonitorService;
     @Autowired
     private AlarmRuleService alarmRuleService;
     @Autowired
     private ApplicationContext applicationContext;
-    private final Map<Integer, AlarmRuleTask> taskMap = new HashMap<>();
+    private final Map<Integer, HttpHeartbeatTask> taskMap = new HashMap<>();
     private final HashedWheelTimer timer = new HashedWheelTimer();
+
 
     @Override
     public void run(String... args) throws Exception {
         Example example = new Example(TabAlarmRule.class);
-        example.and()
-                .andEqualTo("status", true)
-                .andGreaterThan("interval", 0)
-                .andEqualTo("timer", true);
-        List<TabAlarmRule> list = alarmRuleService.selectByExample(example);
+        example.and().andEqualTo("status", true);
+        List<TabHttpMonitor> list = httpMonitorService.selectByExample(example);
         if (list != null) {
             list.forEach(this::add);
         }
     }
 
     public void add(int id) {
-        add(alarmRuleService.selectByKey(id));
+        add(httpMonitorService.selectByKey(id));
     }
 
     public void update(int id) {
-        AlarmRuleTask task = taskMap.get(id);
+        HttpHeartbeatTask task = taskMap.get(id);
         if (task != null) {
             task.stop(true);
             taskMap.remove(id);
@@ -59,19 +62,35 @@ public class AlarmRuleTimer implements CommandLineRunner, ApplicationListener<Co
         this.add(id);
     }
 
-    private void add(TabAlarmRule rule) {
-        if (rule == null || !rule.getStatus() || rule.getInterval() <= 0 || !rule.getTimer()) {
+    public void updateRule(int ruleId) {
+        List<TabHttpMonitor> list = httpMonitorService.select(new TabHttpMonitor().setAlarmRuleId(ruleId));
+        if (list != null) {
+            list.forEach(m -> {
+                if (taskMap.containsKey(m.getId())) {
+                    taskMap.get(m.getId()).setRule(null);
+                }
+            });
+        }
+    }
+
+    private void add(TabHttpMonitor monitor) {
+        if (monitor == null || !monitor.getStatus() || !Validator.isUrl(monitor.getUrl())) {
             return;
         }
-        if (taskMap.containsKey(rule.getId())) {
-            log.warn("该任务规则已存在: {}", rule);
+        TabAlarmRule rule = alarmRuleService.selectByKey(monitor.getAlarmRuleId());
+        if (rule == null || rule.getInterval() <= 0) {
             return;
         }
-        AlarmRuleTask task = applicationContext.getBean(AlarmRuleTask.class);
+        if (taskMap.containsKey(monitor.getId())) {
+            log.warn("该HTTP监控已存在: {}", monitor);
+            return;
+        }
+        HttpHeartbeatTask task = applicationContext.getBean(HttpHeartbeatTask.class);
+        task.setMonitor(monitor);
         task.setRule(rule);
         timer.newTimeout(task, rule.getInterval(), TimeUnit.MINUTES);
-        taskMap.put(rule.getId(), task);
-        log.info("添加报警规则任务: {}", rule);
+        taskMap.put(monitor.getId(), task);
+        log.info("添加HTTP监控任务: {}", monitor);
     }
 
     @Override

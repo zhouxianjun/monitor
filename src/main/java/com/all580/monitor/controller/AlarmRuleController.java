@@ -2,17 +2,13 @@ package com.all580.monitor.controller;
 
 import com.all580.monitor.dto.Result;
 import com.all580.monitor.entity.TabAlarmRule;
-import com.all580.monitor.express.QLExpressMgr;
 import com.all580.monitor.service.AlarmRuleService;
 import com.all580.monitor.task.AlarmRuleTimer;
 import com.github.pagehelper.PageHelper;
 import io.swagger.annotations.*;
-import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.Date;
 
 /**
  * @author zhouxianjun(Alone)
@@ -29,8 +25,6 @@ public class AlarmRuleController {
     private AlarmRuleService alarmRuleService;
     @Autowired
     private AlarmRuleTimer alarmRuleTimer;
-    @Autowired
-    private QLExpressMgr qlExpressMgr;
 
     @ApiOperation(value = "获取报警规则列表", notes = "如果传入page参数则返回value为PageInfo", produces = MediaType.APPLICATION_JSON_VALUE)
     @ApiImplicitParams({
@@ -56,10 +50,6 @@ public class AlarmRuleController {
     @ApiOperation(value = "新增报警规则", produces = MediaType.APPLICATION_JSON_VALUE)
     @PostMapping("add")
     public Result<?> add(@ApiParam(required = true) @RequestBody TabAlarmRule rule) {
-        rule.setCreateTime(new Date());
-        if (StringUtils.isNotEmpty(rule.getScript()) && !qlExpressMgr.validate(rule.getScript())) {
-            return Result.fail("脚本错误");
-        }
         int ret = alarmRuleService.save(rule);
         if (ret <= 0) {
             return Result.fail();
@@ -71,11 +61,7 @@ public class AlarmRuleController {
     @ApiOperation(value = "修改警规则", produces = MediaType.APPLICATION_JSON_VALUE)
     @PostMapping("update")
     public Result<?> update(@ApiParam(required = true) @RequestBody TabAlarmRule rule) {
-        if (StringUtils.isNotEmpty(rule.getScript()) && !qlExpressMgr.validate(rule.getScript())) {
-            return Result.fail("脚本错误");
-        }
-        rule.setCurrentCount(null);
-        rule.setLastHistory(null);
+        rule.setCurrentCount(null).setLastHistory(null);
         int ret = alarmRuleService.updateNotNull(rule);
         if (ret <= 0) {
             return Result.fail();

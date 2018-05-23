@@ -18,6 +18,7 @@
         <result column="alarm_group_id" jdbcType="INTEGER" property="alarmGroupId"/>
         <result column="alarm_callback" jdbcType="VARCHAR" property="alarmCallback"/>
         <result column="nodata" jdbcType="BIT" property="nodata"/>
+        <result column="timer" jdbcType="BIT" property="timer"/>
         <result column="status" jdbcType="BIT" property="status"/>
         <result column="last_history" jdbcType="INTEGER" property="lastHistory"/>
         <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
@@ -35,6 +36,8 @@
             LEFT JOIN tab_spot ts ON ts.id = ta.spot_id
             LEFT JOIN tab_alarm_history tah ON tah.id = tar.last_history
         where 1=1
+        and tar.interval &gt; 0
+        and tar.timer = 1
         <if test="spot != null">
             AND ts.id = #{spot}
         </if>

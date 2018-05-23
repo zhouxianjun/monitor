@@ -41,6 +41,11 @@ public class TabMonitorData implements Serializable {
     private String memo;
 
     /**
+     * 批次号
+     */
+    private String batch;
+
+    /**
      * 上传时间
      */
     @Column(name = "upload_time")

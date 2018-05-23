@@ -25,7 +25,7 @@
                 <FormItem label="脚本" prop="script">
                     <MonacoEditor
                             height="600"
-                            language="java"
+                            language="javascript"
                             @mounted="onMounted"
                             @codeChange="onCodeChange"
                     >
@@ -64,7 +64,7 @@
 <script>
     import MonacoEditor from 'vue-monaco-editor';
     export default {
-        name: "edit",
+        name: "alarm-rule-edit",
         components: {
             MonacoEditor
         },
