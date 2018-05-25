@@ -79,6 +79,15 @@ export const appRouter = [{
         { path: 'rule', title: '报警规则', name: 'rule_index', component: () => import('@/views/alarm/rule/index.vue') },
         { path: 'history', title: '报警历史', name: 'history_index', component: () => import('@/views/alarm/history/index.vue') }
     ]
+},{
+    path: '/contacts',
+    icon: 'key',
+    name: 'contacts',
+    title: '联系人',
+    component: Main,
+    children: [
+        { path: 'index', title: '联系人', name: 'contacts_index', component: () => import('@/views/contacts/list.vue') }
+    ]
 }, {
     path: '/site-monitor',
     icon: 'key',

@@ -42,6 +42,11 @@ public class TabAlarmContacts implements Serializable {
     @NoticeType(Constant.NoticeType.WX)
     private String openid;
 
+    /**
+     * 手机号码
+     */
+    private String phone;
+
     private static final long serialVersionUID = 1L;
 
 }
