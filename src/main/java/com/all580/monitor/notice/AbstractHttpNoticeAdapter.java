@@ -1,5 +1,6 @@
 package com.all580.monitor.notice;
 
+import cn.hutool.core.map.MapUtil;
 import com.all580.monitor.entity.TabAlarmHistory;
 import com.all580.monitor.entity.TabAlarmRule;
 import org.apache.http.HttpEntity;
@@ -30,7 +31,7 @@ public abstract class AbstractHttpNoticeAdapter extends AbstractNotice implement
         return null;
     }
     protected Map<String, String> headers(TabAlarmRule rule, TabAlarmHistory history) {
-        return null;
+        return MapUtil.builder("Content-Type", "application/json; charset=utf-8").build();
     }
 
     @Override
@@ -39,7 +40,8 @@ public abstract class AbstractHttpNoticeAdapter extends AbstractNotice implement
         HttpEntity entity = entity(rule, history);
         if (entity != null && request instanceof HttpEntityEnclosingRequestBase) {
             ((HttpEntityEnclosingRequestBase) request).setEntity(entity);
-        }Map<String, String> headers = headers(rule, history);
+        }
+        Map<String, String> headers = headers(rule, history);
         if (headers != null) {
             headers.forEach(request::addHeader);
         }

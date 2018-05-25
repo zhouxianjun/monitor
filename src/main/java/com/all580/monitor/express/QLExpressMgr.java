@@ -37,7 +37,7 @@ public class QLExpressMgr {
      * @throws Throwable
      */
     public Object execute(String script, Map<String, Object> context) throws Throwable {
-        Object execute = runner.execute(script.replaceAll(COMMENT, ""), new QLExpressContext(context, applicationContext), null, true, true);
+        Object execute = runner.execute(script.replaceAll(COMMENT, ""), new QLExpressContext(context, applicationContext), null, true, false);
         if (execute instanceof Throwable) {
             throw (Throwable) execute;
         }
@@ -51,7 +51,7 @@ public class QLExpressMgr {
      * @throws Throwable
      */
     public Object execute(String script) throws Throwable {
-        Object execute = runner.execute(script.replaceAll(COMMENT, ""), new QLExpressContext(applicationContext), null, true, true);
+        Object execute = runner.execute(script.replaceAll(COMMENT, ""), new QLExpressContext(applicationContext), null, true, false);
         if (execute instanceof Throwable) {
             throw (Throwable) execute;
         }
