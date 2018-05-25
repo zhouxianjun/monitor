@@ -1,6 +1,8 @@
 package com.all580.monitor.controller;
 
+import cn.hutool.core.lang.Assert;
 import com.all580.monitor.dto.Result;
+import com.all580.monitor.entity.TabAlarmContacts;
 import com.all580.monitor.service.AlarmContactsService;
 import com.github.pagehelper.PageHelper;
 import io.swagger.annotations.Api;
@@ -14,6 +16,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
+
 /**
  * @author panyi on 18-5-24.
  */
@@ -24,8 +28,10 @@ import org.springframework.web.bind.annotation.RestController;
 public class AlarmContactsController {
     @Autowired
     private AlarmContactsService contactsService;
+
     /**
-     * 获取应用列表
+     * 获取联系人列表
+     *
      * @param name 姓名
      * @return
      */
@@ -43,6 +49,23 @@ public class AlarmContactsController {
         } else {
             value = contactsService.all();
         }
+        return Result.builder().code(Result.SUCCESS).value(value).build();
+    }
+
+    /**
+     * 通过组ID获取联系人列表
+     *
+     * @param groupId 姓名
+     * @return
+     */
+    @ApiOperation(value = "通过组ID获取联系人列表", notes = "不分页，返回全部成员", produces = MediaType.APPLICATION_JSON_VALUE)
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "groupId", value = "组ID"),
+    })
+    @GetMapping("listByGroup")
+    public Result<?> listByGroup(Integer groupId) {
+        Assert.notNull(groupId, "请指定组");
+        List<TabAlarmContacts> value = contactsService.listByGroup(groupId);
         return Result.builder().code(Result.SUCCESS).value(value).build();
     }
 }
