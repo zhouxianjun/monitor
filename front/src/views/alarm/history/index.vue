@@ -3,17 +3,18 @@
         <Row class="margin-top-10">
             <Input v-model="table.query.name" placeholder="规则名称" clearable style="width: 200px"/>
             <label class="margin-left-10">景区：</label>
-            <Select v-model="table.query.spot" style="width: 200px">
+            <Select v-model="table.query.spot" @on-change="doQuery" style="width: 200px">
                 <Option value="">全部</Option>
                 <Option v-for="item in spots" :value="item.id" :key="item.id">{{ item.name }}</Option>
             </Select>
             <label class="margin-left-10">应用：</label>
-            <Select v-model="table.query.app" style="width: 200px">
+            <Select v-model="table.query.app" @on-change="doQuery" style="width: 200px">
                 <Option value="">全部</Option>
                 <Option v-for="item in apps" :value="item.id" :key="item.id">{{ item.name }}</Option>
             </Select>
             <label class="margin-left-10">状态：</label>
-            <Select v-model="table.query.status" style="width: 200px">
+            <Select v-model="table.query.status" @on-change="doQuery" style="width: 200px">
+                <Option value="">全部</Option>
                 <Option v-for="item in HistoryStatus" :value="item.id" :key="item.id">{{ item.name }}</Option>
             </Select>
             <label class="margin-left-10">范围：</label>

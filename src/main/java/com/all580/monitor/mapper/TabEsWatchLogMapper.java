@@ -1,7 +1,7 @@
 package com.all580.monitor.mapper;
 
 import com.all580.monitor.entity.TabEsWatchLog;
-import tk.mybatis.mapper.common.Mapper;
+import com.all580.monitor.util.IMapper;
 
-public interface TabEsWatchLogMapper extends Mapper<TabEsWatchLog> {
+public interface TabEsWatchLogMapper extends IMapper<TabEsWatchLog> {
 }

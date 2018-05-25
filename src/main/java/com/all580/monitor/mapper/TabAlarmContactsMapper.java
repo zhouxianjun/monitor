@@ -1,7 +1,7 @@
 package com.all580.monitor.mapper;
 
 import com.all580.monitor.entity.TabAlarmContacts;
-import tk.mybatis.mapper.common.Mapper;
+import com.all580.monitor.util.IMapper;
 
-public interface TabAlarmContactsMapper extends Mapper<TabAlarmContacts> {
+public interface TabAlarmContactsMapper extends IMapper<TabAlarmContacts> {
 }

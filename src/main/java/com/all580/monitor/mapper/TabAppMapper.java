@@ -2,12 +2,12 @@ package com.all580.monitor.mapper;
 
 import com.all580.monitor.entity.TabApp;
 import org.apache.ibatis.annotations.Param;
-import tk.mybatis.mapper.common.Mapper;
+import com.all580.monitor.util.IMapper;
 
 import java.util.List;
 import java.util.Map;
 
-public interface TabAppMapper extends Mapper<TabApp> {
+public interface TabAppMapper extends IMapper<TabApp> {
     /**
      * 查询应用列表
      * @param spot 景区ID

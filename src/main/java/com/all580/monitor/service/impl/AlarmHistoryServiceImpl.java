@@ -22,7 +22,7 @@ public class AlarmHistoryServiceImpl extends BaseService<TabAlarmHistory> implem
     private TabAlarmHistoryMapper tabAlarmHistoryMapper;
 
     @Override
-    public List<?> list(Integer spot, Integer app, String name, Boolean status, Date start, Date end) {
+    public List<?> list(Integer spot, Integer app, String name, Integer status, Date start, Date end) {
         return tabAlarmHistoryMapper.search(spot, app, name, status, start, end);
     }
 }

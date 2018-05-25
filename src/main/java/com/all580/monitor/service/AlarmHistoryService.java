@@ -22,5 +22,5 @@ public interface AlarmHistoryService extends IService<TabAlarmHistory> {
      * @param end 结束时间
      * @return
      */
-    List<?> list(Integer spot, Integer app, String name, Boolean status, Date start, Date end);
+    List<?> list(Integer spot, Integer app, String name, Integer status, Date start, Date end);
 }

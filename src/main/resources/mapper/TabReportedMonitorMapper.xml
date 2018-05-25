@@ -1,14 +1,51 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.all580.monitor.mapper.TabReportedMonitorMapper">
-  <resultMap id="BaseResultMap" type="com.all580.monitor.entity.TabReportedMonitor">
-    <!--
-      WARNING - @mbg.generated
-    -->
-    <id column="id" jdbcType="INTEGER" property="id" />
-    <result column="app_id" jdbcType="INTEGER" property="appId" />
-    <result column="name" jdbcType="VARCHAR" property="name" />
-    <result column="status" jdbcType="BIT" property="status" />
-    <result column="alarm_rule_id" jdbcType="INTEGER" property="alarmRuleId" />
-  </resultMap>
+    <resultMap id="BaseResultMap" type="com.all580.monitor.entity.TabReportedMonitor">
+        <!--
+          WARNING - @mbg.generated
+        -->
+        <id column="id" jdbcType="INTEGER" property="id"/>
+        <result column="app_id" jdbcType="INTEGER" property="appId"/>
+        <result column="name" jdbcType="VARCHAR" property="name"/>
+        <result column="status" jdbcType="BIT" property="status"/>
+        <result column="alarm_rule_id" jdbcType="INTEGER" property="alarmRuleId"/>
+    </resultMap>
+
+    <select id="search" resultType="map">
+        SELECT
+            ts.`name` spot_name,
+            ta.`name` app_name,
+            tah.`status` last_status,
+            trm.*,
+            tar.script,
+            tar.nodata,
+            tar.count,
+            tar.interval,
+            tar.silence_interval,
+            tar.alarm_callback,
+            tar.alarm_group_id
+        FROM
+            tab_reported_monitor trm
+        LEFT JOIN tab_alarm_rule tar ON tar.id = trm.alarm_rule_id
+        LEFT JOIN tab_alarm_history tah ON tah.id = tar.last_history
+        LEFT JOIN tab_app ta ON ta.id = tar.app_id
+        LEFT JOIN tab_spot ts ON ts.id = ta.spot_id
+        where 1=1
+        <if test="spot != null">
+            AND ts.id = #{spot}
+        </if>
+        <if test="app != null">
+            AND ta.id = #{app}
+        </if>
+        <if test="name != null">
+            AND trm.`name` like concat('%', #{name}, '%')
+        </if>
+        <if test="alarm != null">
+            AND tah.status in(1, 2)
+        </if>
+        <if test="status != null">
+            AND trm.status = #{status}
+        </if>
+    </select>
 </mapper>

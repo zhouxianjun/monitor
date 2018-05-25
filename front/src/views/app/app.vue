@@ -6,12 +6,12 @@
         <Row class="margin-top-10">
             <Input v-model="table.query.name" placeholder="应用名称" clearable style="width: 200px" />
             <label class="margin-left-10">景区：</label>
-            <Select v-model="table.query.spot" style="width: 200px">
+            <Select v-model="table.query.spot" @on-change="doQuery" style="width: 200px">
                 <Option value="">全部</Option>
                 <Option v-for="item in spots" :value="item.id" :key="item.id">{{ item.name }}</Option>
             </Select>
             <label class="margin-left-10">健康状态：</label>
-            <Select v-model="table.query.normal" style="width: 200px">
+            <Select v-model="table.query.normal" @on-change="doQuery" style="width: 200px">
                 <Option v-for="item in normalStatus" :value="item.id" :key="item.id">{{ item.name }}</Option>
             </Select>
             <Button class="margin-left-10" type="primary" @click="doQuery" icon="search">搜索</Button>

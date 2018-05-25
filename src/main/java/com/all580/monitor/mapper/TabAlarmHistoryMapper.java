@@ -2,13 +2,13 @@ package com.all580.monitor.mapper;
 
 import com.all580.monitor.entity.TabAlarmHistory;
 import org.apache.ibatis.annotations.Param;
-import tk.mybatis.mapper.common.Mapper;
+import com.all580.monitor.util.IMapper;
 
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
-public interface TabAlarmHistoryMapper extends Mapper<TabAlarmHistory> {
+public interface TabAlarmHistoryMapper extends IMapper<TabAlarmHistory> {
     /**
      * 搜索报警历史列表
      * @param spot 景区ID
@@ -23,7 +23,7 @@ public interface TabAlarmHistoryMapper extends Mapper<TabAlarmHistory> {
             @Param("spot") Integer spot,
             @Param("app") Integer app,
             @Param("name") String name,
-            @Param("status") Boolean status,
+            @Param("status") Integer status,
             @Param("start") Date start,
             @Param("end") Date end);
 }

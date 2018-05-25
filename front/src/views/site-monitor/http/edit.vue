@@ -55,6 +55,11 @@
                 <Form-item label="沉默间隔" prop="rule.silenceInterval">
                     <InputNumber v-model="vo.rule.silenceInterval" :min="1" :max="4320" :formatter="val => `${val}分钟`" :parser="val => val.replace('分钟', '')"/>
                 </Form-item>
+                <FormItem label="通知联系组">
+                    <Select v-model="vo.rule.alarmGroupId" filterable>
+                        <Option v-for="item in contactsGroups" :value="item.id" :key="item.id">{{ item.name }}</Option>
+                    </Select>
+                </FormItem>
                 <FormItem label="回调地址" prop="rule.alarmCallback">
                     <Input v-model="vo.rule.alarmCallback" type="url"/>
                 </FormItem>
@@ -77,6 +82,7 @@
     import MonacoEditor from 'vue-monaco-editor';
     import {MethodType} from '../../../libs/dic';
     import QL from '../../../libs/ql.editor';
+
     export default {
         name: "monitor-http-edit",
         components: {
@@ -106,11 +112,13 @@
                         nodata: true,
                         count: 1,
                         silenceInterval: 1440,
+                        alarmGroupId: null,
                         alarmCallback: null
                     }
                 },
                 spots: [],
                 apps: [],
+                contactsGroups: [],
                 validate: {
                     'monitor.name': [{required: true, trigger: 'blur' }],
                     'monitor.appId': [{type: 'number', required: true, trigger: 'change' }],
@@ -126,10 +134,11 @@
         },
         mounted() {
             this.initSpots();
+            this.initContactsGroups();
             Reflect.ownKeys(this.vo.monitor).forEach(key => this.vo.monitor[key] = this.$route.params[key] || this.vo.monitor[key]);
             Reflect.ownKeys(this.vo.rule).forEach(key => this.vo.rule[key] = this.$route.params[key] || this.vo.rule[key]);
             this.editor && this.editor.setValue(this.vo.rule.script);
-            this.$store.commit('changeTagTitle', {name: 'monitor-http-edit', title: this.vo.id ? '修改HTTP监控' : '新增HTTP监控'});
+            this.$store.commit('changeTagTitle', {name: this.name, title: this.vo.id ? '修改HTTP监控' : '新增HTTP监控'});
         },
         watch: {
             async 'vo.monitor.spotId'(val) {
@@ -140,6 +149,10 @@
             async initSpots() {
                 let list = await this.fetch('/api/spot/list');
                 list && (this.spots = (!list.value || list.value.length === 0) ? [] : list.value);
+            },
+            async initContactsGroups() {
+                let list = await this.fetch('/api/contacts/group/list');
+                list && (this.contactsGroups = (!list.value || list.value.length === 0) ? [] : list.value);
             },
             async loadApp(spot) {
                 let list = await this.fetch('/api/app/list', {params: {spot}});
@@ -162,7 +175,7 @@
             back() {
                 this.$router.back();
                 this.$parent.$refs['tags'].refsTag.every(tag => {
-                    if (tag.name === 'monitor-http-edit') {
+                    if (tag.name === this.name) {
                         tag.close({
                             target: tag.$children[0].$el
                         });

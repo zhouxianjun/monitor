@@ -1,9 +1,17 @@
 package com.all580.monitor.service;
 
+import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.util.ArrayUtil;
+import cn.hutool.db.DbRuntimeException;
+import com.all580.monitor.util.IMapper;
+import org.apache.commons.lang.ArrayUtils;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
-import tk.mybatis.mapper.common.Mapper;
+import org.springframework.util.CollectionUtils;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -15,7 +23,7 @@ import java.util.List;
 public class BaseService<T> implements IService<T> {
 
     @Autowired
-    protected Mapper<T> mapper;
+    protected IMapper<T> mapper;
 
     @Override
     public T selectByKey(Object key) {
@@ -26,6 +34,24 @@ public class BaseService<T> implements IService<T> {
     @Transactional(rollbackFor = {Exception.class, RuntimeException.class})
     public int save(T entity) {
         return mapper.insertSelective(entity);
+    }
+
+    @Override
+    @Transactional(rollbackFor = {Exception.class, RuntimeException.class})
+    public int save(List<T> entity) {
+        return save(entity, false);
+    }
+
+    @Override
+    public int save(List<T> entity, boolean exception) {
+        if (CollectionUtils.isEmpty(entity)) {
+            return 0;
+        }
+        int ret = mapper.insertList(entity);
+        if (exception && ret != entity.size()) {
+            throw new DbRuntimeException("need save {}, actual save {}", entity.size(), ret);
+        }
+        return ret;
     }
 
     @Override
@@ -59,5 +85,41 @@ public class BaseService<T> implements IService<T> {
     @Override
     public List<T> select(T entity) {
         return mapper.select(entity);
+    }
+
+    @Override
+    public List<T> selectByIds(String ids) {
+        if (StringUtils.isEmpty(ids) || ids.split(",").length < 1) {
+            return Collections.emptyList();
+        }
+        return mapper.selectByIds(ids);
+    }
+
+    @Override
+    public List<T> selectByIds(Collection<Integer> ids) {
+        return selectByIds(CollectionUtils.isEmpty(ids) ? "" : CollUtil.join(ids, ","));
+    }
+
+    @Override
+    public List<T> selectByIds(int[] ids) {
+        return selectByIds(ArrayUtils.isEmpty(ids) ? "" : ArrayUtil.join(ids, ","));
+    }
+
+    @Override
+    public int deleteByIds(String ids) {
+        if (StringUtils.isEmpty(ids) || ids.split(",").length < 1) {
+            return 0;
+        }
+        return mapper.deleteByIds(ids);
+    }
+
+    @Override
+    public int deleteByIds(Collection<Integer> ids) {
+        return deleteByIds(CollectionUtils.isEmpty(ids) ? "" : CollUtil.join(ids, ","));
+    }
+
+    @Override
+    public int deleteByIds(int[] ids) {
+        return deleteByIds(ArrayUtils.isEmpty(ids) ? "" : ArrayUtil.join(ids, ","));
     }
 }

@@ -19,4 +19,11 @@ public interface AppService extends IService<TabApp> {
      * @return
      */
     List<?> list(Integer spot, String name, Boolean normal);
+
+    /**
+     * 是否开启报警
+     * @param id 应用ID
+     * @return
+     */
+    boolean isAlarm(int id);
 }

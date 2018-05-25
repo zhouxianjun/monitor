@@ -2,12 +2,12 @@ package com.all580.monitor.mapper;
 
 import com.all580.monitor.entity.TabHttpMonitor;
 import org.apache.ibatis.annotations.Param;
-import tk.mybatis.mapper.common.Mapper;
+import com.all580.monitor.util.IMapper;
 
 import java.util.List;
 import java.util.Map;
 
-public interface TabHttpMonitorMapper extends Mapper<TabHttpMonitor> {
+public interface TabHttpMonitorMapper extends IMapper<TabHttpMonitor> {
     /**
      * 搜索HTTP监控列表
      * @param spot 景区ID

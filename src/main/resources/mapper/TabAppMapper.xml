@@ -29,7 +29,7 @@
         tab_alarm_rule tar
         LEFT JOIN tab_alarm_history tah ON tah.id = tar.last_history
         WHERE
-        tah.`status` = 2
+        tah.`status` in(1, 2)
         GROUP BY
         tar.app_id
         ) t ON t.app_id = ta.id

@@ -2,57 +2,52 @@
     <div>
         <Card :bordered="false" shadow>
             <Form ref="form" :model="vo" :label-width="80" :rules="validate">
-                <Form-item label="名称" prop="name">
-                    <Input v-model="vo.name"/>
+                <Form-item label="名称" prop="monitor.name">
+                    <Input v-model="vo.monitor.name"/>
                 </Form-item>
-                <FormItem label="应用" prop="appId">
-                    <Select v-model="vo.spotId" style="width: 200px">
+                <FormItem label="应用" prop="monitor.appId">
+                    <Select v-model="vo.monitor.spotId" style="width: 200px">
                         <Option v-for="item in spots" :value="item.id" :key="item.id">{{ item.name }}</Option>
                     </Select>
-                    <Select v-model="vo.appId" style="width: 200px">
+                    <Select v-model="vo.monitor.appId" style="width: 200px">
                         <Option v-for="item in apps" :value="item.id" :key="item.id">{{ item.name }}</Option>
                     </Select>
                 </FormItem>
-                <Form-item label="监控项" prop="metric">
-                    <Input v-model="vo.metric"/>
+                <Form-item label="频率" prop="rule.interval">
+                    <InputNumber v-model="vo.rule.interval" :min="1" :max="1500" :formatter="val => `${val}分钟`" :parser="val => val.replace('分钟', '')"/>
                 </Form-item>
-                <Form-item label="资源标识" prop="resource">
-                    <Input v-model="vo.resource"/>
-                </Form-item>
-                <Form-item label="频率" prop="interval" v-if="vo.interval > 0">
-                    <InputNumber v-model="vo.interval" :min="1" :max="1500" :formatter="val => `${val}分钟`" :parser="val => val.replace('分钟', '')"/>
-                </Form-item>
-                <FormItem label="脚本" prop="script">
+                <FormItem label="脚本" prop="rule.script">
                     <MonacoEditor
                             height="600"
-                            language="javascript"
+                            srcPath=""
+                            language="java"
                             @mounted="onMounted"
                             @codeChange="onCodeChange"
                     >
                     </MonacoEditor>
                 </FormItem>
-                <FormItem label="NODATA" prop="nodata">
-                    <i-switch v-model="vo.nodata" size="large">
+                <FormItem label="NODATA" prop="rule.nodata">
+                    <i-switch v-model="vo.rule.nodata" size="large">
                         <span slot="open">开启</span>
                         <span slot="close">禁用</span>
                     </i-switch>
                 </FormItem>
-                <Form-item label="连续几次" prop="count">
-                    <InputNumber v-model="vo.count" :min="1" :max="10" :formatter="val => `${val}次后报警`" :parser="val => val.replace('次后报警', '')"/>
+                <Form-item label="连续几次" prop="rule.count">
+                    <InputNumber v-model="vo.rule.count" :min="1" :max="10" :formatter="val => `${val}次后报警`" :parser="val => val.replace('次后报警', '')"/>
                 </Form-item>
-                <Form-item label="沉默间隔" prop="silenceInterval">
-                    <InputNumber v-model="vo.silenceInterval" :min="1" :max="4320" :formatter="val => `${val}分钟`" :parser="val => val.replace('分钟', '')"/>
+                <Form-item label="沉默间隔" prop="rule.silenceInterval">
+                    <InputNumber v-model="vo.rule.silenceInterval" :min="1" :max="4320" :formatter="val => `${val}分钟`" :parser="val => val.replace('分钟', '')"/>
                 </Form-item>
                 <FormItem label="通知联系组">
-                    <Select v-model="vo.alarmGroupId" filterable>
+                    <Select v-model="vo.rule.alarmGroupId" filterable>
                         <Option v-for="item in contactsGroups" :value="item.id" :key="item.id">{{ item.name }}</Option>
                     </Select>
                 </FormItem>
-                <FormItem label="回调地址" prop="alarmCallback">
-                    <Input v-model="vo.alarmCallback" type="url"/>
+                <FormItem label="回调地址" prop="rule.alarmCallback">
+                    <Input v-model="vo.rule.alarmCallback" type="url"/>
                 </FormItem>
-                <FormItem label="状态" prop="status">
-                    <i-switch v-model="vo.status" size="large">
+                <FormItem label="状态" prop="monitor.status">
+                    <i-switch v-model="vo.monitor.status" size="large">
                         <span slot="open">开启</span>
                         <span slot="close">禁用</span>
                     </i-switch>
@@ -68,9 +63,10 @@
 
 <script>
     import MonacoEditor from 'vue-monaco-editor';
+    import QL from '../../../libs/ql.editor';
 
     export default {
-        name: "alarm-rule-edit",
+        name: "monitor-reported-edit",
         components: {
             MonacoEditor
         },
@@ -78,46 +74,48 @@
             return {
                 editor: null,
                 vo: {
-                    id: null,
-                    name: null,
-                    appId: null,
-                    spotId: null,
-                    metric: null,
-                    resource: null,
-                    interval: 1,
-                    script: null,
-                    nodata: true,
-                    count: 1,
-                    silenceInterval: 1440,
-                    alarmGroupId: null,
-                    alarmCallback: null,
-                    status: true
+                    monitor: {
+                        id: null,
+                        name: null,
+                        appId: null,
+                        spotId: null,
+                        status: true,
+                        alarmRuleId: null
+                    },
+                    rule: {
+                        script: null,
+                        interval: 1,
+                        nodata: true,
+                        count: 1,
+                        silenceInterval: 1440,
+                        alarmGroupId: null,
+                        alarmCallback: null
+                    }
                 },
                 spots: [],
                 apps: [],
                 contactsGroups: [],
                 validate: {
-                    name: [{required: true, trigger: 'blur' }],
-                    appId: [{type: 'number', required: true, trigger: 'change' }],
-                    metric: [{required: true, trigger: 'blur' }],
-                    resource: [{required: true, trigger: 'blur' }],
-                    interval: [{type: 'number', required: true, trigger: 'blur' }],
-                    nodata: [{type: 'boolean', required: true, trigger: 'blur' }],
-                    count: [{type: 'number', required: true, trigger: 'blur' }],
-                    silenceInterval: [{type: 'number', required: true, trigger: 'blur' }],
-                    status: [{type: 'boolean', required: true, trigger: 'blur' }]
+                    'monitor.name': [{required: true, trigger: 'blur' }],
+                    'monitor.appId': [{type: 'number', required: true, trigger: 'change' }],
+                    'rule.interval': [{type: 'number', required: true, trigger: 'blur' }],
+                    'rule.nodata': [{type: 'boolean', required: true, trigger: 'blur' }],
+                    'rule.count': [{type: 'number', required: true, trigger: 'blur' }],
+                    'rule.silenceInterval': [{type: 'number', required: true, trigger: 'blur' }],
+                    'monitor.status': [{type: 'boolean', required: true, trigger: 'blur' }]
                 }
             }
         },
         mounted() {
             this.initSpots();
             this.initContactsGroups();
-            this.vo = Object.assign(this.vo, this.$route.params);
-            this.editor && this.editor.setValue(this.vo.script);
-            this.$store.commit('changeTagTitle', {name: 'alarm-rule-edit', title: this.vo.id ? '修改报警规则' : '新增报警规则'});
+            Reflect.ownKeys(this.vo.monitor).forEach(key => this.vo.monitor[key] = this.$route.params[key] || this.vo.monitor[key]);
+            Reflect.ownKeys(this.vo.rule).forEach(key => this.vo.rule[key] = this.$route.params[key] || this.vo.rule[key]);
+            this.editor && this.editor.setValue(this.vo.rule.script);
+            this.$store.commit('changeTagTitle', {name: this.name, title: this.vo.id ? '修改上报监控' : '新增上报监控'});
         },
         watch: {
-            async 'vo.spotId'(val) {
+            async 'vo.monitor.spotId'(val) {
                 this.apps = await this.loadApp(val);
             }
         },
@@ -137,7 +135,7 @@
             async addOrUpdate() {
                 this.$refs['form'].validate(async (valid) => {
                     if (valid) {
-                        let url = this.vo.id ? '/api/alarm/rule/update' : '/api/alarm/rule/add';
+                        let url = this.vo.monitor.id ? '/api/monitor/reported/update' : '/api/monitor/reported/add';
                         let success = await this.fetch(url, {method: 'post', data: this.vo});
                         if (success === false) {
                             return;
@@ -151,7 +149,7 @@
             back() {
                 this.$router.back();
                 this.$parent.$refs['tags'].refsTag.every(tag => {
-                    if (tag.name === 'alarm-rule-edit') {
+                    if (tag.name === this.name) {
                         tag.close({
                             target: tag.$children[0].$el
                         });
@@ -161,11 +159,12 @@
                 });
             },
             onMounted(editor) {
+                QL(monaco);
                 this.editor = editor;
-                this.vo.script && this.editor.setValue(this.vo.script);
+                this.vo.rule.script && this.editor.setValue(this.vo.rule.script);
             },
             onCodeChange(editor) {
-                this.vo.script = editor.getValue();
+                this.vo.rule.script = editor.getValue();
             }
         }
     }

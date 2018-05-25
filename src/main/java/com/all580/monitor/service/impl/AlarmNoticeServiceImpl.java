@@ -5,6 +5,7 @@ import com.all580.monitor.entity.TabAlarmNotice;
 import com.all580.monitor.entity.TabAlarmRule;
 import com.all580.monitor.notice.NoticeAdapter;
 import com.all580.monitor.service.AlarmNoticeService;
+import com.all580.monitor.service.AppService;
 import com.all580.monitor.service.BaseService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -26,6 +27,8 @@ import java.util.Map;
 public class AlarmNoticeServiceImpl extends BaseService<TabAlarmNotice> implements AlarmNoticeService {
     @Autowired
     private ApplicationContext applicationContext;
+    @Autowired
+    private AppService appService;
     private final Map<Integer, NoticeAdapter> adapterMap = new HashMap<>();
 
     @PostConstruct
@@ -38,7 +41,7 @@ public class AlarmNoticeServiceImpl extends BaseService<TabAlarmNotice> implemen
     @SuppressWarnings("unchecked")
     @Retryable(value = Exception.class, backoff = @Backoff(delay = 2000, multiplier = 2))
     public Object notice(int type, Object target, TabAlarmRule rule, TabAlarmHistory history) throws Exception {
-        if (adapterMap.containsKey(type)) {
+        if (appService.isAlarm(rule.getAppId()) && adapterMap.containsKey(type)) {
             return adapterMap.get(type).run(target, rule, history);
         }
         return null;

@@ -42,7 +42,7 @@ public class AlarmHistoryController {
             @ApiImplicitParam(name = "pageSize", value = "页总数")
     })
     @GetMapping("list")
-    public Result<?> list(Integer spot, Integer app, String name, Boolean status, Date start, Date end, Integer pageNum, Integer pageSize) {
+    public Result<?> list(Integer spot, Integer app, String name, Integer status, Date start, Date end, Integer pageNum, Integer pageSize) {
         Object value;
         if (pageNum != null && pageSize != null) {
             value = PageHelper.startPage(pageNum, pageSize).doSelectPageInfo(() -> alarmHistoryService.list(spot, app, name, status, start, end));

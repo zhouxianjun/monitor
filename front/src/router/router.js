@@ -53,8 +53,9 @@ export const otherRouter = {
         { path: 'home', title: {i18n: 'home'}, name: 'home_index', component: () => import('@/views/home/home.vue') },
         { path: 'ownspace', title: '个人中心', name: 'ownspace_index', component: () => import('@/views/own-space/own-space.vue') },
         { path: 'message', title: '消息中心', name: 'message_index', component: () => import('@/views/message/message.vue') },
-        { path: 'alarm/rule/edit', title: '编辑报警规则', name: 'alarm-rule-edit', component: () => import('@/views/alarm/rule/edit.vue') },
-        { path: 'monitor/http/edit', title: '编辑HTTP监控', name: 'monitor-http-edit', component: () => import('@/views/site-monitor/http/edit.vue') }
+        { path: 'alarm/rule/edit', title: '报警规则', name: 'alarm-rule-edit', component: () => import('@/views/alarm/rule/edit.vue') },
+        { path: 'monitor/http/edit', title: 'HTTP监控', name: 'monitor-http-edit', component: () => import('@/views/site-monitor/http/edit.vue') },
+        { path: 'monitor/reported/edit', title: '上报监控', name: 'monitor-reported-edit', component: () => import('@/views/site-monitor/reported/edit.vue') }
     ]
 };
 
