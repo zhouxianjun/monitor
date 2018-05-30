@@ -15,22 +15,17 @@ import io.netty.util.Timeout;
 import io.netty.util.TimerTask;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
 import org.apache.commons.codec.Charsets;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang.StringUtils;
-import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.RequestBuilder;
-import org.apache.http.conn.ConnectTimeoutException;
-import org.apache.http.conn.HttpHostConnectException;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.util.EntityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-import java.net.NoRouteToHostException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -46,7 +41,7 @@ import java.util.stream.Collectors;
 @Component
 @Scope("prototype")
 @Slf4j
-public class HttpHeartbeatTask implements TimerTask {
+public class HttpHeartbeatTaskClearTrace implements TimerTask {
     @Setter
     private TabHttpMonitor monitor;
     @Setter
@@ -61,6 +56,8 @@ public class HttpHeartbeatTask implements TimerTask {
     private AlarmRuleManager alarmRuleManager;
     @Autowired
     private Snowflake snowflake;
+    @Autowired
+    private OkHttpClient okHttpClient;
 
     @Override
     public void run(Timeout timeout) throws Exception {
@@ -75,35 +72,40 @@ public class HttpHeartbeatTask implements TimerTask {
         }
         List<TabMonitorData> data = new ArrayList<>(2);
         try {
-            HttpClient client = HttpClientBuilder.create().build();
-            RequestBuilder requestBuilder = RequestBuilder.create(monitor.getMethod()).setUri(monitor.getUrl());
             String header = monitor.getHeader();
-            if (JSONUtil.isJsonObj(header)) {
-                JSONUtil.parseObj(header).forEach((key, value) -> requestBuilder.addHeader(key, String.valueOf(value)));
-            }
             String cookie = monitor.getCookie();
-            if (JSONUtil.isJsonObj(cookie)) {
-                requestBuilder.setHeader("Cookie", JSONUtil.parseObj(cookie).entrySet().stream()
-                        .map(entry -> String.format("%s=%s", entry.getKey(), entry.getValue()))
-                        .collect(Collectors.joining(";")));
-            }
             String basicAuth = monitor.getBasicAuth();
-            if (StringUtils.isNotEmpty(basicAuth) && basicAuth.contains(":")) {
-                requestBuilder.addHeader("Authorization", "Basic " + new String(Base64.encodeBase64(basicAuth.getBytes(Charsets.UTF_8))));
-            }
             long start = System.currentTimeMillis();
             String memo;
             long delayMs;
             int responseCode;
+
+            Request.Builder builder = new Request.Builder().url(monitor.getUrl()).method(monitor.getMethod(), null);
+            if (JSONUtil.isJsonObj(header)) {
+                JSONUtil.parseObj(header).forEach((key, value) -> builder.addHeader(key, String.valueOf(value)));
+            }
+            if (JSONUtil.isJsonObj(cookie)) {
+                builder.header("Cookie", JSONUtil.parseObj(cookie).entrySet().stream()
+                        .map(entry -> String.format("%s=%s", entry.getKey(), entry.getValue()))
+                        .collect(Collectors.joining(";")));
+            }
+            if (StringUtils.isNotEmpty(basicAuth) && basicAuth.contains(":")) {
+                builder.addHeader("Authorization", "Basic " + new String(Base64.encodeBase64(basicAuth.getBytes(Charsets.UTF_8))));
+            }
+            Request request = builder.build();
             try {
-                HttpResponse response = client.execute(requestBuilder.build());
+                Response response = okHttpClient.newCall(request).execute();
                 try {
-                    memo = EntityUtils.toString(response.getEntity(), Charsets.UTF_8);
+                    if (response.body() != null) {
+                        memo = response.body().string();
+                    } else {
+                        memo = response.toString();
+                    }
                 } catch (Exception ignored) {
                     memo = response.toString();
                 }
-                responseCode = response.getStatusLine().getStatusCode();
-            } catch (ConnectTimeoutException | HttpHostConnectException | NoRouteToHostException e) {
+                responseCode = response.code();
+            } catch (Exception e) {
                 responseCode = HttpStatus.SC_INTERNAL_SERVER_ERROR;
                 memo = e.getMessage();
             }
@@ -111,7 +113,7 @@ public class HttpHeartbeatTask implements TimerTask {
             Date uploadTime = new Date();
             long batch = snowflake.nextId();
             TabMonitorData delay = new TabMonitorData()
-                    .setHost(requestBuilder.getUri().getHost())
+                    .setHost(request.url().host())
                     .setMetric(Constant.Metric.HTTP_HEARTBEAT)
                     .setResource(currentRule.getResource())
                     .setKey("delay")
@@ -122,7 +124,7 @@ public class HttpHeartbeatTask implements TimerTask {
             monitorDataService.save(delay);
             data.add(delay);
             TabMonitorData code = new TabMonitorData()
-                    .setHost(requestBuilder.getUri().getHost())
+                    .setHost(request.url().host())
                     .setMetric(Constant.Metric.HTTP_HEARTBEAT)
                     .setResource(currentRule.getResource())
                     .setKey("code")

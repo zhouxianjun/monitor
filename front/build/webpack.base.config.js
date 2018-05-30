@@ -46,6 +46,11 @@ module.exports = {
                 exclude: /node_modules/
             },
             {
+                test: /\.js$/,
+                loader: 'happypack/loader?id=happybabel',
+                include: [/vue-monaco-editor/]
+            },
+            {
                 test: /\.js[x]?$/,
                 include: [resolve('src')],
                 exclude: /node_modules/,

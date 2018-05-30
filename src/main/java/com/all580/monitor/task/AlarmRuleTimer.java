@@ -30,7 +30,7 @@ public class AlarmRuleTimer implements CommandLineRunner, ApplicationListener<Co
     private AlarmRuleService alarmRuleService;
     @Autowired
     private ApplicationContext applicationContext;
-    private final Map<Integer, AlarmRuleTask> taskMap = new HashMap<>();
+    private final Map<Integer, AlarmRuleTaskClearTrace> taskMap = new HashMap<>();
     private final HashedWheelTimer timer = new HashedWheelTimer();
 
     @Override
@@ -51,7 +51,7 @@ public class AlarmRuleTimer implements CommandLineRunner, ApplicationListener<Co
     }
 
     public void update(int id) {
-        AlarmRuleTask task = taskMap.get(id);
+        AlarmRuleTaskClearTrace task = taskMap.get(id);
         if (task != null) {
             task.stop(true);
             taskMap.remove(id);
@@ -67,7 +67,7 @@ public class AlarmRuleTimer implements CommandLineRunner, ApplicationListener<Co
             log.warn("该任务规则已存在: {}", rule);
             return;
         }
-        AlarmRuleTask task = applicationContext.getBean(AlarmRuleTask.class);
+        AlarmRuleTaskClearTrace task = applicationContext.getBean(AlarmRuleTaskClearTrace.class);
         task.setRule(rule);
         timer.newTimeout(task, rule.getInterval(), TimeUnit.MINUTES);
         taskMap.put(rule.getId(), task);

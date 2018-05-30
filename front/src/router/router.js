@@ -97,6 +97,15 @@ export const appRouter = [{
     children: [
         { path: 'index', title: '站点列表', name: 'index', component: () => import('@/views/site-monitor/index.vue') }
     ]
+}, {
+    path: '/log-service',
+    icon: 'key',
+    name: 'log-service',
+    title: '日志服务',
+    component: Main,
+    children: [
+        { path: 'search', title: '日志搜索', name: 'search', component: () => import('@/views/log/search.vue') }
+    ]
 }];
 
 // 所有上面定义的路由都要写在下面的routers里

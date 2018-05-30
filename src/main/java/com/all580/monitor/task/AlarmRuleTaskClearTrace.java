@@ -28,7 +28,7 @@ import java.util.concurrent.TimeUnit;
 @Component
 @Scope("prototype")
 @Slf4j
-public class AlarmRuleTask implements TimerTask {
+public class AlarmRuleTaskClearTrace implements TimerTask {
     @Setter
     private TabAlarmRule rule;
     private Timeout timeout;

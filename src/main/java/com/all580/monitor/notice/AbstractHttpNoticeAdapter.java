@@ -1,16 +1,12 @@
 package com.all580.monitor.notice;
 
-import cn.hutool.core.map.MapUtil;
 import com.all580.monitor.entity.TabAlarmHistory;
 import com.all580.monitor.entity.TabAlarmRule;
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpRequestBase;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.util.EntityUtils;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Map;
 
@@ -21,32 +17,33 @@ import java.util.Map;
  * @date 2018/5/16 14:04
  */
 public abstract class AbstractHttpNoticeAdapter extends AbstractNotice implements NoticeAdapter<String> {
-    protected HttpClient client() {
-        return HttpClientBuilder.create().build();
+    @Autowired
+    protected OkHttpClient okHttpClient;
+    protected String method() {
+        return "GET";
     }
-    protected HttpRequestBase request(String url, TabAlarmRule rule, TabAlarmHistory history) {
-        return new HttpGet(url);
-    }
-    protected HttpEntity entity(TabAlarmRule rule, TabAlarmHistory history) throws Exception {
+    protected RequestBody request(String url, TabAlarmRule rule, TabAlarmHistory history) {
         return null;
     }
     protected Map<String, String> headers(TabAlarmRule rule, TabAlarmHistory history) {
-        return MapUtil.builder("Content-Type", "application/json; charset=utf-8").build();
+        return null;
     }
 
     @Override
     public Object run(String target, TabAlarmRule rule, TabAlarmHistory history) throws Exception {
-        HttpRequestBase request = request(target, rule, history);
-        HttpEntity entity = entity(rule, history);
-        if (entity != null && request instanceof HttpEntityEnclosingRequestBase) {
-            ((HttpEntityEnclosingRequestBase) request).setEntity(entity);
-        }
+        Request.Builder builder = new Request.Builder()
+                .url(target)
+                .method(method(), request(target, rule, history));
         Map<String, String> headers = headers(rule, history);
         if (headers != null) {
-            headers.forEach(request::addHeader);
+            headers.forEach(builder::addHeader);
         }
 
-        HttpResponse response = client().execute(request);
-        return EntityUtils.toString(response.getEntity());
+        try (Response response = okHttpClient.newCall(builder.build()).execute()) {
+            if (response.isSuccessful() && response.body() != null) {
+                return response.body().string();
+            }
+            return response;
+        }
     }
 }

@@ -57,3 +57,17 @@ exports.MethodType = [{
     id: 'HEAD',
     name: 'HEAD'
 }];
+exports.ESFilterType = [{
+    id: 'range',
+    name: '范围'
+}, {
+    id: 'match',
+    name: '匹配'
+}];
+exports.SortType = [{
+    id: 'asc',
+    name: '正序'
+}, {
+    id: 'desc',
+    name: '倒序'
+}];

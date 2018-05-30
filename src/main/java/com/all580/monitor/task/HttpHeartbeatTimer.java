@@ -35,7 +35,7 @@ public class HttpHeartbeatTimer implements CommandLineRunner, ApplicationListene
     private AlarmRuleService alarmRuleService;
     @Autowired
     private ApplicationContext applicationContext;
-    private final Map<Integer, HttpHeartbeatTask> taskMap = new HashMap<>();
+    private final Map<Integer, HttpHeartbeatTaskClearTrace> taskMap = new HashMap<>();
     private final HashedWheelTimer timer = new HashedWheelTimer();
 
 
@@ -54,7 +54,7 @@ public class HttpHeartbeatTimer implements CommandLineRunner, ApplicationListene
     }
 
     public void update(int id) {
-        HttpHeartbeatTask task = taskMap.get(id);
+        HttpHeartbeatTaskClearTrace task = taskMap.get(id);
         if (task != null) {
             task.stop(true);
             taskMap.remove(id);
@@ -85,7 +85,7 @@ public class HttpHeartbeatTimer implements CommandLineRunner, ApplicationListene
             log.warn("该HTTP监控已存在: {}", monitor);
             return;
         }
-        HttpHeartbeatTask task = applicationContext.getBean(HttpHeartbeatTask.class);
+        HttpHeartbeatTaskClearTrace task = applicationContext.getBean(HttpHeartbeatTaskClearTrace.class);
         task.setMonitor(monitor);
         task.setRule(rule);
         timer.newTimeout(task, rule.getInterval(), TimeUnit.MINUTES);

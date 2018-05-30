@@ -143,6 +143,11 @@ const Common = {
             }
         }
         return vo;
+    },
+    dynamicObjKey(obj, key = 'key', value = 'value') {
+        const result = {};
+        result[obj[key]] = obj[value];
+        return result;
     }
 };
 export default Common;

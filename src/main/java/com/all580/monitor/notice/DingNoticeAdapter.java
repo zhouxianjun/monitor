@@ -1,15 +1,12 @@
 package com.all580.monitor.notice;
 
 import cn.hutool.core.map.MapUtil;
+import cn.hutool.http.Method;
 import cn.hutool.json.JSONUtil;
 import com.all580.monitor.Constant;
 import com.all580.monitor.entity.TabAlarmHistory;
 import com.all580.monitor.entity.TabAlarmRule;
-import org.apache.commons.codec.Charsets;
-import org.apache.http.HttpEntity;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.methods.HttpRequestBase;
-import org.apache.http.entity.StringEntity;
+import okhttp3.RequestBody;
 import org.springframework.stereotype.Component;
 
 import java.util.Collections;
@@ -28,16 +25,16 @@ public class DingNoticeAdapter extends AbstractHttpNoticeAdapter {
     }
 
     @Override
-    protected HttpRequestBase request(String url, TabAlarmRule rule, TabAlarmHistory history) {
-        return new HttpPost(url);
+    protected String method() {
+        return Method.POST.name();
     }
 
     @Override
-    protected HttpEntity entity(TabAlarmRule rule, TabAlarmHistory history) throws Exception {
-        return new StringEntity(JSONUtil.toJsonStr(MapUtil.builder()
+    protected RequestBody request(String url, TabAlarmRule rule, TabAlarmHistory history) {
+        return RequestBody.create(Constant.JSON, JSONUtil.toJsonStr(MapUtil.builder()
                 .put("msgtype", "text")
                 .put("text", Collections.singletonMap("content", content(rule, history)))
                 .put("at", Collections.singletonMap("isAtAll", true))
-                .build()), Charsets.UTF_8);
+                .build()));
     }
 }

@@ -1,5 +1,7 @@
 package com.all580.monitor;
 
+import okhttp3.MediaType;
+
 /**
  * @author zhouxianjun(Alone)
  * @ClassName:
@@ -7,6 +9,8 @@ package com.all580.monitor;
  * @date 2018/5/16 9:27
  */
 public class Constant {
+    public static final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
+
     public static final class HistoryStatus {
         /**
          * 通道沉默
