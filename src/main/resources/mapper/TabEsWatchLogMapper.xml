@@ -7,10 +7,12 @@
     -->
     <id column="id" jdbcType="INTEGER" property="id" />
     <result column="watch_id" jdbcType="INTEGER" property="watchId" />
+    <result column="trace_id" jdbcType="VARCHAR" property="traceId" />
+    <result column="offset" jdbcType="INTEGER" property="offset" />
     <result column="host" jdbcType="VARCHAR" property="host" />
     <result column="source" jdbcType="VARCHAR" property="source" />
     <result column="msg" jdbcType="VARCHAR" property="msg" />
     <result column="log_time" jdbcType="TIMESTAMP" property="logTime" />
-    <result column="sys_time" jdbcType="TIMESTAMP" property="sysTime" />
+    <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
   </resultMap>
 </mapper>

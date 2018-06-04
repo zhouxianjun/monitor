@@ -1,7 +1,7 @@
 <template>
     <div>
-        <div>
-            <p v-for="record in records" style="line-height: 18px">
+        <div class="log-record">
+            <p v-for="record in records">
                 {{record['systemmsg']}}　{{record['cusmsg']}}
             </p>
         </div>
@@ -59,6 +59,6 @@
     }
 </script>
 
-<style scoped>
-
+<style lang="less">
+    @import '../../styles/common.less';
 </style>

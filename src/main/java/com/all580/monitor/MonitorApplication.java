@@ -6,11 +6,13 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.retry.annotation.EnableRetry;
+import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import tk.mybatis.spring.annotation.MapperScan;
 
 @SpringBootApplication
 @EnableRetry
+@EnableScheduling
 @EnableTransactionManagement
 @EnableConfigurationProperties
 @MapperScan(basePackages = "com.all580.monitor.mapper")

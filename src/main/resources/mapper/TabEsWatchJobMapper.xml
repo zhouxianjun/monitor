@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.all580.monitor.mapper.TabEsWatchJobMapper">
+    <resultMap id="BaseResultMap" type="com.all580.monitor.entity.TabEsWatchJob">
+        <!--
+          WARNING - @mbg.generated
+        -->
+        <id column="id" jdbcType="INTEGER" property="id"/>
+        <result column="watcher_id" jdbcType="VARCHAR" property="watcherId"/>
+        <result column="trace" jdbcType="VARCHAR" property="trace"/>
+        <result column="status" jdbcType="BIT" property="status"/>
+        <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
+    </resultMap>
+    <select id="selectByTraceAndUndone" resultMap="BaseResultMap">
+        select * from tab_es_watch_job where `status` = 0
+        <foreach collection="list" item="item" open="and (" separator="OR" close=")">
+            FIND_IN_SET(#{item},trace)
+        </foreach>
+        limit 1
+    </select>
+</mapper>

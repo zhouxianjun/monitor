@@ -112,7 +112,7 @@
             Reflect.ownKeys(this.vo.monitor).forEach(key => this.vo.monitor[key] = this.$route.params[key] || this.vo.monitor[key]);
             Reflect.ownKeys(this.vo.rule).forEach(key => this.vo.rule[key] = this.$route.params[key] || this.vo.rule[key]);
             this.editor && this.editor.setValue(this.vo.rule.script);
-            this.$store.commit('changeTagTitle', {name: this.name, title: this.vo.id ? '修改上报监控' : '新增上报监控'});
+            this.$store.commit('changeTagTitle', {name: 'monitor-reported-edit', title: this.vo.id ? '修改上报监控' : '新增上报监控'});
         },
         watch: {
             async 'vo.monitor.spotId'(val) {
@@ -149,7 +149,7 @@
             back() {
                 this.$router.back();
                 this.$parent.$refs['tags'].refsTag.every(tag => {
-                    if (tag.name === this.name) {
+                    if (tag.name === 'monitor-reported-edit') {
                         tag.close({
                             target: tag.$children[0].$el
                         });

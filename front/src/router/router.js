@@ -55,14 +55,16 @@ export const otherRouter = {
         { path: 'message', title: '消息中心', name: 'message_index', component: () => import('@/views/message/message.vue') },
         { path: 'alarm/rule/edit', title: '报警规则', name: 'alarm-rule-edit', component: () => import('@/views/alarm/rule/edit.vue') },
         { path: 'monitor/http/edit', title: 'HTTP监控', name: 'monitor-http-edit', component: () => import('@/views/site-monitor/http/edit.vue') },
-        { path: 'monitor/reported/edit', title: '上报监控', name: 'monitor-reported-edit', component: () => import('@/views/site-monitor/reported/edit.vue') }
+        { path: 'monitor/reported/edit', title: '上报监控', name: 'monitor-reported-edit', component: () => import('@/views/site-monitor/reported/edit.vue') },
+        { path: 'log-service/watcher/edit', title: '日志监控', name: 'log-watcher-edit', component: () => import('@/views/log/watcher/edit.vue') },
+        { path: 'log-service/watcher/record', title: '日志监控记录', name: 'log-watcher-record', component: () => import('@/views/log/watcher/record.vue') }
     ]
 };
 
 // 作为Main组件的子页面展示并且在左侧菜单显示的路由写在appRouter里
 export const appRouter = [{
     path: '/app',
-    icon: 'key',
+    icon: 'android-apps',
     name: 'app',
     title: '应用管理',
     component: Main,
@@ -71,26 +73,26 @@ export const appRouter = [{
     ]
 }, {
     path: '/alarm',
-    icon: 'key',
+    icon: 'android-alert',
     name: 'alarm',
     title: '报警服务',
     component: Main,
     children: [
-        { path: 'rule', title: '报警规则', name: 'rule_index', component: () => import('@/views/alarm/rule/index.vue') },
-        { path: 'history', title: '报警历史', name: 'history_index', component: () => import('@/views/alarm/history/index.vue') }
+        { path: 'rule', icon: 'ios-settings', title: '报警规则', name: 'rule_index', component: () => import('@/views/alarm/rule/index.vue') },
+        { path: 'history', icon: 'ios-list' , title: '报警历史', name: 'history_index', component: () => import('@/views/alarm/history/index.vue') }
     ]
 },{
     path: '/contacts',
-    icon: 'key',
+    icon: 'android-contacts',
     name: 'contacts',
     title: '联系人',
     component: Main,
     children: [
-        { path: 'index', title: '联系人', name: 'contacts_index', component: () => import('@/views/contacts/list.vue') }
+        { path: 'index', icon: 'android-contact', title: '联系人', name: 'contacts_index', component: () => import('@/views/contacts/list.vue') }
     ]
 }, {
     path: '/site-monitor',
-    icon: 'key',
+    icon: 'monitor',
     name: 'site-monitor',
     title: '站点监控',
     component: Main,
@@ -99,12 +101,13 @@ export const appRouter = [{
     ]
 }, {
     path: '/log-service',
-    icon: 'key',
+    icon: 'log-out',
     name: 'log-service',
     title: '日志服务',
     component: Main,
     children: [
-        { path: 'search', title: '日志搜索', name: 'search', component: () => import('@/views/log/search.vue') }
+        { path: 'search', title: '日志搜索', name: 'search', component: () => import('@/views/log/search.vue') },
+        { path: 'watcher', title: '日志监控', name: 'watcher', component: () => import('@/views/log/watcher/index.vue') }
     ]
 }];
 

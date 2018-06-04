@@ -21,6 +21,11 @@ public class TabEsWatchLog implements Serializable {
     @Column(name = "watch_id")
     private Integer watchId;
 
+    @Column(name = "trace_id")
+    private String traceId;
+
+    private Integer offset;
+
     /**
      * 主机地址
      */
@@ -43,10 +48,10 @@ public class TabEsWatchLog implements Serializable {
     private Date logTime;
 
     /**
-     * ES时间
+     * 创建时间
      */
-    @Column(name = "sys_time")
-    private Date sysTime;
+    @Column(name = "create_time")
+    private Date createTime;
 
     private static final long serialVersionUID = 1L;
 

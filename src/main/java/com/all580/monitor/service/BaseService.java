@@ -7,7 +7,6 @@ import com.all580.monitor.util.IMapper;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
 import java.util.Collection;
@@ -31,13 +30,11 @@ public class BaseService<T> implements IService<T> {
     }
 
     @Override
-    @Transactional(rollbackFor = {Exception.class, RuntimeException.class})
     public int save(T entity) {
         return mapper.insertSelective(entity);
     }
 
     @Override
-    @Transactional(rollbackFor = {Exception.class, RuntimeException.class})
     public int save(List<T> entity) {
         return save(entity, false);
     }
@@ -55,19 +52,16 @@ public class BaseService<T> implements IService<T> {
     }
 
     @Override
-    @Transactional(rollbackFor = {Exception.class, RuntimeException.class})
     public int delete(Object key) {
         return mapper.deleteByPrimaryKey(key);
     }
 
     @Override
-    @Transactional(rollbackFor = {Exception.class, RuntimeException.class})
     public int updateAll(T entity) {
         return mapper.updateByPrimaryKey(entity);
     }
 
     @Override
-    @Transactional(rollbackFor = {Exception.class, RuntimeException.class})
     public int updateNotNull(T entity) {
         return mapper.updateByPrimaryKeySelective(entity);
     }
@@ -80,6 +74,11 @@ public class BaseService<T> implements IService<T> {
     @Override
     public List<T> all() {
         return mapper.selectAll();
+    }
+
+    @Override
+    public T selectOne(T entity) {
+        return mapper.selectOne(entity);
     }
 
     @Override

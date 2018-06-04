@@ -35,29 +35,12 @@
                         </Row>
                     </div>
                 </Panel>
-                <Panel name="sort">
-                    <label>排序</label>
-                    <div slot="content">
-                        <Row v-for="(queryItem, index) in query.sort" :key="index" class="margin-bottom-10">
-                            <Input v-model="queryItem.key" placeholder="字段" clearable style="width: 200px"/>
-                            <Select v-model="queryItem.type" style="width: 100px">
-                                <Option v-for="item in SortType" :value="item.id" :key="item.id">{{ item.name }}
-                                </Option>
-                            </Select>
-                            <Button type="ghost" @click="remove('sort', index)">删除一项</Button>
-                        </Row>
-                        <Row>
-                            <Col span="8">
-                                <Button type="dashed" long @click="add('sort')" icon="plus-round">新增一项</Button>
-                            </Col>
-                        </Row>
-                    </div>
-                </Panel>
             </Collapse>
         </Row>
         <Row class="margin-top-10">
             <Col>
-                <Table :columns="table.col" :data="table.data"></Table>
+                <Table :columns="table.col" :data="table.data" :row-class-name="rowClass"></Table>
+                <Button v-show="table.size <= table.data.length && table.data.length > 0" type="text" long @click="pull">加载更多</Button>
             </Col>
         </Row>
     </div>
@@ -123,7 +106,8 @@
                         key: '@timestamp'
                     }],
                     data: [],
-                    expanded: {}
+                    size: 0,
+                    pageSize: 15
                 },
                 range: [dayjs().subtract(1, 'day').toDate(), new Date()],
                 dateRangeOpt: {
@@ -176,6 +160,12 @@
                 this.query[key].splice(index, 1);
             },
             async doQuery() {
+                this.table.size = 0;
+                this.table.data = [];
+                await this.pull();
+            },
+            async pull() {
+                this.table.size += this.table.pageSize;
                 const params = {
                     size: 0,
                     query: {
@@ -194,7 +184,7 @@
                         trace: {
                             terms: {
                                 field: 'trace_id.keyword',
-                                size: 200,
+                                size: this.table.size,
                                 order: { "_term": "desc" }
                             },
                             aggs: {
@@ -223,11 +213,16 @@
                 let result = await this.fetch('/api/log/search', {method: 'post', data: params});
                 if (result) {
                     let data = JSON.parse(result.value);
-                    this.table.data = data['aggregations']['trace']['buckets']
+                    data['aggregations']['trace']['buckets']
+                        .slice(this.table.size - this.table.pageSize)
                         .map(trace => Object.assign({
                             traceId: trace.key
-                        }, trace['one']['hits']['hits'][0]['_source']));
+                        }, trace['one']['hits']['hits'][0]['_source']))
+                        .forEach(item => this.table.data.push(item));
                 }
+            },
+            rowClass(row, index) {
+                return (index + 1) % this.table.pageSize === 0 ? ['mark-row-1', 'mark-row-2'][(index + 1) / this.table.pageSize % 2] : null;
             }
         }
     }
@@ -235,4 +230,12 @@
 
 <style lang="less">
     @import '../../styles/common.less';
+    .ivu-table .mark-row-1 td{
+        background-color: #ff6600;
+        color: #fff;
+    }
+    .ivu-table .mark-row-2 td{
+        background-color: #3a77ff;
+        color: #fff;
+    }
 </style>

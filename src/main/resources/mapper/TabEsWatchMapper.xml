@@ -1,17 +1,41 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.all580.monitor.mapper.TabEsWatchMapper">
-  <resultMap id="BaseResultMap" type="com.all580.monitor.entity.TabEsWatch">
-    <!--
-      WARNING - @mbg.generated
-    -->
-    <id column="id" jdbcType="INTEGER" property="id" />
-    <result column="app_id" jdbcType="INTEGER" property="appId" />
-    <result column="name" jdbcType="VARCHAR" property="name" />
-    <result column="config" jdbcType="VARCHAR" property="config" />
-    <result column="memo" jdbcType="VARCHAR" property="memo" />
-    <result column="status" jdbcType="BIT" property="status" />
-    <result column="reported" jdbcType="BIT" property="reported" />
-    <result column="reported_script" jdbcType="VARCHAR" property="reportedScript" />
-  </resultMap>
+    <resultMap id="BaseResultMap" type="com.all580.monitor.entity.TabEsWatch">
+        <!--
+          WARNING - @mbg.generated
+        -->
+        <id column="id" jdbcType="INTEGER" property="id"/>
+        <result column="app_id" jdbcType="INTEGER" property="appId"/>
+        <result column="watcher_id" jdbcType="VARCHAR" property="watcherId"/>
+        <result column="name" jdbcType="VARCHAR" property="name"/>
+        <result column="config" jdbcType="VARCHAR" property="config"/>
+        <result column="memo" jdbcType="VARCHAR" property="memo"/>
+        <result column="status" jdbcType="BIT" property="status"/>
+        <result column="reported" jdbcType="BIT" property="reported"/>
+        <result column="reported_script" jdbcType="VARCHAR" property="reportedScript"/>
+    </resultMap>
+    <select id="search" resultType="map">
+        SELECT
+            ts.`name` spot_name,
+            ta.`name` app_name,
+            tew.*
+        FROM
+            tab_es_watch tew
+        LEFT JOIN tab_app ta ON ta.id = tew.app_id
+        LEFT JOIN tab_spot ts ON ts.id = ta.spot_id
+        where 1=1
+        <if test="spot != null">
+            AND ts.id = #{spot}
+        </if>
+        <if test="app != null">
+            AND ta.id = #{app}
+        </if>
+        <if test="name != null">
+            AND tew.`name` like concat('%', #{name}, '%')
+        </if>
+        <if test="status != null">
+            AND tew.status = #{status}
+        </if>
+    </select>
 </mapper>

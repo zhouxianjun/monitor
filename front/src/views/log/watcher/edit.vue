@@ -13,51 +13,35 @@
                         <Option v-for="item in apps" :value="item.id" :key="item.id">{{ item.name }}</Option>
                     </Select>
                 </FormItem>
-                <Form-item label="监控项" prop="metric">
-                    <Input v-model="vo.metric"/>
-                </Form-item>
-                <Form-item label="资源标识" prop="resource">
-                    <Input v-model="vo.resource"/>
-                </Form-item>
-                <Form-item label="频率" prop="interval" v-if="vo.interval > 0">
-                    <InputNumber v-model="vo.interval" :min="1" :max="1500" :formatter="val => `${val}分钟`" :parser="val => val.replace('分钟', '')"/>
-                </Form-item>
-                <FormItem label="脚本" prop="script">
+                <FormItem label="监控配置" prop="config">
                     <MonacoEditor
                             height="600"
                             srcPath=""
-                            language="java"
+                            language="json"
                             @mounted="onMounted"
                             @codeChange="onCodeChange"
                     >
                     </MonacoEditor>
                 </FormItem>
-                <FormItem label="NODATA" prop="nodata">
-                    <i-switch v-model="vo.nodata" size="large">
+                <FormItem label="是否上报" prop="reported">
+                    <i-switch v-model="vo.reported" size="large">
                         <span slot="open">开启</span>
                         <span slot="close">禁用</span>
                     </i-switch>
                 </FormItem>
-                <Form-item label="连续几次" prop="count">
-                    <InputNumber v-model="vo.count" :min="1" :max="10" :formatter="val => `${val}次后报警`" :parser="val => val.replace('次后报警', '')"/>
+                <FormItem label="上报脚本" prop="reportedScript" v-if="vo.reported">
+                    <MonacoEditor
+                            height="600"
+                            language="java"
+                            srcPath=""
+                            @mounted="onMountedReportedScript"
+                            @codeChange="onCodeChangeReportedScript"
+                    >
+                    </MonacoEditor>
+                </FormItem>
+                <Form-item label="描述" prop="memo">
+                    <Input type="textarea" v-model="vo.memo"/>
                 </Form-item>
-                <Form-item label="沉默间隔" prop="silenceInterval">
-                    <InputNumber v-model="vo.silenceInterval" :min="1" :max="4320" :formatter="val => `${val}分钟`" :parser="val => val.replace('分钟', '')"/>
-                </Form-item>
-                <FormItem label="通知联系组">
-                    <Select v-model="vo.alarmGroupId" filterable>
-                        <Option v-for="item in contactsGroups" :value="item.id" :key="item.id">{{ item.name }}</Option>
-                    </Select>
-                </FormItem>
-                <FormItem label="回调地址" prop="alarmCallback">
-                    <Input v-model="vo.alarmCallback" type="url"/>
-                </FormItem>
-                <FormItem label="状态" prop="status">
-                    <i-switch v-model="vo.status" size="large">
-                        <span slot="open">开启</span>
-                        <span slot="close">禁用</span>
-                    </i-switch>
-                </FormItem>
                 <FormItem>
                     <Button type="primary" @click="addOrUpdate">确定</Button>
                     <Button type="ghost" class="margin-left-10" @click="back">取消</Button>
@@ -69,54 +53,45 @@
 
 <script>
     import MonacoEditor from 'vue-monaco-editor';
-    import QL from '../../../libs/ql.editor';
 
     export default {
-        name: "alarm-rule-edit",
+        name: "log-watcher-edit",
         components: {
             MonacoEditor
         },
         data() {
             return {
                 editor: null,
+                editorReportedScript: null,
                 vo: {
                     id: null,
                     name: null,
                     appId: null,
                     spotId: null,
-                    metric: null,
-                    resource: null,
-                    interval: 1,
-                    script: null,
-                    nodata: true,
-                    count: 1,
-                    silenceInterval: 1440,
-                    alarmGroupId: null,
-                    alarmCallback: null,
+                    config: null,
+                    reported: false,
+                    reportedScript: null,
+                    memo: null,
                     status: true
                 },
                 spots: [],
                 apps: [],
-                contactsGroups: [],
                 validate: {
                     name: [{required: true, trigger: 'blur' }],
                     appId: [{type: 'number', required: true, trigger: 'change' }],
-                    metric: [{required: true, trigger: 'blur' }],
-                    resource: [{required: true, trigger: 'blur' }],
+                    config: [{required: true, trigger: 'blur' }],
                     interval: [{type: 'number', required: true, trigger: 'blur' }],
-                    nodata: [{type: 'boolean', required: true, trigger: 'blur' }],
-                    count: [{type: 'number', required: true, trigger: 'blur' }],
-                    silenceInterval: [{type: 'number', required: true, trigger: 'blur' }],
+                    reported: [{type: 'boolean', required: true, trigger: 'blur' }],
                     status: [{type: 'boolean', required: true, trigger: 'blur' }]
                 }
             }
         },
         mounted() {
             this.initSpots();
-            this.initContactsGroups();
             this.vo = Object.assign(this.vo, this.$route.params);
-            this.editor && this.editor.setValue(this.vo.script);
-            this.$store.commit('changeTagTitle', {name: 'alarm-rule-edit', title: this.vo.id ? '修改报警规则' : '新增报警规则'});
+            this.editor && this.editor.setValue(this.vo.config);
+            this.editorReportedScript && this.editorReportedScript.setValue(this.vo.reportedScript);
+            this.$store.commit('changeTagTitle', {name: 'log-watcher-edit', title: this.vo.id ? '修改日志监控' : '新增日志监控'});
         },
         watch: {
             async 'vo.spotId'(val) {
@@ -128,10 +103,6 @@
                 let list = await this.fetch('/api/spot/list');
                 list && (this.spots = (!list.value || list.value.length === 0) ? [] : list.value);
             },
-            async initContactsGroups() {
-                let list = await this.fetch('/api/contacts/group/list');
-                list && (this.contactsGroups = (!list.value || list.value.length === 0) ? [] : list.value);
-            },
             async loadApp(spot) {
                 let list = await this.fetch('/api/app/list', {params: {spot}});
                 return list.value ? list.value : [];
@@ -139,7 +110,7 @@
             async addOrUpdate() {
                 this.$refs['form'].validate(async (valid) => {
                     if (valid) {
-                        let url = this.vo.id ? '/api/alarm/rule/update' : '/api/alarm/rule/add';
+                        let url = this.vo.id ? '/api/log/watcher/update' : '/api/log/watcher/add';
                         let success = await this.fetch(url, {method: 'post', data: this.vo});
                         if (success === false) {
                             return;
@@ -153,7 +124,7 @@
             back() {
                 this.$router.back();
                 this.$parent.$refs['tags'].refsTag.every(tag => {
-                    if (tag.name === 'alarm-rule-edit') {
+                    if (tag.name === 'log-watcher-edit') {
                         tag.close({
                             target: tag.$children[0].$el
                         });
@@ -163,17 +134,23 @@
                 });
             },
             onMounted(editor) {
-                QL(monaco);
                 this.editor = editor;
-                this.vo.script && this.editor.setValue(this.vo.script);
+                this.vo.config && this.editor.setValue(this.vo.config);
             },
             onCodeChange(editor) {
-                this.vo.script = editor.getValue();
+                this.vo.config = editor.getValue();
+            },
+            onMountedReportedScript(editor) {
+                this.editorReportedScript = editor;
+                this.vo.reportedScript && this.editorReportedScript.setValue(this.vo.reportedScript);
+            },
+            onCodeChangeReportedScript(editor) {
+                this.vo.reportedScript = editor.getValue();
             }
         }
     }
 </script>
 
-<style lang="less">
-    @import '../../../styles/common.less';
+<style scoped>
+
 </style>

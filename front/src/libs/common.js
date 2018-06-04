@@ -148,6 +148,34 @@ const Common = {
         const result = {};
         result[obj[key]] = obj[value];
         return result;
-    }
+    },
+    tableColBtn(h, params, fn) {
+        return h('a', {
+            on: {
+                click: fn
+            }
+        }, params.row[params.column.key]);
+    },
+    tableBtnPop(h, title, text, type, fn, config) {
+        return h('Poptip', {
+            props: {
+                confirm: true,
+                title,
+                placement: 'top',
+                transfer: true
+            },
+            on: {
+                'on-ok': fn
+            }
+        }, [
+            h('Button', Object.assign({
+                props: {
+                    type: type,
+                    size: 'small'
+                }
+            }, config), text)
+        ]);
+    },
+    switchTableBtnPop: (h, bool, fn, config) => Common.tableBtnPop(h, `您确定要${bool ? '禁用' : '启用'}这条数据吗?`, bool ? '禁用' : '启用', bool ? 'warning' : 'success', fn, config)
 };
 export default Common;

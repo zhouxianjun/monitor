@@ -21,7 +21,7 @@ public class ExceptionHandle {
     @ExceptionHandler(RuntimeException.class)
     @ResponseBody
     public Result<?> handle(RuntimeException e, HttpServletRequest request){
-        log.warn("", e);
+        log.error("未捕获的异常", e);
         return Result.builder()
                 .code(Result.FAIL)
                 .msg("操作失败")

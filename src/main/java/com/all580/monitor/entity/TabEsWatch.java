@@ -21,6 +21,12 @@ public class TabEsWatch implements Serializable {
     private Integer appId;
 
     /**
+     * ES预计ID
+     */
+    @Column(name = "watcher_id")
+    private String watcherId;
+
+    /**
      * 名称
      */
     private String name;
