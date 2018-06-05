@@ -37,29 +37,31 @@
                 </Panel>
             </Collapse>
         </Row>
-        <Row class="margin-top-10">
-            <Col>
-                <Table :columns="table.col" :data="table.data" :row-class-name="rowClass"></Table>
-                <Button v-show="table.size <= table.data.length && table.data.length > 0" type="text" long @click="pull">加载更多</Button>
-            </Col>
+        <GridKeepaliveTable :columns="table.col" :data="table.data" class="margin-top-10">
+            <Detail slot="expand" slot-scope="{record}" :trace_id="record.traceId" :load="true"/>
+        </GridKeepaliveTable>
+        <Row>
+            <Button v-show="table.size <= table.data.length && table.data.length > 0" type="text" long @click="pull">加载更多</Button>
         </Row>
     </div>
 </template>
 
 <script>
     import dayjs from 'dayjs';
-    import {ESFilterType, SortType} from '../../libs/dic';
+    import {ESFilterType} from '../../libs/dic';
+    import Common from '../../libs/common';
     import Detail from './detail';
+    import GridKeepaliveTable from '../../components/grid-keepalive-table';
 
     export default {
         name: "log-search",
         components: {
+            GridKeepaliveTable,
             Detail
         },
         data() {
             return {
                 ESFilterType,
-                SortType,
                 types: [{
                     description: 'AND -- 多个查询条件的完全匹配',
                     key: 'must'
@@ -82,28 +84,21 @@
                 table: {
                     col: [{
                         type: 'expand',
-                        width: 50,
-                        render: (h, params) => {
-                            return h('keep-alive', [
-                                h(Detail, {
-                                    props: {
-                                        trace_id: params.row['traceId']
-                                    }
-                                })
-                            ]);
-                        }
+                        width: 50
                     }, {
                         title: 'TRACEID',
                         key: 'traceId'
                     }, {
                         title: '文件路径',
-                        key: 'source'
+                        key: 'source',
+                        ellipsis: true
                     }, {
                         title: '主机',
                         key: 'host'
                     }, {
                         title: '记录时间',
-                        key: '@timestamp'
+                        key: '@timestamp',
+                        render: (h, params) => Common.RENDER.DATE(h, params, (val) => new Date(val))
                     }],
                     data: [],
                     size: 0,
@@ -123,6 +118,9 @@
                     }]
                 }
             }
+        },
+        mounted() {
+            this.doQuery();
         },
         methods: {
             generate() {
@@ -213,16 +211,14 @@
                 let result = await this.fetch('/api/log/search', {method: 'post', data: params});
                 if (result) {
                     let data = JSON.parse(result.value);
-                    data['aggregations']['trace']['buckets']
+                    this.table.data = this.table.data.concat(data['aggregations']['trace']['buckets']
                         .slice(this.table.size - this.table.pageSize)
                         .map(trace => Object.assign({
-                            traceId: trace.key
-                        }, trace['one']['hits']['hits'][0]['_source']))
-                        .forEach(item => this.table.data.push(item));
+                            traceId: trace.key,
+                            expand: false,
+                            load: false
+                        }, trace['one']['hits']['hits'][0]['_source'])));
                 }
-            },
-            rowClass(row, index) {
-                return (index + 1) % this.table.pageSize === 0 ? ['mark-row-1', 'mark-row-2'][(index + 1) / this.table.pageSize % 2] : null;
             }
         }
     }
@@ -230,12 +226,4 @@
 
 <style lang="less">
     @import '../../styles/common.less';
-    .ivu-table .mark-row-1 td{
-        background-color: #ff6600;
-        color: #fff;
-    }
-    .ivu-table .mark-row-2 td{
-        background-color: #3a77ff;
-        color: #fff;
-    }
 </style>

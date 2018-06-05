@@ -37,8 +37,8 @@ const Common = {
         return `<a href="mailto:${val}">${val}</a>`;
     },
     RENDER: {
-        DATE(h, params) {
-            return h('span', Common.dateFormat(params.row[params.column.key]));
+        DATE(h, params, convert = (val => val)) {
+            return h('span', Common.dateFormat(convert(params.row[params.column.key])));
         },
         DATE_RANGE(h, params) {
             return (start, end) => h('span', `${Common.dateFormat(params.row[start])}~${Common.dateFormat(params.row[end])}`);

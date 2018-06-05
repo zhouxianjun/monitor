@@ -13,7 +13,11 @@
     export default {
         name: "log-detail",
         props: {
-            trace_id: {type: [String, Array], require: true}
+            trace_id: {type: [String, Array], require: true},
+            load: {
+                type: Boolean,
+                default: false
+            }
         },
         data() {
             return {
@@ -23,10 +27,13 @@
             }
         },
         mounted() {
-            this.pull();
+            if (this.load) {
+                this.pull();
+            }
         },
         methods: {
             async pull() {
+                let traceId = Array.isArray(this.trace_id) ? this.trace_id : [this.trace_id];
                 let result = await this.fetch('/api/log/search', {
                     method: 'post', data: {
                         _source: ['systemmsg', 'cusmsg'],
@@ -34,7 +41,7 @@
                             bool: {
                                 filter: [{
                                     terms: {
-                                        trace_id: Array.isArray(this.trace_id) ? this.trace_id : [this.trace_id]
+                                        trace_id: traceId
                                     }
                                 }]
                             }
