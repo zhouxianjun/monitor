@@ -24,6 +24,12 @@ public class TabEsWatchLog implements Serializable {
     @Column(name = "trace_id")
     private String traceId;
 
+    /**
+     * 日志_id
+     */
+    @Column(name = "log_id")
+    private String logId;
+
     private Integer offset;
 
     /**
@@ -46,6 +52,11 @@ public class TabEsWatchLog implements Serializable {
      */
     @Column(name = "log_time")
     private Date logTime;
+
+    /**
+     * 是否为触发的那一条
+     */
+    private Boolean marker;
 
     /**
      * 创建时间

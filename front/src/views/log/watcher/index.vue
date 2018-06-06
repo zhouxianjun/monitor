@@ -49,7 +49,7 @@
                         key: 'name',
                         render: (h, params) => Common.tableColBtn(h, params, () => {
                             this.$router.push({
-                                name: 'log-watcher-record',
+                                name: 'log-watcher-list',
                                 query: {
                                     watchId: params.row['id']
                                 }

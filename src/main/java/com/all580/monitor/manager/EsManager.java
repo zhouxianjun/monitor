@@ -1,5 +1,6 @@
 package com.all580.monitor.manager;
 
+import cn.hutool.core.map.MapUtil;
 import cn.hutool.http.Method;
 import cn.hutool.json.JSON;
 import cn.hutool.json.JSONUtil;
@@ -23,6 +24,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * @author zhouxianjun(Alone)
@@ -42,7 +44,7 @@ public class EsManager {
     @Value("${es.api.password}")
     private String password;
 
-    public static final String QUERY_TRACE = "{\"_source\":[\"systemmsg\",\"cusmsg\",\"offset\",\"host\",\"@timestamp\",\"source\",\"trace_id\"],\"query\":{\"bool\":{\"filter\":[{\"terms\":{\"trace_id\":[]}}]}},\"from\":0,\"size\":100,\"sort\":[{\"@timestamp\":\"asc\"},{\"offset\":\"asc\"}]}";
+    public static final String QUERY_TRACE = "{\"_source\":[\"systemmsg\",\"cusmsg\",\"offset\",\"_id\",\"host\",\"@timestamp\",\"source\",\"trace_id\"],\"query\":{\"bool\":{\"filter\":[{\"terms\":{\"trace_id\":[]}}]}},\"from\":0,\"size\":100,\"sort\":[{\"@timestamp\":\"asc\"},{\"offset\":\"asc\"}]}";
 
     public JSON execute(String path, Method method, String json) throws IOException {
         Request request = new Request.Builder()
@@ -78,7 +80,13 @@ public class EsManager {
         if (total <= 0) {
             return list;
         }
-        list.addAll(resultParse.read("$.hits.hits[*]._source"));
+        List<Map<String, Object>> hits = resultParse.read("$.hits.hits[*]");
+        hits = hits.stream()
+                .map(map -> MapUtil.builder("_id", map.get("_id"))
+                        .putAll((Map<String, Object>) map.get("_source"))
+                        .build())
+                .collect(Collectors.toList());
+        list.addAll(hits);
         if (list.size() < total) {
             return queryTrace(parse, list);
         }

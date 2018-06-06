@@ -27,6 +27,12 @@ public class TabEsWatchJob implements Serializable {
     private String trace;
 
     /**
+     * 日志_id 逗号分隔
+     */
+    @Column(name = "log_id")
+    private String logId;
+
+    /**
      * 是否执行
      */
     private Boolean status;

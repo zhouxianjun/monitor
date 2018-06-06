@@ -19,12 +19,10 @@ import tk.mybatis.mapper.entity.Example;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * @author zhouxianjun(Alone)
@@ -44,7 +42,10 @@ public class WatcherJobTask {
     private EsWatcherLogService esWatcherLogService;
     @Autowired
     private EsManager esManager;
-    private SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+    private static SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+    static {
+        df.setTimeZone(TimeZone.getTimeZone("UTC"));
+    }
 
     @Scheduled(fixedDelay = 60 * 1000 * 5)
     public void scan() {
@@ -60,6 +61,8 @@ public class WatcherJobTask {
                             List<Map<String, Object>> maps = esManager.queryTrace(Arrays.stream(job.getTrace().split(",")).collect(Collectors.toList()));
                             maps.forEach(map -> {
                                 try {
+                                    String logId = map.get("_id").toString();
+                                    Stream<String> logIdStream = Arrays.stream(job.getLogId().split(","));
                                     esWatcherLogService.save(new TabEsWatchLog()
                                             .setHost(map.get("host").toString())
                                             .setLogTime(df.parse(map.get("@timestamp").toString()))
@@ -67,8 +70,10 @@ public class WatcherJobTask {
                                             .setSource(map.get("source").toString())
                                             .setTraceId(map.get("trace_id").toString())
                                             .setWatchId(watch.getId())
+                                            .setLogId(logId)
                                             .setOffset(MapUtil.getInt(map, "offset"))
-                                            .setMsg(StrUtil.maxLength(StrUtil.format("{}　{}", map.get("systemmsg"), map.get("cusmsg")), 5000)));
+                                            .setMarker(logIdStream.anyMatch(id -> id.equals(logId)))
+                                            .setMsg(StrUtil.maxLength(StrUtil.format("{}　{}", map.get("systemmsg"), map.get("cusmsg")), 4500)));
                                 } catch (DuplicateKeyException dbe) {
                                     log.warn("当前日志已经记录: {}", map);
                                 } catch (ParseException e) {

@@ -8,6 +8,7 @@
         <id column="id" jdbcType="INTEGER" property="id"/>
         <result column="watcher_id" jdbcType="VARCHAR" property="watcherId"/>
         <result column="trace" jdbcType="VARCHAR" property="trace"/>
+        <result column="log_id" jdbcType="VARCHAR" property="logId"/>
         <result column="status" jdbcType="BIT" property="status"/>
         <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
     </resultMap>

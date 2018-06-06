@@ -14,9 +14,7 @@ import com.all580.monitor.service.EsWatcherService;
 import com.github.pagehelper.PageHelper;
 import com.jayway.jsonpath.JsonPath;
 import io.swagger.annotations.*;
-import io.swagger.models.auth.In;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
@@ -58,11 +56,13 @@ public class LogController {
     @PostMapping("watcher/hook")
     public Result<?> hook(@RequestParam String watcher, @RequestBody Map<String, Object> params) {
         List<String> traceIds = JsonPath.parse(params).read("$.hits.hits[*]._source.trace_id");
+        List<String> logIds = JsonPath.parse(params).read("$.hits.hits[*]._id");
         TabEsWatchJob job = new TabEsWatchJob()
                 .setCreateTime(new Date())
                 .setStatus(false)
                 .setWatcherId(watcher)
-                .setTrace(traceIds.stream().distinct().collect(Collectors.joining(",")));
+                .setTrace(traceIds.stream().distinct().collect(Collectors.joining(",")))
+                .setLogId(logIds.stream().distinct().collect(Collectors.joining(",")));
         esWatcherJobService.save(job);
         return Result.ok();
     }
@@ -111,14 +111,33 @@ public class LogController {
     @ApiOperation(value = "获取日志监控的日志列表", notes = "如果传入page参数则返回value为PageInfo", produces = MediaType.APPLICATION_JSON_VALUE)
     @ApiImplicitParams({
             @ApiImplicitParam(name = "watchId", value = "监控ID", required = true),
-            @ApiImplicitParam(name = "traceId", value = "traceId"),
+            @ApiImplicitParam(name = "keyword", value = "消息关键字"),
+            @ApiImplicitParam(name = "start", value = "开始时间"),
+            @ApiImplicitParam(name = "end", value = "结束时间"),
             @ApiImplicitParam(name = "pageNum", value = "页总数"),
             @ApiImplicitParam(name = "pageSize", value = "页总数")
     })
     @GetMapping("watcher/log/list")
-    public Result<?> logList(@RequestParam Integer watchId, String traceId, Integer pageNum, Integer pageSize) {
+    public Result<?> logList(@RequestParam Integer watchId, String keyword, Date start, Date end, Integer pageNum, Integer pageSize) {
         Object value;
-        TabEsWatchLog entity = new TabEsWatchLog().setWatchId(watchId).setTraceId(StringUtils.isEmpty(traceId) ? null : traceId);
+        if (pageNum != null && pageSize != null) {
+            value = PageHelper.startPage(pageNum, pageSize).doSelectPageInfo(() -> esWatcherLogService.searchGroupByTrace(watchId, keyword, start, end));
+        } else {
+            value = esWatcherLogService.searchGroupByTrace(watchId, keyword, start, end);
+        }
+        return Result.builder().code(Result.SUCCESS).value(value).build();
+    }
+
+    @ApiOperation(value = "获取日志监控的详情", notes = "如果传入page参数则返回value为PageInfo", produces = MediaType.APPLICATION_JSON_VALUE)
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "traceId", value = "traceId", required = true),
+            @ApiImplicitParam(name = "pageNum", value = "页总数"),
+            @ApiImplicitParam(name = "pageSize", value = "页总数")
+    })
+    @GetMapping("watcher/log/detail")
+    public Result<?> logDetail(@RequestParam String traceId, Integer pageNum, Integer pageSize) {
+        Object value;
+        TabEsWatchLog entity = new TabEsWatchLog().setTraceId(traceId);
         if (pageNum != null && pageSize != null) {
             value = PageHelper.startPage(pageNum, pageSize).doSelectPageInfo(() -> esWatcherLogService.select(entity));
         } else {

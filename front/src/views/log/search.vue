@@ -15,7 +15,7 @@
                                 <Option v-for="item in ESFilterType" :value="item.id" :key="item.id">{{ item.name }}
                                 </Option>
                             </Select>
-                            <Input v-model="queryItem.key" placeholder="字段" clearable style="width: 200px"/>
+                            <AutoComplete v-model="queryItem.key" :data="fields" placeholder="字段" clearable style="width: 200px"/>
                             <span v-if="queryItem.type === 'range'">
                                 <label>&gt;=</label>
                                 <InputNumber v-model="queryItem.gte" style="width: 90px"></InputNumber>
@@ -38,7 +38,8 @@
             </Collapse>
         </Row>
         <GridKeepaliveTable :columns="table.col" :data="table.data" class="margin-top-10">
-            <Detail slot="expand" slot-scope="{record}" :trace_id="record.traceId" :load="true"/>
+            <Detail v-highlight="{keyword: highlight}" slot="expand" slot-scope="{record}" :trace_id="record.traceId" :load="true"/>
+            <Icon slot="col-expand" slot-scope="{record}" :type="record.expand ? 'ios-arrow-down' : 'ios-arrow-right'" size="14"></Icon>
         </GridKeepaliveTable>
         <Row>
             <Button v-show="table.size <= table.data.length && table.data.length > 0" type="text" long @click="pull">加载更多</Button>
@@ -52,6 +53,7 @@
     import Common from '../../libs/common';
     import Detail from './detail';
     import GridKeepaliveTable from '../../components/grid-keepalive-table';
+    import highlight from '../../components/highlight-directive';
 
     export default {
         name: "log-search",
@@ -59,8 +61,13 @@
             GridKeepaliveTable,
             Detail
         },
+        directives: {
+            highlight
+        },
         data() {
             return {
+                fields: ['cusmsg', 'trace_id', 'level'],
+                highlight: [],
                 ESFilterType,
                 types: [{
                     description: 'AND -- 多个查询条件的完全匹配',
@@ -83,6 +90,9 @@
                 },
                 table: {
                     col: [{
+                        type: 'index',
+                        width: 50
+                    }, {
                         type: 'expand',
                         width: 50
                     }, {
@@ -138,6 +148,7 @@
                     case 'match':
                         value[item.type] = {};
                         value[item.type][item.key] = item.value;
+                        this.highlight.push(item.value);
                         break;
                     case 'range':
                         value[item.type] = {};
@@ -145,6 +156,7 @@
                             gte: item.gte ? typeof item.gte === 'object' ? dayjs(item.gte).valueOf() : item.gte : null,
                             lte: item.lte ? typeof item.lte === 'object' ? dayjs(item.lte).valueOf() : item.lte : null
                         };
+                        this.highlight.concat([value[item.type][item.key].gte, value[item.type][item.key].lte]);
                         break;
                     default:
                         break;
@@ -160,6 +172,7 @@
             async doQuery() {
                 this.table.size = 0;
                 this.table.data = [];
+                this.highlight = [];
                 await this.pull();
             },
             async pull() {

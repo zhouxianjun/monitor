@@ -1,54 +1,67 @@
 <template>
-    <Row class="grid-table">
-        <Row class="grid-table-header" v-if="showHeader" ref="header">
-            <Row>
-                <slot name="header">
-                    <template v-for="col in cols">
-                        <Col :style="{width: `${col._width}px`, float: 'left'}">
-                            <template v-if="col.type === 'expand'">
-                                &nbsp;
-                            </template>
-                            <template v-else>
-                                {{col.title}}
-                            </template>
-                        </Col>
-                    </template>
-                </slot>
-            </Row>
-        </Row>
-        <Row class="grid-table-body" v-show="records && records.length > 0">
-            <Row class="grid-table-row" v-for="record in records" :key="record.traceId">
-                <Row type="flex" justify="center" align="middle" @click.native="clickRow($event, record)">
-                    <template v-for="col in cols">
-                        <Col :class="col.className"
+    <div class="grid-table">
+        <div class="grid-table-header" v-if="showHeader" ref="header">
+            <slot name="header">
+                <template v-for="col in cols">
+                    <div :style="{width: `${columnsWidth[col._index]}px`}">
+                        <template v-if="col.type === 'expand'">
+                            &nbsp;
+                        </template>
+                        <template v-else-if="col.type === 'index'">
+                            #
+                        </template>
+                        <div v-else-if="col.type === 'checkbox'" @click.stop="selectAll(col)">
+                            <slot name="header-checkbox">
+                                <input type="checkbox"/>
+                            </slot>
+                        </div>
+                        <template v-else>
+                            {{col.title}}
+                        </template>
+                    </div>
+                </template>
+            </slot>
+        </div>
+        <div class="grid-table-body" v-show="records && records.length > 0">
+            <div class="grid-table-row" v-for="(record, index) in records" @click="clickRow($event, record)" :key="record.traceId">
+                <template v-for="col in cols">
+                    <div class="grid-table-row-wrapper">
+                        <div :class="['grid-table-cell', {'grid-table-cell-with-expand': col.type === 'expand'}, col.className]"
                              :style="cellStyle(col)" :data-index="col._index">
                             <div v-if="col.type === 'expand'" @click.stop="toggleExpand(col, record)">
-                                <Icon
-                                      :type="record.expand ? 'ios-arrow-down' : 'ios-arrow-right'"
-                                      size="14"></Icon>
+                                <slot name="col-expand" :record="record">
+                                    <span>{{record.expand ? 'v' : '>'}}</span>
+                                </slot>
                             </div>
+                            <div v-else-if="col.type === 'checkbox'" @click.stop="toggleSelect(col, record)">
+                                <slot name="col-checkbox">
+                                    <input type="checkbox" :checked="record.isChecked"/>
+                                </slot>
+                            </div>
+                            <template v-else-if="col.type === 'index'">
+                                {{index + 1}}
+                            </template>
                             <Render v-else-if="col.type === 'render'" :render="col.render" :params="{row: record, column: col}"/>
                             <template v-else>
                                 {{record[col.key]}}
                             </template>
-                        </Col>
-                    </template>
-                </Row>
-                <keep-alive>
-                    <Row class="grid-table-expand" v-if="record.expand">
-                        <slot name="expand" :record="record"></slot>
-                    </Row>
-                </keep-alive>
-            </Row>
-        </Row>
-        <Row class="grid-table-no-data" v-show="!records || records.length === 0">
+                        </div>
+                    </div>
+                </template>
+                <div class="grid-table-expand" v-show="record.expand">
+                    <keep-alive>
+                        <slot name="expand" :record="record" v-if="record.expand"></slot>
+                    </keep-alive>
+                </div>
+                <div style="clear:both"></div>
+            </div>
+        </div>
+        <div class="grid-table-no-data" v-show="!records || records.length === 0">
             <slot name="noData">
-                <Row type="flex" justify="center" align="middle">
-                    <Col>{{noDataText}}</Col>
-                </Row>
+                <div>{{noDataText}}</div>
             </slot>
-        </Row>
-    </Row>
+        </div>
+    </div>
 </template>
 
 <script>
@@ -97,14 +110,14 @@
         watch: {
             data: {
                 handler() {
-                    this.records = this.data.map((item, index) => Object.assign(this.records[index] || {expand: false}, item));
+                    this.records = this.data.map((item, index) => Object.assign(this.records[index] || {expand: false, isChecked: false}, item));
                 },
                 deep: true
             }
         },
         methods: {
             cellStyle(cell) {
-                const style = {width: `${cell._width}px`, float: 'left'};
+                const style = {width: `${this.columnsWidth[cell._index]}px`};
                 if (cell.ellipsis) {
                     style.overflow = 'hidden';
                     style.wordWrap = 'normal'
@@ -123,6 +136,7 @@
                 let maxWidthColumns = [];
                 // 没有自定义最大宽度的列
                 let noMaxWidthColumns = [];
+                let columnsWidth = {};
                 this.cols = this.columns.map((col, index) => {
                     let column = Object.assign({_index: index, _width: null}, col);
                     if (typeof column.render === 'function') {
@@ -183,6 +197,7 @@
                     }
 
                     col._width = width;
+                    columnsWidth[col._index] = width;
                 });
                 if (usableWidth > 0) {
                     usableLength = noMaxWidthColumns.length;
@@ -199,10 +214,12 @@
                         }
 
                         column._width = width;
+                        columnsWidth[column._index] = width;
                     });
                 }
 
                 this.tableWidth = this.cols.map(cell => cell._width).reduce((a, b) => a + b, 0) + 1;
+                this.columnsWidth = columnsWidth;
             },
             clickRow(event, record) {
                 this.$emit('on-click-row', event.target.getAttribute('data-index'), JSON.parse(JSON.stringify(record)));
@@ -210,6 +227,24 @@
             toggleExpand(col, record) {
                 record.expand = !record.expand;
                 this.$emit('on-expand', JSON.parse(JSON.stringify(record)), col);
+            },
+            toggleSelect(col, record) {
+                record.isChecked = !record.isChecked;
+                this.$emit('on-select', JSON.parse(JSON.stringify(record)), col);
+                this.$emit('on-selection-change', this.getSelection(), col);
+            },
+            selectAll(col) {
+                const status = this.isSelectAll();
+                this.records.filter(r => !r.disabled).forEach(r => r.isChecked = status);
+                this.$emit('on-selection-change', this.getSelection(), col);
+            },
+            isSelectAll() {
+                if (!this.data.length) return false;
+                if (!this.data.find(item => !item.disabled)) return false;
+                return !!this.records.find(record => !record.isChecked && !record.disabled);
+            },
+            getSelection() {
+                return JSON.parse(JSON.stringify(this.records.filter(r => r.isChecked)));
             }
         }
     }
@@ -221,43 +256,49 @@
         border-bottom: 0;
         .grid-table-row {
             border-bottom: 1px solid #e9eaec;
-        }
-        .grid-table-header {
-            .ivu-row {
-                border-bottom: 1px solid #e9eaec;
+            .grid-table-row-wrapper {
+                display: table-cell;
+                vertical-align: middle;
+                height: 48px;
             }
-        }
-        .grid-table-no-data {
-            border-bottom: 1px solid #e9eaec;
-        }
-        .grid-table-header {
-            overflow: hidden;
-            font-weight: bold;
-            .ivu-col {
-                height: 40px;
-                white-space: nowrap;
-                overflow: hidden;
-                background-color: #f8f8f9;
+            .grid-table-cell {
+                float: left;
+                display: inline-block;
+                word-wrap: break-word;
+                text-overflow: ellipsis;
+                text-align: left;
+                padding: 18px;
             }
-        }
-        .grid-table-row {
-            .ivu-col:first-child {
-                text-align: center;
+            .grid-table-cell-with-expand {
                 cursor: pointer;
+                text-align: center;
             }
         }
-        .ivu-col {
-            padding: 18px;
-            text-align: left;
-            word-wrap: break-word;
-            text-overflow: ellipsis;
-            vertical-align: middle;
+        .grid-table-header {
+            height: 40px;
+            display:table-cell;
+            vertical-align:middle;
+            background-color: #f8f8f9;
+            border-bottom: 1px solid #e9eaec;
+            > div {
+                float: left;
+                padding: 0 18px;
+                overflow: hidden;
+                font-weight: bold;
+                display: inline-block;
+                white-space: nowrap;
+            }
         }
         .grid-table-expand {
             border-top: 1px solid #e9eaec;
             min-height: 50px;
             padding: 15px 50px;
             background: #f8f8f9;
+        }
+        .grid-table-no-data {
+            text-align: center;
+            border-bottom: 1px solid #e9eaec;
+            padding: 18px 0;
         }
     }
 </style>

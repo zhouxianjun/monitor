@@ -1,18 +1,33 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.all580.monitor.mapper.TabEsWatchLogMapper">
-  <resultMap id="BaseResultMap" type="com.all580.monitor.entity.TabEsWatchLog">
-    <!--
-      WARNING - @mbg.generated
-    -->
-    <id column="id" jdbcType="INTEGER" property="id" />
-    <result column="watch_id" jdbcType="INTEGER" property="watchId" />
-    <result column="trace_id" jdbcType="VARCHAR" property="traceId" />
-    <result column="offset" jdbcType="INTEGER" property="offset" />
-    <result column="host" jdbcType="VARCHAR" property="host" />
-    <result column="source" jdbcType="VARCHAR" property="source" />
-    <result column="msg" jdbcType="VARCHAR" property="msg" />
-    <result column="log_time" jdbcType="TIMESTAMP" property="logTime" />
-    <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
-  </resultMap>
+    <resultMap id="BaseResultMap" type="com.all580.monitor.entity.TabEsWatchLog">
+        <!--
+          WARNING - @mbg.generated
+        -->
+        <id column="id" jdbcType="INTEGER" property="id"/>
+        <result column="watch_id" jdbcType="INTEGER" property="watchId"/>
+        <result column="trace_id" jdbcType="VARCHAR" property="traceId"/>
+        <result column="log_id" jdbcType="VARCHAR" property="logId"/>
+        <result column="offset" jdbcType="INTEGER" property="offset"/>
+        <result column="host" jdbcType="VARCHAR" property="host"/>
+        <result column="source" jdbcType="VARCHAR" property="source"/>
+        <result column="msg" jdbcType="VARCHAR" property="msg"/>
+        <result column="log_time" jdbcType="TIMESTAMP" property="logTime"/>
+        <result column="marker" jdbcType="BIT" property="marker"/>
+        <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
+    </resultMap>
+    <select id="searchGroupByTrace" resultMap="BaseResultMap">
+        select * from tab_es_watch_log where watch_id = #{watchId}
+        <if test="keyword != null and keyword != ''">
+            and msg like concat('%', #{keyword}, '%')
+        </if>
+        <if test="start != null">
+            AND log_time &gt;= #{start}
+        </if>
+        <if test="end != null">
+            AND log_time &lt;= #{end}
+        </if>
+        group by trace_id order by log_time desc
+    </select>
 </mapper>

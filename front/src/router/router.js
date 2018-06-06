@@ -57,7 +57,7 @@ export const otherRouter = {
         { path: 'monitor/http/edit', title: 'HTTP监控', name: 'monitor-http-edit', component: () => import('@/views/site-monitor/http/edit.vue') },
         { path: 'monitor/reported/edit', title: '上报监控', name: 'monitor-reported-edit', component: () => import('@/views/site-monitor/reported/edit.vue') },
         { path: 'log-service/watcher/edit', title: '日志监控', name: 'log-watcher-edit', component: () => import('@/views/log/watcher/edit.vue') },
-        { path: 'log-service/watcher/record', title: '日志监控记录', name: 'log-watcher-record', component: () => import('@/views/log/watcher/record.vue') }
+        { path: 'log-service/watcher/list', title: '日志监控记录', name: 'log-watcher-list', component: () => import('@/views/log/watcher/list.vue') }
     ]
 };
 
