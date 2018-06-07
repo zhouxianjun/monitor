@@ -22,4 +22,15 @@ public abstract class AbstractNotice {
                 return String.format("您监控%s有情况", rule.getName());
         }
     }
+
+    protected String title(TabAlarmRule rule, TabAlarmHistory history) {
+        switch (history.getStatus()) {
+            case Constant.HistoryStatus.ALARM:
+                return "发生告警";
+            case Constant.HistoryStatus.NORMAL:
+                return "恢复正常";
+            default:
+                return "有情况";
+        }
+    }
 }

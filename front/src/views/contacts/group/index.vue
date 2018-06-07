@@ -1,37 +1,36 @@
 <template>
     <div>
         <Row>
-            <Button type="primary" @click="add"><Icon type="plus"></Icon>创建联系人</Button>
-        </Row>
-        <Row class="margin-top-10">
-            <Input v-model="table.query.keyword" placeholder="keyword" clearable style="width: 200px" />
-            <Button class="margin-left-10" type="primary" @click="doQuery" icon="search">搜索</Button>
+            <Button type="primary" @click="add"><Icon type="plus"></Icon>创建组</Button>
         </Row>
         <Row class="margin-top-10">
             <Col>
                 <Table :columns="table.col" :data="table.data"></Table>
                 <div style="margin: 10px;overflow: hidden">
                     <div style="float: right;">
-                        <Page :total="table.total" :show-sizer="true" placement="top"
-                              @on-page-size-change="changePageSize" @on-change="changePage"></Page>
+                        <Page :total="table.total" :show-sizer="true" placement="top" @on-page-size-change="changePageSize" @on-change="changePage"></Page>
                     </div>
                 </div>
             </Col>
         </Row>
-        <Modal v-model="model" :title="modelTitle" :loading="loadingBtn" @on-ok="addOrUpdate" @on-cancel="cancel">
-            <div style="max-height: 400px;" v-slimscroll>
+
+        <Modal v-model="model" :title="modelTitle" :width="550" :loading="loadingBtn" @on-ok="addOrUpdate" @on-cancel="cancel">
+            <div style="max-height: 400px;" v-slimscroll="{height: 300}">
                 <Form ref="form" :model="vo" :label-width="80" :rules="validate">
-                    <Form-item label="姓名" prop="name">
-                        <Input v-model="vo.name"/>
+                    <Form-item label="组名" prop="group.name">
+                        <Input v-model="vo.group.name"/>
                     </Form-item>
-                    <FormItem label="邮箱" prop="email">
-                        <Input type="email" v-model="vo.email"/>
+                    <FormItem label="备注" prop="group.remark">
+                        <Input type="textarea" v-model="vo.group.remark"/>
                     </FormItem>
-                    <FormItem label="openid" prop="openid">
-                        <Input v-model="vo.openid"/>
-                    </FormItem>
-                    <FormItem label="钉钉机器人" prop="dingding">
-                        <Input type="url" v-model="vo.ding"/>
+                    <FormItem label="选择联系人" prop="contacts">
+                        <Transfer
+                                :data="contacts"
+                                :target-keys="vo.contacts"
+                                :titles="['已有联系人', '已选联系人']"
+                                filterable
+                                :filter-method="(data, query) => data.label.indexOf(query) > -1"
+                                @on-change="val => vo.contacts = val"></Transfer>
                     </FormItem>
                 </Form>
             </div>
@@ -40,28 +39,32 @@
 </template>
 
 <script>
-    import Common from '../../libs/common';
-
+    import Common from '../../../libs/common';
     export default {
-        name: "contacts-list",
+        name: "contacts-group-index",
         data() {
             return {
+                model: false,
+                modelTitle: null,
+                loadingBtn: false,
+                contacts: [],
                 table: {
                     col: [{
-                        title: '姓名',
-                        key: 'name'
+                        title: '组名',
+                        key: 'name',
+                        render: (h, params) => Common.tableColBtn(h, params, () => {
+                            this.$router.push({
+                                name: 'contacts_index',
+                                query: {
+                                    groupId: params.row['id']
+                                }
+                            });
+                        })
                     }, {
-                        title: '邮箱',
-                        key: 'email'
-                    }, {
-                        title: '手机号码',
-                        key: 'phone'
-                    }, {
-                        title: '钉钉',
-                        key: 'ding'
-                    }, {
-                        title: '微信openId',
-                        key: 'openid'
+                        title: '备注',
+                        key: 'remark',
+                        ellipsis: true,
+                        render: Common.RENDER.POPTIP
                     }, {
                         title: '操作',
                         key: 'action',
@@ -81,9 +84,10 @@
                                     on: {
                                         click: async () => {
                                             this.model = true;
-                                            this.modelTitle = '修改联系人';
+                                            this.modelTitle = '修改组';
                                             this.loadingBtn = true;
-                                            Object.keys(this.vo).forEach(key => this.vo[key] = params.row[key]);
+                                            Object.keys(this.vo.group).forEach(key => this.vo.group[key] = params.row[key]);
+                                            await this.loadContactsForUpdate(params.row);
                                         }
                                     }
                                 }, '修改'),
@@ -93,38 +97,45 @@
                     }],
                     data: [],
                     query: {
-                        groupId: null,
-                        keyword: null,
+                        spot: null,
+                        name: null,
+                        normal: null,
                         pageNum: 1,
                         pageSize: 10
                     }
                 },
-                loadingBtn: false,
                 vo: {
-                    id: null,
-                    name: null,
-                    email: null,
-                    phone: null,
-                    openid: null,
-                    ding: null
+                    group: {
+                        id: null,
+                        name: null,
+                        remark: null,
+                    },
+                    contacts: []
                 },
                 validate: {
-                    name: [{required: true, trigger: 'blur' }],
-                    email: [{type: 'email', trigger: 'blur' }],
-                    phone: [{type: 'regexp', trigger: 'blur' }],
-                    ding: [{type: 'url', trigger: 'blur' }]
-                },
-                model: false,
-                modelTitle: null
+                    'group.name': [{required: true, trigger: 'blur' }]
+                }
             }
         },
         mounted() {
-            this.table.query['groupId'] = this.$route.query['groupId'];
             this.doQuery();
+            this.initContacts();
         },
         methods: {
+            async initContacts() {
+                let result = await this.fetch('/api/contacts/list');
+                if (result && result.value && result.value.length) {
+                    this.contacts = result.value.map(val => Object.assign({}, {key: val.id, label: val.name}));
+                }
+            },
+            async loadContactsForUpdate(item) {
+                let result = await this.fetch('/api/contacts/list', {params: {groupId: item.id}});
+                if (result && result.value && result.value.length) {
+                    this.vo.contacts = result.value.map(val => val.id);
+                }
+            },
             async doQuery() {
-                let list = await this.fetch('/api/contacts/list', {params: this.table.query});
+                let list = await this.fetch('/api/contacts/group/list', {params: this.table.query});
                 list && (this.table.data = list.value.size === 0 ? [] : list.value.list);
                 list && (this.table.total = list.value.total);
                 this.loadingBtn = false;
@@ -140,7 +151,7 @@
             async addOrUpdate() {
                 this.$refs['form'].validate(async (valid) => {
                     if (valid) {
-                        let url = this.vo.id ? '/api/contacts/update' : '/api/contacts/add';
+                        let url = this.vo.group.id ? '/api/contacts/group/update' : '/api/contacts/group/add';
                         let success = await this.fetch(url, {method: 'post', data: this.vo});
                         if (success === false) {
                             this.resetLoadingBtn();
@@ -156,7 +167,7 @@
             },
             async remove(item) {
                 if (!item) return;
-                let success = await this.fetch('/api/contacts/remove', {method: 'post', data: {id: item.id}});
+                let success = await this.fetch('/api/contacts/group/remove', {method: 'post', data: {id: item.id}});
                 if (success === false) {
                     return;
                 }
@@ -164,7 +175,7 @@
             },
             add() {
                 this.model = true;
-                this.modelTitle = '创建联系人';
+                this.modelTitle = '创建组';
                 this.loadingBtn = true;
                 this.$refs['form'].resetFields();
             },
@@ -180,5 +191,5 @@
 </script>
 
 <style lang="less">
-    @import '../../styles/common.less';
+    @import '../../../styles/common.less';
 </style>

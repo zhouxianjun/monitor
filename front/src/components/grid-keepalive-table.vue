@@ -1,6 +1,6 @@
 <template>
     <div class="grid-table">
-        <div class="grid-table-header" v-if="showHeader" ref="header">
+        <div class="header" v-if="showHeader" ref="header">
             <slot name="header">
                 <template v-for="col in cols">
                     <div :style="{width: `${columnsWidth[col._index]}px`}">
@@ -22,11 +22,17 @@
                 </template>
             </slot>
         </div>
-        <div class="grid-table-body" v-show="records && records.length > 0">
-            <div class="grid-table-row" v-for="(record, index) in records" @click="clickRow($event, record)" :key="record.traceId">
+        <div class="body" v-show="records && records.length > 0">
+            <div :class="rowClass(record)"
+                 :data-index="index"
+                 v-for="(record, index) in records"
+                 @mouseenter.stop="handleMouse(record, true)"
+                 @mouseleave.stop="handleMouse(record, false)"
+                 @click="clickRow($event, record)"
+                 :key="record.traceId">
                 <template v-for="col in cols">
-                    <div class="grid-table-row-wrapper">
-                        <div :class="['grid-table-cell', {'grid-table-cell-with-expand': col.type === 'expand'}, col.className]"
+                    <div class="wrapper">
+                        <div :class="['cell', {'cell-with-expand': col.type === 'expand'}, col.className]"
                              :style="cellStyle(col)" :data-index="col._index">
                             <div v-if="col.type === 'expand'" @click.stop="toggleExpand(col, record)">
                                 <slot name="col-expand" :record="record">
@@ -48,7 +54,7 @@
                         </div>
                     </div>
                 </template>
-                <div class="grid-table-expand" v-show="record.expand">
+                <div class="expand" v-show="record.expand">
                     <keep-alive>
                         <slot name="expand" :record="record" v-if="record.expand"></slot>
                     </keep-alive>
@@ -56,7 +62,7 @@
                 <div style="clear:both"></div>
             </div>
         </div>
-        <div class="grid-table-no-data" v-show="!records || records.length === 0">
+        <div class="no-data" v-show="!records || records.length === 0">
             <slot name="noData">
                 <div>{{noDataText}}</div>
             </slot>
@@ -91,6 +97,14 @@
             noDataText: {
                 type: String,
                 default: '没有数据'
+            },
+            disabledHover: {
+                type: Boolean,
+                default: false
+            },
+            hoverClass: {
+                type: String,
+                default: 'row-hover'
             }
         },
         data() {
@@ -110,7 +124,7 @@
         watch: {
             data: {
                 handler() {
-                    this.records = this.data.map((item, index) => Object.assign(this.records[index] || {expand: false, isChecked: false}, item));
+                    this.records = this.data.map((item, index) => Object.assign(this.records[index] || {expand: false, isChecked: false, hover: false}, item));
                 },
                 deep: true
             }
@@ -123,6 +137,13 @@
                     style.wordWrap = 'normal'
                 }
                 return style;
+            },
+            rowClass(record) {
+                const result = ['row'];
+                if (record.hover) {
+                    result.push(this.hoverClass.toString());
+                }
+                return result;
             },
             handleResize() {
                 let tableWidth = this.$el.offsetWidth - 1;
@@ -222,7 +243,7 @@
                 this.columnsWidth = columnsWidth;
             },
             clickRow(event, record) {
-                this.$emit('on-click-row', event.target.getAttribute('data-index'), JSON.parse(JSON.stringify(record)));
+                this.$emit('on-click-row', JSON.parse(JSON.stringify(record)), event.target.getAttribute('data-index'), event);
             },
             toggleExpand(col, record) {
                 record.expand = !record.expand;
@@ -245,6 +266,13 @@
             },
             getSelection() {
                 return JSON.parse(JSON.stringify(this.records.filter(r => r.isChecked)));
+            },
+            getRow(index) {
+                return document.querySelector(`.grid-table div.row[data-index='${index}']`);
+            },
+            handleMouse(record, status) {
+                if (this.disabledHover) return;
+                record.hover = status;
             }
         }
     }
@@ -254,28 +282,33 @@
     .grid-table {
         border: 1px solid #dddee1;
         border-bottom: 0;
-        .grid-table-row {
-            border-bottom: 1px solid #e9eaec;
-            .grid-table-row-wrapper {
-                display: table-cell;
-                vertical-align: middle;
-                height: 48px;
+        .body {
+            .row {
+                border-bottom: 1px solid #e9eaec;
+                .wrapper {
+                    display: table-cell;
+                    vertical-align: middle;
+                    height: 40px;
+                    .cell {
+                        float: left;
+                        display: inline-block;
+                        word-wrap: break-word;
+                        text-overflow: ellipsis;
+                        text-align: left;
+                        padding: 5px 14px;
+                    }
+                    .cell-with-expand {
+                        cursor: pointer;
+                        text-align: center;
+                    }
+                }
             }
-            .grid-table-cell {
-                float: left;
-                display: inline-block;
-                word-wrap: break-word;
-                text-overflow: ellipsis;
-                text-align: left;
-                padding: 18px;
-            }
-            .grid-table-cell-with-expand {
-                cursor: pointer;
-                text-align: center;
+            .row-hover {
+                background: #ebf7ff;
             }
         }
-        .grid-table-header {
-            height: 40px;
+        .header {
+            height: 36px;
             display:table-cell;
             vertical-align:middle;
             background-color: #f8f8f9;
@@ -289,13 +322,13 @@
                 white-space: nowrap;
             }
         }
-        .grid-table-expand {
+        .expand {
             border-top: 1px solid #e9eaec;
             min-height: 50px;
             padding: 15px 50px;
             background: #f8f8f9;
         }
-        .grid-table-no-data {
+        .no-data {
             text-align: center;
             border-bottom: 1px solid #e9eaec;
             padding: 18px 0;

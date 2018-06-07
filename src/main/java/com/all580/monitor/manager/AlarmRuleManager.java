@@ -10,10 +10,7 @@ import com.all580.monitor.Constant;
 import com.all580.monitor.annotation.NoticeType;
 import com.all580.monitor.entity.*;
 import com.all580.monitor.express.QLExpressMgr;
-import com.all580.monitor.service.AlarmContactsService;
-import com.all580.monitor.service.AlarmHistoryService;
-import com.all580.monitor.service.AlarmNoticeService;
-import com.all580.monitor.service.AlarmRuleService;
+import com.all580.monitor.service.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.exception.ExceptionUtils;
@@ -46,6 +43,8 @@ public class AlarmRuleManager {
     private AlarmNoticeService alarmNoticeService;
     @Autowired
     private AlarmContactsService alarmContactsService;
+    @Autowired
+    private AppService appService;
     @Autowired
     private QLExpressMgr qlExpressMgr;
 
@@ -132,6 +131,10 @@ public class AlarmRuleManager {
     private void notice(TabAlarmRule rule, TabAlarmHistory history, Date curDate) {
         log.debug("报警规则任务通知: {}", rule);
         try {
+            if (!appService.isAlarm(rule.getAppId())) {
+                log.debug("忽略报警任务通知: {}", rule);
+                return;
+            }
             if (StringUtils.isNotEmpty(rule.getAlarmCallback())) {
                 doNotice(Constant.NoticeType.URL, rule.getAlarmCallback(), rule, history, curDate);
             }

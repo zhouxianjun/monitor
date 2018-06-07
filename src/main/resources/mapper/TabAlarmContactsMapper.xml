@@ -11,10 +11,22 @@
         <result column="ding" jdbcType="VARCHAR" property="ding"/>
         <result column="openid" jdbcType="VARCHAR" property="openid"/>
     </resultMap>
-    <!-- 通过组ID查询联系人列表 -->
-    <select id="listByGroup" resultMap="BaseResultMap" parameterType="java.lang.Integer">
-        SELECT ac.* FROM tab_alarm_contacts_relation acr
-        JOIN tab_alarm_contacts ac ON acr.contacts_id=ac.id
-        WHERE acr.group_id = #{groupId}
+    <select id="search" resultMap="BaseResultMap">
+        select tac.* from tab_alarm_contacts tac
+        <if test="groupId != null">
+            join tab_alarm_contacts_relation tacr on tacr.contacts_id = tac.id
+        </if>
+        where 1=1
+        <if test="groupId != null">
+            and tacr.group_id = #{groupId}
+        </if>
+        <if test="keyword != null and keyword != ''">
+            and (
+              `name` like concat('%', #{keyword}, '%') or
+              `email` like concat('%', #{keyword}, '%') or
+              `ding` like concat('%', #{keyword}, '%') or
+              `openid` like concat('%', #{keyword}, '%')
+            )
+        </if>
     </select>
 </mapper>

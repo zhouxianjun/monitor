@@ -69,7 +69,7 @@ export const appRouter = [{
     title: '应用管理',
     component: Main,
     children: [
-        { path: 'index', title: '应用管理', name: 'app_index', component: () => import('@/views/app/app.vue') }
+        { path: 'index', title: '应用管理', name: 'app-list', component: () => import('@/views/app/app.vue') }
     ]
 }, {
     path: '/alarm',
@@ -78,8 +78,8 @@ export const appRouter = [{
     title: '报警服务',
     component: Main,
     children: [
-        { path: 'rule', icon: 'ios-settings', title: '报警规则', name: 'rule_index', component: () => import('@/views/alarm/rule/index.vue') },
-        { path: 'history', icon: 'ios-list' , title: '报警历史', name: 'history_index', component: () => import('@/views/alarm/history/index.vue') }
+        { path: 'rule', icon: 'ios-settings', title: '报警规则', name: 'rule-list', component: () => import('@/views/alarm/rule/index.vue') },
+        { path: 'history', icon: 'ios-list' , title: '报警历史', name: 'history-list', component: () => import('@/views/alarm/history/index.vue') }
     ]
 },{
     path: '/contacts',
@@ -88,7 +88,8 @@ export const appRouter = [{
     title: '联系人',
     component: Main,
     children: [
-        { path: 'index', icon: 'android-contact', title: '联系人', name: 'contacts_index', component: () => import('@/views/contacts/list.vue') }
+        { path: 'list', icon: 'android-contact', title: '联系人', name: 'contacts-list', component: () => import('@/views/contacts/list.vue') },
+        { path: 'group', icon: 'android-contacts', title: '联系人组', name: 'contacts_group', component: () => import('@/views/contacts/group/index.vue') }
     ]
 }, {
     path: '/site-monitor',
@@ -97,7 +98,7 @@ export const appRouter = [{
     title: '站点监控',
     component: Main,
     children: [
-        { path: 'index', title: '站点列表', name: 'index', component: () => import('@/views/site-monitor/index.vue') }
+        { path: 'index', title: '站点列表', name: 'monitor-index', component: () => import('@/views/site-monitor/index.vue') }
     ]
 }, {
     path: '/log-service',

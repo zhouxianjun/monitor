@@ -1,6 +1,7 @@
 package com.all580.monitor.service;
 
 import com.all580.monitor.entity.TabAlarmContacts;
+import io.swagger.models.auth.In;
 
 import java.util.List;
 
@@ -17,4 +18,12 @@ public interface AlarmContactsService extends IService<TabAlarmContacts> {
      * @return
      */
     List<TabAlarmContacts> listByGroup(int group);
+
+    /**
+     * 查询联系人
+     * @param group 组ID
+     * @param keyword 关键字
+     * @return
+     */
+    List<TabAlarmContacts> search(Integer group, String keyword);
 }

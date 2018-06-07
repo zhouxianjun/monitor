@@ -1,17 +1,13 @@
 package com.all580.monitor.controller;
 
 import com.all580.monitor.dto.Result;
+import com.all580.monitor.entity.TabAlarmContactsGroup;
 import com.all580.monitor.service.AlarmContactsGroupService;
+import com.all580.monitor.vo.AlarmContactsGroupVo;
 import com.github.pagehelper.PageHelper;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiImplicitParams;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.*;
 import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 
@@ -46,5 +42,24 @@ public class AlarmContactsGroupController {
             value = groupService.all();
         }
         return Result.builder().code(Result.SUCCESS).value(value).build();
+    }
+
+    @ApiOperation(value = "新增联系人组", produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping("add")
+    public Result<?> add(@ApiParam(required = true) @RequestBody AlarmContactsGroupVo vo) {
+        return groupService.add(vo.getGroup(), vo.getContacts());
+    }
+
+    @ApiOperation(value = "修改联系人组", produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping("update")
+    public Result<?> update(@ApiParam(required = true) @RequestBody AlarmContactsGroupVo vo) {
+        return groupService.update(vo.getGroup(), vo.getContacts());
+    }
+
+    @ApiOperation(value = "删除联系人组", produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping("remove")
+    public Result<?> remove(@ApiParam(required = true) @RequestBody TabAlarmContactsGroup group) {
+        int ret = groupService.delete(group.getId());
+        return ret > 0 ? Result.ok() : Result.fail();
     }
 }

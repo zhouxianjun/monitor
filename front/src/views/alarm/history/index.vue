@@ -81,17 +81,17 @@
                 },
                 spots: [],
                 apps: [],
-                range: [dayjs().subtract(1, 'day').toDate(), new Date()],
+                range: [dayjs().subtract(1, 'day').toDate(), dayjs().set('second', 0).toDate()],
                 dateRangeOpt: {
                     shortcuts: [{
                         text: '1 天',
-                        value: () => [dayjs().subtract(1, 'day').toDate(), new Date()]
+                        value: () => [dayjs().subtract(1, 'day').toDate(), dayjs().set('second', 0).toDate()]
                     }, {
                         text: '3 天',
-                        value: () => [dayjs().subtract(3, 'day').toDate(), new Date()]
+                        value: () => [dayjs().subtract(3, 'day').toDate(), dayjs().set('second', 0).toDate()]
                     }, {
                         text: '7 天',
-                        value: () => [dayjs().subtract(7, 'day').toDate(), new Date()]
+                        value: () => [dayjs().subtract(7, 'day').toDate(), dayjs().set('second', 0).toDate()]
                     }]
                 }
             }

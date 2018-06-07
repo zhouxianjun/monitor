@@ -43,7 +43,8 @@
 
 <script>
     import Common from '../../libs/common';
-    import {Status, SiteType} from '../../libs/dic';
+    import {SiteType, Status} from '../../libs/dic';
+
     export default {
         name: "site-monitor-index",
         data() {
@@ -101,7 +102,7 @@
                                         }
                                     }
                                 }, '修改'),
-                                Common.tableBtnPop('您确定要删除这条数据吗?', '删除', 'error', async () => await this.remove(params.row))
+                                Common.tableBtnPop(h, '您确定要删除这条数据吗?', '删除', 'error', async () => await this.remove(params.row))
                             ]);
                         }
                     }],

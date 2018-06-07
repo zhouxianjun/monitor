@@ -37,7 +37,7 @@
                 </Panel>
             </Collapse>
         </Row>
-        <GridKeepaliveTable :columns="table.col" :data="table.data" class="margin-top-10">
+        <GridKeepaliveTable ref="table" :columns="table.col" :data="table.data" class="margin-top-10">
             <Detail v-highlight="{keyword: highlight}" slot="expand" slot-scope="{record}" :trace_id="record.traceId" :load="true"/>
             <Icon slot="col-expand" slot-scope="{record}" :type="record.expand ? 'ios-arrow-down' : 'ios-arrow-right'" size="14"></Icon>
         </GridKeepaliveTable>
@@ -114,17 +114,17 @@
                     size: 0,
                     pageSize: 15
                 },
-                range: [dayjs().subtract(1, 'day').toDate(), new Date()],
+                range: [dayjs().subtract(1, 'day').toDate(), dayjs().set('second', 0).toDate()],
                 dateRangeOpt: {
                     shortcuts: [{
                         text: '1 天',
-                        value: () => [dayjs().subtract(1, 'day').toDate(), new Date()]
+                        value: () => [dayjs().subtract(1, 'day').toDate(), dayjs().set('second', 0).toDate()]
                     }, {
                         text: '3 天',
-                        value: () => [dayjs().subtract(3, 'day').toDate(), new Date()]
+                        value: () => [dayjs().subtract(3, 'day').toDate(), dayjs().set('second', 0).toDate()]
                     }, {
                         text: '7 天',
-                        value: () => [dayjs().subtract(7, 'day').toDate(), new Date()]
+                        value: () => [dayjs().subtract(7, 'day').toDate(), dayjs().set('second', 0).toDate()]
                     }]
                 }
             }
@@ -224,6 +224,7 @@
                 let result = await this.fetch('/api/log/search', {method: 'post', data: params});
                 if (result) {
                     let data = JSON.parse(result.value);
+                    let lastDom = this.$refs.table.getRow(this.table.data.length - 1);
                     this.table.data = this.table.data.concat(data['aggregations']['trace']['buckets']
                         .slice(this.table.size - this.table.pageSize)
                         .map(trace => Object.assign({
@@ -231,6 +232,10 @@
                             expand: false,
                             load: false
                         }, trace['one']['hits']['hits'][0]['_source'])));
+                    if (lastDom) {
+                        lastDom.classList.add('animated', 'infinite', 'flash', 'bg-color-yellow');
+                        setTimeout(() => lastDom.classList.remove('animated', 'infinite', 'flash', 'bg-color-yellow'), 2000);
+                    }
                 }
             }
         }
@@ -239,4 +244,5 @@
 
 <style lang="less">
     @import '../../styles/common.less';
+    @import '~animate.css';
 </style>
