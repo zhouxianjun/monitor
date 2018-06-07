@@ -64,7 +64,7 @@ public class WatcherJobTask {
                                     String logId = map.get("_id").toString();
                                     Stream<String> logIdStream = Arrays.stream(job.getLogId().split(","));
                                     esWatcherLogService.save(new TabEsWatchLog()
-                                            .setHost(map.get("host").toString())
+                                            .setHost(map.get("remote_ip").toString())
                                             .setLogTime(df.parse(map.get("@timestamp").toString()))
                                             .setCreateTime(new Date())
                                             .setSource(map.get("source").toString())

@@ -104,7 +104,7 @@
                         ellipsis: true
                     }, {
                         title: '主机',
-                        key: 'host'
+                        key: 'remote_ip'
                     }, {
                         title: '记录时间',
                         key: '@timestamp',
@@ -205,7 +205,7 @@
                                         sort: {
                                             '@timestamp': 'desc'
                                         },
-                                        _source: ['source', '@timestamp', 'host']
+                                        _source: ['source', '@timestamp', 'remote_ip']
                                     }
                                 }
                             }

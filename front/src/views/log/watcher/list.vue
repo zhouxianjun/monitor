@@ -6,7 +6,7 @@
             <DatePicker v-model="range" type="datetimerange" :options="dateRangeOpt" format="yyyy-MM-dd HH:mm" placeholder="请选择查询范围" style="width: 250px"></DatePicker>
             <Button class="margin-left-10" type="primary" @click="doQuery" icon="search">搜索</Button>
         </Row>
-        <GridKeepaliveTable :columns="table.col" :data="table.data" class="margin-top-10">
+        <GridKeepaliveTable ref="table" :columns="table.col" :data="table.data" class="margin-top-10">
             <Record v-highlight="{keyword: query.keyword}" slot="expand" slot-scope="{record}" :traceId="record.traceId" :load="true"/>
             <Icon slot="col-expand" slot-scope="{record}" :type="record.expand ? 'ios-arrow-down' : 'ios-arrow-right'" size="14"></Icon>
         </GridKeepaliveTable>
@@ -94,8 +94,13 @@
                 this.query.pageNum++;
                 let result = await this.fetch('/api/log/watcher/log/list', {params: this.query});
                 if (result && result.value.size) {
+                    let lastDom = this.$refs.table.getRow(this.table.data.length - 1);
                     this.table.data = this.table.data.concat(result.value.list);
                     this.table.total = result.value.total;
+                    if (lastDom) {
+                        lastDom.classList.add('animated', 'infinite', 'flash', 'bg-color-yellow');
+                        setTimeout(() => lastDom.classList.remove('animated', 'infinite', 'flash', 'bg-color-yellow'), 2000);
+                    }
                 }
             }
         }
@@ -104,4 +109,5 @@
 
 <style lang="less">
     @import '../../../styles/common.less';
+    @import '~animate.css';
 </style>

@@ -44,7 +44,7 @@ public class EsManager {
     @Value("${es.api.password}")
     private String password;
 
-    public static final String QUERY_TRACE = "{\"_source\":[\"systemmsg\",\"cusmsg\",\"offset\",\"_id\",\"host\",\"@timestamp\",\"source\",\"trace_id\"],\"query\":{\"bool\":{\"filter\":[{\"terms\":{\"trace_id\":[]}}]}},\"from\":0,\"size\":100,\"sort\":[{\"@timestamp\":\"asc\"},{\"offset\":\"asc\"}]}";
+    public static final String QUERY_TRACE = "{\"_source\":[\"systemmsg\",\"cusmsg\",\"offset\",\"_id\",\"remote_ip\",\"@timestamp\",\"source\",\"trace_id\"],\"query\":{\"bool\":{\"filter\":[{\"terms\":{\"trace_id\":[]}}]}},\"from\":0,\"size\":100,\"sort\":[{\"@timestamp\":\"asc\"},{\"offset\":\"asc\"}]}";
 
     public JSON execute(String path, Method method, String json) throws IOException {
         Request request = new Request.Builder()
