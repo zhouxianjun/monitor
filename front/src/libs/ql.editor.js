@@ -3,7 +3,7 @@ const provide = {
         info: 'Function',
         debug: 'Function',
         warn: 'Function',
-        error: 'Function',
+        error: 'Function'
     },
     rule: {
         id: 'Property',
@@ -64,7 +64,7 @@ export default () => {
                 kind: monaco.languages.CompletionItemKind.Snippet,
                 insertText: {
                     value: [
-                        'if (${1:condition}) {',
+                        'if (${1:condition}) {', // eslint-disable-line
                         '\t$0',
                         '}'
                     ].join('\n')
@@ -74,7 +74,7 @@ export default () => {
                 kind: monaco.languages.CompletionItemKind.Snippet,
                 insertText: {
                     value: [
-                        'if (${1:condition}) {',
+                        'if (${1:condition}) {', // eslint-disable-line
                         '\t$0',
                         '} else {',
                         '\t',
@@ -86,7 +86,7 @@ export default () => {
                 kind: monaco.languages.CompletionItemKind.Snippet,
                 insertText: {
                     value: [
-                        'function ${1:f}() {',
+                        'function ${1:f}() {', // eslint-disable-line
                         '\t$0',
                         '}'
                     ].join('\n')

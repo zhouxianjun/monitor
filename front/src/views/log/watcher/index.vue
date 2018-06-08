@@ -39,8 +39,8 @@
     import {Status} from '../../../libs/dic';
 
     export default {
-        name: "log-watcher-index",
-        data() {
+        name: 'log-watcher-index',
+        data () {
             return {
                 Status,
                 table: {
@@ -89,12 +89,12 @@
                                         }
                                     }
                                 }, '修改'),
-                                Common.switchTableBtnPop(h, params.row.status, async () => await this.status(params.row), {
+                                Common.switchTableBtnPop(h, params.row.status, () => this.status(params.row), {
                                     style: {
                                         marginRight: '5px'
                                     }
                                 }),
-                                Common.tableBtnPop(h, '您确定要删除这条数据吗?', '删除', 'error', async () => await this.remove(params.row))
+                                Common.tableBtnPop(h, '您确定要删除这条数据吗?', '删除', 'error', () => this.remove(params.row))
                             ]);
                         }
                     }],
@@ -111,46 +111,46 @@
                 },
                 spots: [],
                 apps: []
-            }
+            };
         },
-        async mounted() {
+        async mounted () {
             this.doQuery();
             this.initSpots();
         },
         watch: {
-            async 'table.query.spot'(val) {
+            async 'table.query.spot' (val) {
                 this.apps = await this.loadApp(val);
             }
         },
         methods: {
-            async doQuery() {
+            async doQuery () {
                 let list = await this.fetch('/api/log/watcher/list', {params: this.table.query});
                 list && (this.table.data = list.value.size === 0 ? [] : list.value.list);
                 list && (this.table.total = list.value.total);
             },
-            async changePage(page) {
+            async changePage (page) {
                 this.table.query.pageNum = page;
                 this.doQuery();
             },
-            async changePageSize(size) {
+            async changePageSize (size) {
                 this.table.query.pageSize = size;
                 this.doQuery();
             },
-            async initSpots() {
+            async initSpots () {
                 let list = await this.fetch('/api/spot/list');
                 list && (this.spots = (!list.value || list.value.length === 0) ? [] : list.value);
             },
-            async loadApp(spot) {
+            async loadApp (spot) {
                 let list = await this.fetch('/api/app/list', {params: {spot}});
                 return list.value ? list.value : [];
             },
-            add() {
+            add () {
                 this.$router.push({
                     name: 'log-watcher-edit',
                     params: {}
                 });
             },
-            async remove(item) {
+            async remove (item) {
                 if (!item) return;
                 let success = await this.fetch('/api/log/watcher/remove', {method: 'post', data: {id: item.id}});
                 if (success === false) {
@@ -158,7 +158,7 @@
                 }
                 setTimeout(() => this.doQuery(), 500);
             },
-            async status(item) {
+            async status (item) {
                 if (!item) return;
                 let success = await this.fetch('/api/log/watcher/update', {method: 'post', data: {id: item.id, status: !item.status}});
                 if (success === false) {
@@ -167,7 +167,7 @@
                 setTimeout(() => this.doQuery(), 500);
             }
         }
-    }
+    };
 </script>
 
 <style lang="less">

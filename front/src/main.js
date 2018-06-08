@@ -27,7 +27,8 @@ const BASE_URL = baseURL;
  */
 Vue.prototype.fetch = async (url, config, showError = true, error) => {
     iView['LoadingBar'].start();
-    let response = null, result = null;
+    let response = null;
+    let result = null;
     try {
         response = await axios(url, Object.assign({
             baseURL: BASE_URL,
@@ -47,7 +48,6 @@ Vue.prototype.fetch = async (url, config, showError = true, error) => {
             return false;
         }
         showError && iView['Notice'].error({title: result ? result.msg : '操作失败'});
-        console.log(err.stack);
         if (typeof error === 'function') {
             Reflect.apply(error, response, result);
         }
@@ -55,7 +55,7 @@ Vue.prototype.fetch = async (url, config, showError = true, error) => {
     }
 };
 
-new Vue({
+const app = new Vue({
     el: '#app',
     router: router,
     store: store,

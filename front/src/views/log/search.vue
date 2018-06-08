@@ -56,7 +56,7 @@
     import highlight from '../../components/highlight-directive';
 
     export default {
-        name: "log-search",
+        name: 'log-search',
         components: {
             GridKeepaliveTable,
             Detail
@@ -64,7 +64,7 @@
         directives: {
             highlight
         },
-        data() {
+        data () {
             return {
                 fields: ['cusmsg', 'trace_id', 'level'],
                 highlight: [],
@@ -86,7 +86,7 @@
                     }],
                     must: [],
                     must_not: [],
-                    should: [],
+                    should: []
                 },
                 table: {
                     col: [{
@@ -127,13 +127,13 @@
                         value: () => [dayjs().subtract(7, 'day').toDate(), dayjs().set('second', 0).toDate()]
                     }]
                 }
-            }
+            };
         },
-        mounted() {
+        mounted () {
             this.doQuery();
         },
         methods: {
-            generate() {
+            generate () {
                 return {
                     type: 'match',
                     gte: null,
@@ -142,7 +142,7 @@
                     value: null
                 };
             },
-            toFilterType(item) {
+            toFilterType (item) {
                 const value = {};
                 switch (item.type) {
                     case 'match':
@@ -163,19 +163,19 @@
                 }
                 return value;
             },
-            add(key) {
+            add (key) {
                 this.query[key].push(this.generate());
             },
-            remove(key, index) {
+            remove (key, index) {
                 this.query[key].splice(index, 1);
             },
-            async doQuery() {
+            async doQuery () {
                 this.table.size = 0;
                 this.table.data = [];
                 this.highlight = [];
                 await this.pull();
             },
-            async pull() {
+            async pull () {
                 this.table.size += this.table.pageSize;
                 const params = {
                     size: 0,
@@ -196,7 +196,7 @@
                             terms: {
                                 field: 'trace_id.keyword',
                                 size: this.table.size,
-                                order: { "_term": "desc" }
+                                order: { '_term': 'desc' }
                             },
                             aggs: {
                                 one: {
@@ -239,7 +239,7 @@
                 }
             }
         }
-    }
+    };
 </script>
 
 <style lang="less">

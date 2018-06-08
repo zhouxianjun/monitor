@@ -81,7 +81,7 @@ export default {
     name: 'ownspace_index',
     data () {
         const validePhone = (rule, value, callback) => {
-            var re = /^1[0-9]{10}$/;
+            let re = /^1[0-9]{10}$/;
             if (!re.test(value)) {
                 callback(new Error('请输入正确格式的手机号'));
             } else {

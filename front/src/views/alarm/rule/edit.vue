@@ -72,11 +72,11 @@
     import QL from '../../../libs/ql.editor';
 
     export default {
-        name: "alarm-rule-edit",
+        name: 'alarm-rule-edit',
         components: {
             MonacoEditor
         },
-        data() {
+        data () {
             return {
                 editor: null,
                 vo: {
@@ -99,19 +99,19 @@
                 apps: [],
                 contactsGroups: [],
                 validate: {
-                    name: [{required: true, trigger: 'blur' }],
-                    appId: [{type: 'number', required: true, trigger: 'change' }],
-                    metric: [{required: true, trigger: 'blur' }],
-                    resource: [{required: true, trigger: 'blur' }],
-                    interval: [{type: 'number', required: true, trigger: 'blur' }],
-                    nodata: [{type: 'boolean', required: true, trigger: 'blur' }],
-                    count: [{type: 'number', required: true, trigger: 'blur' }],
-                    silenceInterval: [{type: 'number', required: true, trigger: 'blur' }],
-                    status: [{type: 'boolean', required: true, trigger: 'blur' }]
+                    name: [{required: true, trigger: 'blur'}],
+                    appId: [{type: 'number', required: true, trigger: 'change'}],
+                    metric: [{required: true, trigger: 'blur'}],
+                    resource: [{required: true, trigger: 'blur'}],
+                    interval: [{type: 'number', required: true, trigger: 'blur'}],
+                    nodata: [{type: 'boolean', required: true, trigger: 'blur'}],
+                    count: [{type: 'number', required: true, trigger: 'blur'}],
+                    silenceInterval: [{type: 'number', required: true, trigger: 'blur'}],
+                    status: [{type: 'boolean', required: true, trigger: 'blur'}]
                 }
-            }
+            };
         },
-        mounted() {
+        mounted () {
             this.initSpots();
             this.initContactsGroups();
             this.vo = Object.assign(this.vo, this.$route.params);
@@ -119,24 +119,24 @@
             this.$store.commit('changeTagTitle', {name: 'alarm-rule-edit', title: this.vo.id ? '修改报警规则' : '新增报警规则'});
         },
         watch: {
-            async 'vo.spotId'(val) {
+            async 'vo.spotId' (val) {
                 this.apps = await this.loadApp(val);
             }
         },
         methods: {
-            async initSpots() {
+            async initSpots () {
                 let list = await this.fetch('/api/spot/list');
                 list && (this.spots = (!list.value || list.value.length === 0) ? [] : list.value);
             },
-            async initContactsGroups() {
+            async initContactsGroups () {
                 let list = await this.fetch('/api/contacts/group/list');
                 list && (this.contactsGroups = (!list.value || list.value.length === 0) ? [] : list.value);
             },
-            async loadApp(spot) {
+            async loadApp (spot) {
                 let list = await this.fetch('/api/app/list', {params: {spot}});
                 return list.value ? list.value : [];
             },
-            async addOrUpdate() {
+            async addOrUpdate () {
                 this.$refs['form'].validate(async (valid) => {
                     if (valid) {
                         let url = this.vo.id ? '/api/alarm/rule/update' : '/api/alarm/rule/add';
@@ -150,7 +150,7 @@
                     }
                 });
             },
-            back() {
+            back () {
                 this.$router.back();
                 this.$parent.$refs['tags'].refsTag.every(tag => {
                     if (tag.name === 'alarm-rule-edit') {
@@ -162,16 +162,16 @@
                     return true;
                 });
             },
-            onMounted(editor) {
+            onMounted (editor) {
                 QL(monaco);
                 this.editor = editor;
                 this.vo.script && this.editor.setValue(this.vo.script);
             },
-            onCodeChange(editor) {
+            onCodeChange (editor) {
                 this.vo.script = editor.getValue();
             }
         }
-    }
+    };
 </script>
 
 <style lang="less">

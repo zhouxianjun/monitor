@@ -75,18 +75,18 @@
     import elementResizeDetectorMaker from 'element-resize-detector';
 
     export default {
-        name: "grid-keepalive-table",
+        name: 'grid-keepalive-table',
         components: {Render},
         props: {
             data: {
                 type: Array,
-                default() {
+                default () {
                     return [];
                 }
             },
             columns: {
                 type: Array,
-                default() {
+                default () {
                     return [];
                 }
             },
@@ -107,15 +107,15 @@
                 default: 'row-hover'
             }
         },
-        data() {
+        data () {
             return {
                 tableWidth: 0,
                 columnsWidth: {},
                 cols: [],
                 records: []
-            }
+            };
         },
-        mounted() {
+        mounted () {
             this.handleResize();
             window.addEventListener('resize', this.handleResize, false);
             this.observer = elementResizeDetectorMaker();
@@ -123,29 +123,29 @@
         },
         watch: {
             data: {
-                handler() {
+                handler () {
                     this.records = this.data.map((item, index) => Object.assign(this.records[index] || {expand: false, isChecked: false, hover: false}, item));
                 },
                 deep: true
             }
         },
         methods: {
-            cellStyle(cell) {
+            cellStyle (cell) {
                 const style = {width: `${this.columnsWidth[cell._index]}px`};
                 if (cell.ellipsis) {
                     style.overflow = 'hidden';
-                    style.wordWrap = 'normal'
+                    style.wordWrap = 'normal';
                 }
                 return style;
             },
-            rowClass(record) {
+            rowClass (record) {
                 const result = ['row'];
                 if (record.hover) {
                     result.push(this.hoverClass.toString());
                 }
                 return result;
             },
-            handleResize() {
+            handleResize () {
                 let tableWidth = this.$el.offsetWidth - 1;
                 // 最小宽度和
                 let sumMinWidth = 0;
@@ -229,8 +229,7 @@
                             usableLength--;
                             usableWidth -= columnWidth;
                             columnWidth = parseInt(`${usableWidth / usableLength}`);
-                        }
-                        else {
+                        } else {
                             columnWidth = 0;
                         }
 
@@ -242,40 +241,40 @@
                 this.tableWidth = this.cols.map(cell => cell._width).reduce((a, b) => a + b, 0) + 1;
                 this.columnsWidth = columnsWidth;
             },
-            clickRow(event, record) {
+            clickRow (event, record) {
                 this.$emit('on-click-row', JSON.parse(JSON.stringify(record)), event.target.getAttribute('data-index'), event);
             },
-            toggleExpand(col, record) {
+            toggleExpand (col, record) {
                 record.expand = !record.expand;
                 this.$emit('on-expand', JSON.parse(JSON.stringify(record)), col);
             },
-            toggleSelect(col, record) {
+            toggleSelect (col, record) {
                 record.isChecked = !record.isChecked;
                 this.$emit('on-select', JSON.parse(JSON.stringify(record)), col);
                 this.$emit('on-selection-change', this.getSelection(), col);
             },
-            selectAll(col) {
+            selectAll (col) {
                 const status = this.isSelectAll();
                 this.records.filter(r => !r.disabled).forEach(r => r.isChecked = status);
                 this.$emit('on-selection-change', this.getSelection(), col);
             },
-            isSelectAll() {
+            isSelectAll () {
                 if (!this.data.length) return false;
                 if (!this.data.find(item => !item.disabled)) return false;
                 return !!this.records.find(record => !record.isChecked && !record.disabled);
             },
-            getSelection() {
+            getSelection () {
                 return JSON.parse(JSON.stringify(this.records.filter(r => r.isChecked)));
             },
-            getRow(index) {
+            getRow (index) {
                 return document.querySelector(`.grid-table div.row[data-index='${index}']`);
             },
-            handleMouse(record, status) {
+            handleMouse (record, status) {
                 if (this.disabledHover) return;
                 record.hover = status;
             }
         }
-    }
+    };
 </script>
 
 <style scoped lang="less">

@@ -11,7 +11,7 @@
 
 <script>
     export default {
-        name: "log-detail",
+        name: 'log-detail',
         props: {
             trace_id: {type: [String, Array], require: true},
             load: {
@@ -19,23 +19,24 @@
                 default: false
             }
         },
-        data() {
+        data () {
             return {
                 total: 0,
                 records: [],
                 from: 0
-            }
+            };
         },
-        mounted() {
+        mounted () {
             if (this.load) {
                 this.pull();
             }
         },
         methods: {
-            async pull() {
+            async pull () {
                 let traceId = Array.isArray(this.trace_id) ? this.trace_id : [this.trace_id];
                 let result = await this.fetch('/api/log/search', {
-                    method: 'post', data: {
+                    method: 'post',
+                    data: {
                         _source: ['systemmsg', 'cusmsg'],
                         query: {
                             bool: {
@@ -63,7 +64,7 @@
                 }
             }
         }
-    }
+    };
 </script>
 
 <style lang="less">

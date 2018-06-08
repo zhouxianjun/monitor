@@ -66,11 +66,11 @@
     import QL from '../../../libs/ql.editor';
 
     export default {
-        name: "monitor-reported-edit",
+        name: 'monitor-reported-edit',
         components: {
             MonacoEditor
         },
-        data() {
+        data () {
             return {
                 editor: null,
                 vo: {
@@ -96,17 +96,17 @@
                 apps: [],
                 contactsGroups: [],
                 validate: {
-                    'monitor.name': [{required: true, trigger: 'blur' }],
-                    'monitor.appId': [{type: 'number', required: true, trigger: 'change' }],
-                    'rule.interval': [{type: 'number', required: true, trigger: 'blur' }],
-                    'rule.nodata': [{type: 'boolean', required: true, trigger: 'blur' }],
-                    'rule.count': [{type: 'number', required: true, trigger: 'blur' }],
-                    'rule.silenceInterval': [{type: 'number', required: true, trigger: 'blur' }],
-                    'monitor.status': [{type: 'boolean', required: true, trigger: 'blur' }]
+                    'monitor.name': [{required: true, trigger: 'blur'}],
+                    'monitor.appId': [{type: 'number', required: true, trigger: 'change'}],
+                    'rule.interval': [{type: 'number', required: true, trigger: 'blur'}],
+                    'rule.nodata': [{type: 'boolean', required: true, trigger: 'blur'}],
+                    'rule.count': [{type: 'number', required: true, trigger: 'blur'}],
+                    'rule.silenceInterval': [{type: 'number', required: true, trigger: 'blur'}],
+                    'monitor.status': [{type: 'boolean', required: true, trigger: 'blur'}]
                 }
-            }
+            };
         },
-        mounted() {
+        mounted () {
             this.initSpots();
             this.initContactsGroups();
             Reflect.ownKeys(this.vo.monitor).forEach(key => this.vo.monitor[key] = this.$route.params[key] || this.vo.monitor[key]);
@@ -115,24 +115,24 @@
             this.$store.commit('changeTagTitle', {name: 'monitor-reported-edit', title: this.vo.id ? '修改上报监控' : '新增上报监控'});
         },
         watch: {
-            async 'vo.monitor.spotId'(val) {
+            async 'vo.monitor.spotId' (val) {
                 this.apps = await this.loadApp(val);
             }
         },
         methods: {
-            async initSpots() {
+            async initSpots () {
                 let list = await this.fetch('/api/spot/list');
                 list && (this.spots = (!list.value || list.value.length === 0) ? [] : list.value);
             },
-            async initContactsGroups() {
+            async initContactsGroups () {
                 let list = await this.fetch('/api/contacts/group/list');
                 list && (this.contactsGroups = (!list.value || list.value.length === 0) ? [] : list.value);
             },
-            async loadApp(spot) {
+            async loadApp (spot) {
                 let list = await this.fetch('/api/app/list', {params: {spot}});
                 return list.value ? list.value : [];
             },
-            async addOrUpdate() {
+            async addOrUpdate () {
                 this.$refs['form'].validate(async (valid) => {
                     if (valid) {
                         let url = this.vo.monitor.id ? '/api/monitor/reported/update' : '/api/monitor/reported/add';
@@ -146,7 +146,7 @@
                     }
                 });
             },
-            back() {
+            back () {
                 this.$router.back();
                 this.$parent.$refs['tags'].refsTag.every(tag => {
                     if (tag.name === 'monitor-reported-edit') {
@@ -158,16 +158,16 @@
                     return true;
                 });
             },
-            onMounted(editor) {
+            onMounted (editor) {
                 QL(monaco);
                 this.editor = editor;
                 this.vo.rule.script && this.editor.setValue(this.vo.rule.script);
             },
-            onCodeChange(editor) {
+            onCodeChange (editor) {
                 this.vo.rule.script = editor.getValue();
             }
         }
-    }
+    };
 </script>
 
 <style lang="less">

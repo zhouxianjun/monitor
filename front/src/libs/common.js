@@ -3,9 +3,9 @@ import {getAttribute} from './dic';
 
 const Common = {
     valid: {
-        ip(rule, value, callback) {
+        ip (rule, value, callback) {
             if (rule.required && (value === undefined || value === '' || value.length <= 0)) {
-                callback(new Error(`不能为空`));
+                callback(new Error('不能为空'));
                 return;
             }
             if (value) {
@@ -27,26 +27,26 @@ const Common = {
             callback();
         }
     },
-    dateFormat(val, format = 'YYYY-MM-DD HH:mm:ss') {
+    dateFormat (val, format = 'YYYY-MM-DD HH:mm:ss') {
         return val ? dayjs(Number(val)).format(format) : '-';
     },
-    statusFormat(val, trueTxt = '启用', falseTxt = '禁用') {
+    statusFormat (val, trueTxt = '启用', falseTxt = '禁用') {
         return `<span class="${val === true ? 'text-green' : 'text-muted'}">${val === true ? trueTxt : falseTxt}</span>`;
     },
-    emailFormat(val) {
+    emailFormat (val) {
         return `<a href="mailto:${val}">${val}</a>`;
     },
     RENDER: {
-        DATE(h, params, convert = (val => val)) {
+        DATE (h, params, convert = (val => val)) {
             return h('span', Common.dateFormat(convert(params.row[params.column.key])));
         },
-        DATE_RANGE(h, params) {
+        DATE_RANGE (h, params) {
             return (start, end) => h('span', `${Common.dateFormat(params.row[start])}~${Common.dateFormat(params.row[end])}`);
         },
-        APPEND(h, params) {
+        APPEND (h, params) {
             return append => h('span', `${params.row[params.column.key]}${append}`);
         },
-        STATUS(h, params) {
+        STATUS (h, params) {
             let status = params.row[params.column.key];
             return h('Tag', {
                 props: {
@@ -55,7 +55,7 @@ const Common = {
                 }
             }, status === true ? '启用' : '禁用');
         },
-        STATUS_DIY(h, params) {
+        STATUS_DIY (h, params) {
             let status = params.row[params.column.key];
             return function (trueTxt = '启用', falseTxt = '禁用', value = status) {
                 return h('Tag', {
@@ -66,7 +66,7 @@ const Common = {
                 }, value === true ? trueTxt : falseTxt);
             };
         },
-        STATUS_DIC(h, params) {
+        STATUS_DIC (h, params) {
             let status = params.row[params.column.key];
             return (color, dic) => h('Tag', {
                 props: {
@@ -75,7 +75,7 @@ const Common = {
                 }
             }, getAttribute(dic, 'id', status).name);
         },
-        POPTIP(h, params) {
+        POPTIP (h, params) {
             return h('Poptip', {
                 props: {
                     trigger: 'hover',
@@ -86,10 +86,10 @@ const Common = {
                 h('span', params.row[params.column.key])
             ]);
         },
-        SPLIT_COUNT(h, params) {
+        SPLIT_COUNT (h, params) {
             return h('span', Common.tableSplitCount(params));
         },
-        SPLIT_COUNT_POP(h, params) {
+        SPLIT_COUNT_POP (h, params) {
             let val = params.row[params.column.key] || '';
             let array = val ? val.split(',') : [];
             return h('Poptip', {
@@ -113,15 +113,15 @@ const Common = {
                 ])
             ]);
         },
-        JOIN(h, params) {
+        JOIN (h, params) {
             return (...args) => h('span', args.map(arg => params.row[arg]).join('/'));
         }
     },
-    tableSplitCount(params) {
+    tableSplitCount (params) {
         let val = params.row[params.column.key] || '';
         return val ? val.split(',').length : 0;
     },
-    stringToNumber(vo) {
+    stringToNumber (vo) {
         if (!vo) return vo;
         if (Array.isArray(vo)) {
             vo.forEach(item => {
@@ -144,19 +144,19 @@ const Common = {
         }
         return vo;
     },
-    dynamicObjKey(obj, key = 'key', value = 'value') {
+    dynamicObjKey (obj, key = 'key', value = 'value') {
         const result = {};
         result[obj[key]] = obj[value];
         return result;
     },
-    tableColBtn(h, params, fn) {
+    tableColBtn (h, params, fn) {
         return h('a', {
             on: {
                 click: fn
             }
         }, params.row[params.column.key]);
     },
-    tableBtnPop(h, title, text, type, fn, config) {
+    tableBtnPop (h, title, text, type, fn, config) {
         return h('Poptip', {
             props: {
                 confirm: true,

@@ -1,12 +1,12 @@
 import uuid from 'uuid/v4';
 const key = `mark-${uuid()}`;
-function findNodes(el) {
+function findNodes (el) {
     let walk = document.createTreeWalker(el, NodeFilter.SHOW_TEXT, null, false);
     let result = [];
     while (walk.nextNode()) result.push(walk.currentNode);
     return result;
 }
-function parseConfig(binding) {
+function parseConfig (binding) {
     let cfg = Object.assign({
         caseSensitive: false
     }, binding.value);
@@ -22,14 +22,14 @@ function parseConfig(binding) {
     cfg.regex = new RegExp(`(${cfg.keyword.map(word => word.replace(/[-\\^$*+?.()|[\]{}/]/g, '\\$&')).join('|')})`, cfg.caseSensitive ? 'g' : 'ig');
     return cfg;
 }
-function remove(el) {
+function remove (el) {
     el.querySelectorAll(`mark[data-mark-key=${key}]`).forEach(item => {
         let parent = item.parentNode;
         parent.replaceChild(item.firstChild, item);
         parent.normalize();
-    })
+    });
 }
-function apply(el, cfg) {
+function apply (el, cfg) {
     if (!cfg) return;
     findNodes(el).filter(node => node.textContent.length >= cfg.minLength).forEach(node => {
         let mark = document.createElement('mark');
@@ -39,14 +39,14 @@ function apply(el, cfg) {
     });
 }
 export default {
-    bind(el, binding) {
+    bind (el, binding) {
         apply(el, parseConfig(binding));
     },
-    componentUpdated(el, binding) {
+    componentUpdated (el, binding) {
         remove(el);
         apply(el, parseConfig(binding));
     },
-    unbind(el) {
+    unbind (el) {
         remove(el);
     }
-}
+};

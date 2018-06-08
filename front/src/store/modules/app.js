@@ -191,7 +191,7 @@ const app = {
             state.pageOpenedList.push(tagObj);
             localStorage.pageOpenedList = JSON.stringify(state.pageOpenedList);
         },
-        changeTagTitle(state, info) {
+        changeTagTitle (state, info) {
             state.pageOpenedList.every(item => {
                 if (item.name === info.name) {
                     item.title = info.title;

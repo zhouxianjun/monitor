@@ -42,8 +42,8 @@
     import {HistoryStatus} from '../../../libs/dic';
 
     export default {
-        name: "alarm-history-index",
-        data() {
+        name: 'alarm-history-index',
+        data () {
             return {
                 HistoryStatus,
                 table: {
@@ -94,19 +94,19 @@
                         value: () => [dayjs().subtract(7, 'day').toDate(), dayjs().set('second', 0).toDate()]
                     }]
                 }
-            }
+            };
         },
-        async mounted() {
+        async mounted () {
             this.doQuery();
             this.initSpots();
         },
         watch: {
-            'table.query.spot'(val) {
+            'table.query.spot' (val) {
                 this.apps = this.loadApp(val);
             }
         },
         methods: {
-            async doQuery() {
+            async doQuery () {
                 if (this.range) {
                     this.table.query.start = dayjs(this.range[0]).format('YYYY-MM-DD HH:mm');
                     this.table.query.end = dayjs(this.range[1]).format('YYYY-MM-DD HH:mm');
@@ -117,24 +117,24 @@
                 this.table.query.start = '';
                 this.table.query.end = '';
             },
-            async changePage(page) {
+            async changePage (page) {
                 this.table.query.pageNum = page;
                 this.doQuery();
             },
-            async changePageSize(size) {
+            async changePageSize (size) {
                 this.table.query.pageSize = size;
                 this.doQuery();
             },
-            async initSpots() {
+            async initSpots () {
                 let list = await this.fetch('/api/spot/list');
                 list && (this.spots = (!list.value || list.value.length === 0) ? [] : list.value);
             },
-            async loadApp(spot) {
+            async loadApp (spot) {
                 let list = await this.fetch('/api/app/list', {params: {spot}});
                 return list.value ? list.value : [];
             }
         }
-    }
+    };
 </script>
 
 <style lang="less">

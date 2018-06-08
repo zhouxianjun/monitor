@@ -71,11 +71,11 @@
     import {StatusDiy} from '../../libs/dic';
     import VueTagsInput from '@johmun/vue-tags-input';
     export default {
-        name: "app",
+        name: 'app',
         components: {
             VueTagsInput
         },
-        data() {
+        data () {
             return {
                 normalStatus: StatusDiy('正常', '异常'),
                 table: {
@@ -92,7 +92,7 @@
                     }, {
                         title: '健康状态',
                         key: 'alertCount',
-                        render(h, params) {
+                        render (h, params) {
                             let count = params.row[params.column.key] || 0;
                             return Common.RENDER.STATUS_DIY(h, params)('健康', `正在报警: ${count}`, count <= 0);
                         }
@@ -170,38 +170,38 @@
                     hosts: ''
                 },
                 validate: {
-                    name: [{required: true, trigger: 'blur' }],
-                    spotId: [{type: 'number', required: true, trigger: 'change' }],
-                    alarm: [{type: 'boolean', required: true, trigger: 'blur' }]
+                    name: [{required: true, trigger: 'blur'}],
+                    spotId: [{type: 'number', required: true, trigger: 'change'}],
+                    alarm: [{type: 'boolean', required: true, trigger: 'blur'}]
                 },
                 hosts: [],
                 host: ''
-            }
+            };
         },
-        async mounted() {
+        async mounted () {
             this.doQuery();
             this.initSpots();
         },
         methods: {
-            async doQuery() {
+            async doQuery () {
                 let list = await this.fetch('/api/app/list', {params: this.table.query});
                 list && (this.table.data = list.value.size === 0 ? [] : list.value.list);
                 list && (this.table.total = list.value.total);
                 this.loadingBtn = false;
             },
-            async changePage(page) {
+            async changePage (page) {
                 this.table.query.pageNum = page;
                 this.doQuery();
             },
-            async changePageSize(size) {
+            async changePageSize (size) {
                 this.table.query.pageSize = size;
                 this.doQuery();
             },
-            async initSpots() {
+            async initSpots () {
                 let list = await this.fetch('/api/spot/list');
                 list && (this.spots = (!list.value || list.value.length === 0) ? [] : list.value);
             },
-            async addOrUpdate() {
+            async addOrUpdate () {
                 this.$refs['form'].validate(async (valid) => {
                     if (valid) {
                         let url = this.vo.id ? '/api/app/update' : '/api/app/add';
@@ -218,7 +218,7 @@
                     }
                 });
             },
-            async remove() {
+            async remove () {
                 if (!this.removeItem) return;
                 let success = await this.fetch('/api/app/remove', {method: 'post', data: {id: this.removeItem.id}});
                 if (success === false) {
@@ -229,26 +229,26 @@
                 this.removeModal = false;
                 setTimeout(() => this.doQuery(), 500);
             },
-            add() {
+            add () {
                 this.model = true;
                 this.modelTitle = '创建应用';
                 this.loadingBtn = true;
                 this.$refs['form'].resetFields();
                 this.hosts = [];
             },
-            cancel() {
+            cancel () {
                 this.loadingBtn = false;
             },
-            resetLoadingBtn() {
+            resetLoadingBtn () {
                 this.loadingBtn = false;
                 this.$nextTick(() => this.loadingBtn = true);
             },
-            tagChanged(newTags) {
+            tagChanged (newTags) {
                 this.hosts = newTags;
                 this.vo.hosts = newTags.map(tag => tag.text).join();
             }
-         }
-    }
+        }
+    };
 </script>
 
 <style lang="less">

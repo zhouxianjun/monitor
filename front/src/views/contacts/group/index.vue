@@ -41,8 +41,8 @@
 <script>
     import Common from '../../../libs/common';
     export default {
-        name: "contacts-group-index",
-        data() {
+        name: 'contacts-group-index',
+        data () {
             return {
                 model: false,
                 modelTitle: null,
@@ -91,7 +91,7 @@
                                         }
                                     }
                                 }, '修改'),
-                                Common.tableBtnPop(h, '您确定要删除这条数据吗?', '删除', 'error', async () => await this.remove(params.row))
+                                Common.tableBtnPop(h, '您确定要删除这条数据吗?', '删除', 'error', () => this.remove(params.row))
                             ]);
                         }
                     }],
@@ -108,47 +108,47 @@
                     group: {
                         id: null,
                         name: null,
-                        remark: null,
+                        remark: null
                     },
                     contacts: []
                 },
                 validate: {
-                    'group.name': [{required: true, trigger: 'blur' }]
+                    'group.name': [{required: true, trigger: 'blur'}]
                 }
-            }
+            };
         },
-        mounted() {
+        mounted () {
             this.doQuery();
             this.initContacts();
         },
         methods: {
-            async initContacts() {
+            async initContacts () {
                 let result = await this.fetch('/api/contacts/list');
                 if (result && result.value && result.value.length) {
                     this.contacts = result.value.map(val => Object.assign({}, {key: val.id, label: val.name}));
                 }
             },
-            async loadContactsForUpdate(item) {
+            async loadContactsForUpdate (item) {
                 let result = await this.fetch('/api/contacts/list', {params: {groupId: item.id}});
                 if (result && result.value && result.value.length) {
                     this.vo.contacts = result.value.map(val => val.id);
                 }
             },
-            async doQuery() {
+            async doQuery () {
                 let list = await this.fetch('/api/contacts/group/list', {params: this.table.query});
                 list && (this.table.data = list.value.size === 0 ? [] : list.value.list);
                 list && (this.table.total = list.value.total);
                 this.loadingBtn = false;
             },
-            async changePage(page) {
+            async changePage (page) {
                 this.table.query.pageNum = page;
                 this.doQuery();
             },
-            async changePageSize(size) {
+            async changePageSize (size) {
                 this.table.query.pageSize = size;
                 this.doQuery();
             },
-            async addOrUpdate() {
+            async addOrUpdate () {
                 this.$refs['form'].validate(async (valid) => {
                     if (valid) {
                         let url = this.vo.group.id ? '/api/contacts/group/update' : '/api/contacts/group/add';
@@ -165,7 +165,7 @@
                     }
                 });
             },
-            async remove(item) {
+            async remove (item) {
                 if (!item) return;
                 let success = await this.fetch('/api/contacts/group/remove', {method: 'post', data: {id: item.id}});
                 if (success === false) {
@@ -173,21 +173,21 @@
                 }
                 setTimeout(() => this.doQuery(), 500);
             },
-            add() {
+            add () {
                 this.model = true;
                 this.modelTitle = '创建组';
                 this.loadingBtn = true;
                 this.$refs['form'].resetFields();
             },
-            cancel() {
+            cancel () {
                 this.loadingBtn = false;
             },
-            resetLoadingBtn() {
+            resetLoadingBtn () {
                 this.loadingBtn = false;
                 this.$nextTick(() => this.loadingBtn = true);
             }
         }
-    }
+    };
 </script>
 
 <style lang="less">

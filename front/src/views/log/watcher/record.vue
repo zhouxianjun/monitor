@@ -14,7 +14,7 @@
 
 <script>
     export default {
-        name: "log-watcher-record",
+        name: 'log-watcher-record',
         props: {
             traceId: {type: String, require: true},
             load: {
@@ -22,7 +22,7 @@
                 default: false
             }
         },
-        data() {
+        data () {
             return {
                 records: [],
                 total: 0,
@@ -30,29 +30,29 @@
                     pageNum: 0,
                     pageSize: 50
                 }
-            }
+            };
         },
-        async mounted() {
+        async mounted () {
             if (this.load) {
                 await this.pull();
             }
         },
         methods: {
-            async pull() {
+            async pull () {
                 this.query.pageNum++;
                 let result = await this.fetch('/api/log/watcher/log/detail', {params: Object.assign({traceId: this.traceId}, this.query)});
                 if (result && result.value.size) {
                     this.records = this.records.concat(result.value.list);
-                    this.total = result.value.total
+                    this.total = result.value.total;
                 }
             },
-            async doQuery() {
+            async doQuery () {
                 this.query.pageNum = 0;
                 this.records = [];
                 await this.pull();
             }
         }
-    }
+    };
 </script>
 
 <style lang="less">

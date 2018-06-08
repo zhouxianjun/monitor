@@ -43,8 +43,8 @@
     import Common from '../../libs/common';
 
     export default {
-        name: "contacts-list",
-        data() {
+        name: 'contacts-list',
+        data () {
             return {
                 table: {
                     col: [{
@@ -87,7 +87,7 @@
                                         }
                                     }
                                 }, '修改'),
-                                Common.tableBtnPop(h, '您确定要删除这条数据吗?', '删除', 'error', async () => await this.remove(params.row))
+                                Common.tableBtnPop(h, '您确定要删除这条数据吗?', '删除', 'error', () => this.remove(params.row))
                             ]);
                         }
                     }],
@@ -109,35 +109,35 @@
                     ding: null
                 },
                 validate: {
-                    name: [{required: true, trigger: 'blur' }],
-                    email: [{type: 'email', trigger: 'blur' }],
-                    phone: [{type: 'regexp', trigger: 'blur' }],
-                    ding: [{type: 'url', trigger: 'blur' }]
+                    name: [{required: true, trigger: 'blur'}],
+                    email: [{type: 'email', trigger: 'blur'}],
+                    phone: [{type: 'regexp', trigger: 'blur'}],
+                    ding: [{type: 'url', trigger: 'blur'}]
                 },
                 model: false,
                 modelTitle: null
-            }
+            };
         },
-        mounted() {
+        mounted () {
             this.table.query['groupId'] = this.$route.query['groupId'];
             this.doQuery();
         },
         methods: {
-            async doQuery() {
+            async doQuery () {
                 let list = await this.fetch('/api/contacts/list', {params: this.table.query});
                 list && (this.table.data = list.value.size === 0 ? [] : list.value.list);
                 list && (this.table.total = list.value.total);
                 this.loadingBtn = false;
             },
-            async changePage(page) {
+            async changePage (page) {
                 this.table.query.pageNum = page;
                 this.doQuery();
             },
-            async changePageSize(size) {
+            async changePageSize (size) {
                 this.table.query.pageSize = size;
                 this.doQuery();
             },
-            async addOrUpdate() {
+            async addOrUpdate () {
                 this.$refs['form'].validate(async (valid) => {
                     if (valid) {
                         let url = this.vo.id ? '/api/contacts/update' : '/api/contacts/add';
@@ -154,7 +154,7 @@
                     }
                 });
             },
-            async remove(item) {
+            async remove (item) {
                 if (!item) return;
                 let success = await this.fetch('/api/contacts/remove', {method: 'post', data: {id: item.id}});
                 if (success === false) {
@@ -162,21 +162,21 @@
                 }
                 setTimeout(() => this.doQuery(), 500);
             },
-            add() {
+            add () {
                 this.model = true;
                 this.modelTitle = '创建联系人';
                 this.loadingBtn = true;
                 this.$refs['form'].resetFields();
             },
-            cancel() {
+            cancel () {
                 this.loadingBtn = false;
             },
-            resetLoadingBtn() {
+            resetLoadingBtn () {
                 this.loadingBtn = false;
                 this.$nextTick(() => this.loadingBtn = true);
             }
         }
-    }
+    };
 </script>
 
 <style lang="less">

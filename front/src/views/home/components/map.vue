@@ -11,11 +11,11 @@ export default {
         cityData: Array
     },
     mounted () {
-        var convertData = function (data) {
+        let convertData = function (data) {
             let res = [];
             let len = data.length;
-            for (var i = 0; i < len; i++) {
-                var geoCoord = geoData[data[i].name];
+            for (let i = 0; i < len; i++) {
+                let geoCoord = geoData[data[i].name];
                 if (geoCoord) {
                     res.push({
                         name: data[i].name,
@@ -26,7 +26,7 @@ export default {
             return res;
         };
 
-        var map = echarts.init(document.getElementById('home_page_map'));
+        let map = echarts.init(document.getElementById('home_page_map'));
         const chinaJson = require('../map-data/china.json');
         echarts.registerMap('china', chinaJson);
         map.setOption({

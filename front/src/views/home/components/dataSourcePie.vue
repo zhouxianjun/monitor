@@ -14,7 +14,7 @@ export default {
     },
     mounted () {
         this.$nextTick(() => {
-            var dataSourcePie = echarts.init(document.getElementById('data_source_con'));
+            let dataSourcePie = echarts.init(document.getElementById('data_source_con'));
             const option = {
                 tooltip: {
                     trigger: 'item',

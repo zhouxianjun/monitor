@@ -55,11 +55,11 @@
     import MonacoEditor from 'vue-monaco-editor';
 
     export default {
-        name: "log-watcher-edit",
+        name: 'log-watcher-edit',
         components: {
             MonacoEditor
         },
-        data() {
+        data () {
             return {
                 editor: null,
                 editorReportedScript: null,
@@ -77,16 +77,16 @@
                 spots: [],
                 apps: [],
                 validate: {
-                    name: [{required: true, trigger: 'blur' }],
-                    appId: [{type: 'number', required: true, trigger: 'change' }],
-                    config: [{required: true, trigger: 'blur' }],
-                    interval: [{type: 'number', required: true, trigger: 'blur' }],
-                    reported: [{type: 'boolean', required: true, trigger: 'blur' }],
-                    status: [{type: 'boolean', required: true, trigger: 'blur' }]
+                    name: [{required: true, trigger: 'blur'}],
+                    appId: [{type: 'number', required: true, trigger: 'change'}],
+                    config: [{required: true, trigger: 'blur'}],
+                    interval: [{type: 'number', required: true, trigger: 'blur'}],
+                    reported: [{type: 'boolean', required: true, trigger: 'blur'}],
+                    status: [{type: 'boolean', required: true, trigger: 'blur'}]
                 }
-            }
+            };
         },
-        mounted() {
+        mounted () {
             this.initSpots();
             this.vo = Object.assign(this.vo, this.$route.params);
             this.editor && this.editor.setValue(this.vo.config);
@@ -94,20 +94,20 @@
             this.$store.commit('changeTagTitle', {name: 'log-watcher-edit', title: this.vo.id ? '修改日志监控' : '新增日志监控'});
         },
         watch: {
-            async 'vo.spotId'(val) {
+            async 'vo.spotId' (val) {
                 this.apps = await this.loadApp(val);
             }
         },
         methods: {
-            async initSpots() {
+            async initSpots () {
                 let list = await this.fetch('/api/spot/list');
                 list && (this.spots = (!list.value || list.value.length === 0) ? [] : list.value);
             },
-            async loadApp(spot) {
+            async loadApp (spot) {
                 let list = await this.fetch('/api/app/list', {params: {spot}});
                 return list.value ? list.value : [];
             },
-            async addOrUpdate() {
+            async addOrUpdate () {
                 this.$refs['form'].validate(async (valid) => {
                     if (valid) {
                         let url = this.vo.id ? '/api/log/watcher/update' : '/api/log/watcher/add';
@@ -121,7 +121,7 @@
                     }
                 });
             },
-            back() {
+            back () {
                 this.$router.back();
                 this.$parent.$refs['tags'].refsTag.every(tag => {
                     if (tag.name === 'log-watcher-edit') {
@@ -133,22 +133,22 @@
                     return true;
                 });
             },
-            onMounted(editor) {
+            onMounted (editor) {
                 this.editor = editor;
                 this.vo.config && this.editor.setValue(this.vo.config);
             },
-            onCodeChange(editor) {
+            onCodeChange (editor) {
                 this.vo.config = editor.getValue();
             },
-            onMountedReportedScript(editor) {
+            onMountedReportedScript (editor) {
                 this.editorReportedScript = editor;
                 this.vo.reportedScript && this.editorReportedScript.setValue(this.vo.reportedScript);
             },
-            onCodeChangeReportedScript(editor) {
+            onCodeChangeReportedScript (editor) {
                 this.vo.reportedScript = editor.getValue();
             }
         }
-    }
+    };
 </script>
 
 <style scoped>

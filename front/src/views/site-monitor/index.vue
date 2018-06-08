@@ -46,8 +46,8 @@
     import {SiteType, Status} from '../../libs/dic';
 
     export default {
-        name: "site-monitor-index",
-        data() {
+        name: 'site-monitor-index',
+        data () {
             return {
                 Status,
                 SiteType,
@@ -64,9 +64,9 @@
                     }, {
                         title: '报警状态',
                         key: 'lastStatus',
-                        render(h, params) {
+                        render (h, params) {
                             let lastStatus = params.row[params.column.key] || 0;
-                            return Common.RENDER.STATUS_DIY(h, params)('正常', `正在报警`, !lastStatus || ![1, 2].includes(lastStatus));
+                            return Common.RENDER.STATUS_DIY(h, params)('正常', '正在报警', !lastStatus || ![1, 2].includes(lastStatus));
                         },
                         width: 140
                     }, {
@@ -102,7 +102,7 @@
                                         }
                                     }
                                 }, '修改'),
-                                Common.tableBtnPop(h, '您确定要删除这条数据吗?', '删除', 'error', async () => await this.remove(params.row))
+                                Common.tableBtnPop(h, '您确定要删除这条数据吗?', '删除', 'error', () => this.remove(params.row))
                             ]);
                         }
                     }],
@@ -119,54 +119,54 @@
                     }
                 },
                 spots: [],
-                apps: [],
-            }
+                apps: []
+            };
         },
-        async mounted() {
+        async mounted () {
             this.doQuery();
             this.initSpots();
         },
         watch: {
-            async 'table.query.spot'(val) {
+            async 'table.query.spot' (val) {
                 this.apps = await this.loadApp(val);
             }
         },
         methods: {
-            async doQuery() {
+            async doQuery () {
                 let list = await this.fetch(this.table.query.type === 1 ? '/api/monitor/http/list' : '/api/monitor/reported/list', {params: this.table.query});
                 list && (this.table.data = list.value.size === 0 ? [] : list.value.list);
                 list && (this.table.total = list.value.total);
                 this.loadingBtn = false;
             },
-            async changePage(page) {
+            async changePage (page) {
                 this.table.query.pageNum = page;
                 this.doQuery();
             },
-            async changePageSize(size) {
+            async changePageSize (size) {
                 this.table.query.pageSize = size;
                 this.doQuery();
             },
-            async initSpots() {
+            async initSpots () {
                 let list = await this.fetch('/api/spot/list');
                 list && (this.spots = (!list.value || list.value.length === 0) ? [] : list.value);
             },
-            async loadApp(spot) {
+            async loadApp (spot) {
                 let list = await this.fetch('/api/app/list', {params: {spot}});
                 return list.value ? list.value : [];
             },
-            addHttp() {
+            addHttp () {
                 this.$router.push({
                     name: 'monitor-http-edit',
                     params: {}
                 });
             },
-            addReported() {
+            addReported () {
                 this.$router.push({
                     name: 'monitor-reported-edit',
                     params: {}
                 });
             },
-            async remove(item) {
+            async remove (item) {
                 if (!item) return;
                 let success = await this.fetch(this.table.query.type === 1 ? '/api/monitor/http/remove' : '/api/monitor/reported/remove', {method: 'post', data: {id: item.id}});
                 if (success === false) {
@@ -175,7 +175,7 @@
                 setTimeout(() => this.doQuery(), 500);
             }
         }
-    }
+    };
 </script>
 
 <style lang="less">

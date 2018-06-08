@@ -114,7 +114,7 @@ export default {
             }
         },
         handlescroll (e) {
-            var type = e.type;
+            let type = e.type;
             let delta = 0;
             if (type === 'DOMMouseScroll' || type === 'mousewheel') {
                 delta = (e.wheelDelta) ? e.wheelDelta : -(e.detail || 0) * 40;

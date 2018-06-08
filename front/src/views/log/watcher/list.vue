@@ -24,7 +24,7 @@
     import highlight from '../../../components/highlight-directive';
 
     export default {
-        name: "log-watcher-list",
+        name: 'log-watcher-list',
         components: {
             GridKeepaliveTable,
             Record
@@ -32,7 +32,7 @@
         directives: {
             highlight
         },
-        data() {
+        data () {
             return {
                 query: {
                     watchId: 0,
@@ -78,19 +78,19 @@
                         value: () => [dayjs().subtract(7, 'day').toDate(), dayjs().set('second', 0).toDate()]
                     }]
                 }
-            }
+            };
         },
-        mounted() {
+        mounted () {
             this.query.watchId = this.$route.query['watchId'];
             this.doQuery();
         },
         methods: {
-            async doQuery() {
+            async doQuery () {
                 this.query.pageNum = 0;
                 this.table.data = [];
                 await this.pull();
             },
-            async pull() {
+            async pull () {
                 this.query.pageNum++;
                 let result = await this.fetch('/api/log/watcher/log/list', {params: this.query});
                 if (result && result.value.size) {
@@ -104,7 +104,7 @@
                 }
             }
         }
-    }
+    };
 </script>
 
 <style lang="less">
