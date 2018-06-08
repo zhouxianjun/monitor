@@ -205,6 +205,13 @@
                 <log.level>INFO</log.level>
             </properties>
         </profile>
+        <profile>
+            <id>pord</id>
+            <properties>
+                <profile.env>pord</profile.env>
+                <log.level>INFO</log.level>
+            </properties>
+        </profile>
     </profiles>
 
 </project>
