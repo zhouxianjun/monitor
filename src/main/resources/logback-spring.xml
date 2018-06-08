@@ -39,6 +39,10 @@
     <logger name="tk.mybatis.spring.mapper.ClassPathMapperScanner" level="WARN"/>
     <logger name="org.hibernate.validator.internal.engine.ValidatorFactoryImpl" level="WARN"/>
     <logger name="org.springframework" level="info"/>
+    <logger name="com.all580.monitor.mapper" level="debug" additivity="false">
+        <appender-ref ref="console" />
+        <appender-ref ref="file" />
+    </logger>
 
     <root level="@log.level@">
         <appender-ref ref="console" />

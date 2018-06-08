@@ -14,7 +14,7 @@ module.exports = merge(webpackBaseConfig, {
             'process.env': {
                 NODE_ENV: '"production"'
             },
-            baseURL: '"http://www.baidu.com"'
+            baseURL: '"http://120.78.231.191:8080"'
         }),
         new webpack.optimize.UglifyJsPlugin({
             compress: {

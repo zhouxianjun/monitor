@@ -206,9 +206,9 @@
             </properties>
         </profile>
         <profile>
-            <id>pord</id>
+            <id>prod</id>
             <properties>
-                <profile.env>pord</profile.env>
+                <profile.env>prod</profile.env>
                 <log.level>INFO</log.level>
             </properties>
         </profile>
