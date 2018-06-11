@@ -1,5 +1,6 @@
 package com.all580.monitor.controller;
 
+import cn.hutool.core.util.StrUtil;
 import cn.hutool.http.Method;
 import cn.hutool.json.JSON;
 import cn.hutool.json.JSONUtil;
@@ -16,6 +17,7 @@ import com.jayway.jsonpath.JsonPath;
 import io.swagger.annotations.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
@@ -37,6 +39,8 @@ import java.util.stream.Collectors;
 @RequestMapping("api/log")
 @Slf4j
 public class LogController {
+    @Value("${es.index}")
+    private String index;
     @Autowired
     private EsManager esManager;
     @Autowired
@@ -48,7 +52,7 @@ public class LogController {
 
     @PostMapping("search")
     public Result<?> search(@RequestBody Map<String, Object> params) throws IOException {
-        JSON json = esManager.execute("/logstash-*/_search", Method.POST, JSONUtil.toJsonStr(params));
+        JSON json = esManager.execute(StrUtil.format("/{}/_search", index), Method.POST, JSONUtil.toJsonStr(params));
         Object error = json.getByPath("error");
         return Result.builder().code(error == null ? Result.SUCCESS : Result.FAIL).msg(error != null ? error.toString() : null).value(json.toString()).build();
     }

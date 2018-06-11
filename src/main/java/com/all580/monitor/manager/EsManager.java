@@ -1,6 +1,7 @@
 package com.all580.monitor.manager;
 
 import cn.hutool.core.map.MapUtil;
+import cn.hutool.core.util.StrUtil;
 import cn.hutool.http.Method;
 import cn.hutool.json.JSON;
 import cn.hutool.json.JSONUtil;
@@ -43,6 +44,8 @@ public class EsManager {
     private String user;
     @Value("${es.api.password}")
     private String password;
+    @Value("${es.index}")
+    private String index;
 
     public static final String QUERY_TRACE = "{\"_source\":[\"systemmsg\",\"cusmsg\",\"offset\",\"_id\",\"remote_ip\",\"@timestamp\",\"source\",\"trace_id\"],\"query\":{\"bool\":{\"filter\":[{\"terms\":{\"trace_id\":[]}}]}},\"from\":0,\"size\":100,\"sort\":[{\"@timestamp\":\"asc\"},{\"offset\":\"asc\"}]}";
 
@@ -70,7 +73,7 @@ public class EsManager {
     @SneakyThrows
     private List<Map<String, Object>> queryTrace(DocumentContext parse, List<Map<String, Object>> list) {
         parse.set("$.from", list.size());
-        JSON json = execute("/logstash-*/_search", Method.POST, parse.jsonString());
+        JSON json = execute(StrUtil.format("/{}/_search", index), Method.POST, parse.jsonString());
         Object error = json.getByPath("$.error");
         if (error != null) {
             throw new RuntimeException(error.toString());

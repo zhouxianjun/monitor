@@ -32,7 +32,7 @@ import java.util.stream.Stream;
  */
 @Component
 @Slf4j
-public class WatcherJobTask {
+public class WatcherJobTaskClearTrace {
     private AtomicBoolean run = new AtomicBoolean(false);
     @Autowired
     private EsWatcherJobService esWatcherJobService;
@@ -48,7 +48,7 @@ public class WatcherJobTask {
     }
 
     @Scheduled(fixedDelay = 60 * 1000 * 5)
-    public void scan() {
+    public void run() {
         if (run.compareAndSet(false, true)) {
             try {
                 Example example = new Example(TabEsWatchJob.class);
