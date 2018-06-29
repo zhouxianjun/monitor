@@ -7,7 +7,7 @@
             <Button class="margin-left-10" type="primary" @click="doQuery" icon="search">搜索</Button>
         </Row>
         <GridKeepaliveTable ref="table" :columns="table.col" :data="table.data" class="margin-top-10">
-            <Record v-highlight="{keyword: query.keyword}" slot="expand" slot-scope="{record}" :traceId="record.traceId" :load="true"/>
+            <Record v-highlight="{keyword: query.keyword}" slot="expand" slot-scope="{record}" :traceId="record.traceId" :load="true" />
             <Icon slot="col-expand" slot-scope="{record}" :type="record.expand ? 'ios-arrow-down' : 'ios-arrow-right'" size="14"></Icon>
         </GridKeepaliveTable>
         <Row>
@@ -108,6 +108,5 @@
 </script>
 
 <style lang="less">
-    @import '../../../styles/common.less';
-    @import '~animate.css';
+@import '~animate.css';
 </style>

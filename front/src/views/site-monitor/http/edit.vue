@@ -3,7 +3,7 @@
         <Card :bordered="false" shadow>
             <Form ref="form" :model="vo" :label-width="80" :rules="validate">
                 <Form-item label="名称" prop="monitor.name">
-                    <Input v-model="vo.monitor.name"/>
+                    <Input v-model="vo.monitor.name" />
                 </Form-item>
                 <FormItem label="应用" prop="monitor.appId">
                     <Select v-model="vo.monitor.spotId" style="width: 200px">
@@ -14,10 +14,10 @@
                     </Select>
                 </FormItem>
                 <Form-item label="地址" prop="monitor.url">
-                    <Input v-model="vo.monitor.url" type="url"/>
+                    <Input v-model="vo.monitor.url" type="url" />
                 </Form-item>
                 <Form-item label="频率" prop="rule.interval">
-                    <InputNumber v-model="vo.rule.interval" :min="1" :max="1500" :formatter="val => `${val}分钟`" :parser="val => val.replace('分钟', '')"/>
+                    <InputNumber v-model="vo.rule.interval" :min="1" :max="1500" :formatter="val => `${val}分钟`" :parser="val => val.replace('分钟', '')" />
                 </Form-item>
                 <Form-item label="请求方式" prop="monitor.method">
                     <Select v-model="vo.monitor.method" style="width: 200px">
@@ -25,22 +25,16 @@
                     </Select>
                 </Form-item>
                 <FormItem label="Cookie" prop="monitor.cookie">
-                    <Input type="textarea" v-model="vo.monitor.cookie"/>
+                    <Input type="textarea" v-model="vo.monitor.cookie" />
                 </FormItem>
                 <FormItem label="请求头" prop="monitor.header">
-                    <Input type="textarea" v-model="vo.monitor.header"/>
+                    <Input type="textarea" v-model="vo.monitor.header" />
                 </FormItem>
                 <FormItem label="basicAuth" prop="monitor.basicAuth">
-                    <Input v-model="vo.monitor.basicAuth"/>
+                    <Input v-model="vo.monitor.basicAuth" />
                 </FormItem>
                 <FormItem label="脚本" prop="rule.script">
-                    <MonacoEditor
-                            height="600"
-                            srcPath=""
-                            language="java"
-                            @mounted="onMounted"
-                            @codeChange="onCodeChange"
-                    >
+                    <MonacoEditor height="600" srcPath="" language="java" @mounted="onMounted" @codeChange="onCodeChange">
                     </MonacoEditor>
                 </FormItem>
                 <FormItem label="NODATA" prop="rule.nodata">
@@ -50,10 +44,10 @@
                     </i-switch>
                 </FormItem>
                 <Form-item label="连续几次" prop="rule.count">
-                    <InputNumber v-model="vo.rule.count" :min="1" :max="10" :formatter="val => `${val}次后报警`" :parser="val => val.replace('次后报警', '')"/>
+                    <InputNumber v-model="vo.rule.count" :min="1" :max="10" :formatter="val => `${val}次后报警`" :parser="val => val.replace('次后报警', '')" />
                 </Form-item>
                 <Form-item label="沉默间隔" prop="rule.silenceInterval">
-                    <InputNumber v-model="vo.rule.silenceInterval" :min="1" :max="4320" :formatter="val => `${val}分钟`" :parser="val => val.replace('分钟', '')"/>
+                    <InputNumber v-model="vo.rule.silenceInterval" :min="1" :max="4320" :formatter="val => `${val}分钟`" :parser="val => val.replace('分钟', '')" />
                 </Form-item>
                 <FormItem label="通知联系组">
                     <Select v-model="vo.rule.alarmGroupId" filterable>
@@ -61,7 +55,7 @@
                     </Select>
                 </FormItem>
                 <FormItem label="回调地址" prop="rule.alarmCallback">
-                    <Input v-model="vo.rule.alarmCallback" type="url"/>
+                    <Input v-model="vo.rule.alarmCallback" type="url" />
                 </FormItem>
                 <FormItem label="状态" prop="monitor.status">
                     <i-switch v-model="vo.monitor.status" size="large">
@@ -195,7 +189,3 @@
         }
     };
 </script>
-
-<style lang="less">
-    @import '../../../styles/common.less';
-</style>

@@ -1,7 +1,8 @@
 <template>
     <div>
         <Row>
-            <Button type="primary" @click="add"><Icon type="plus"></Icon>创建监控</Button>
+            <Button type="primary" @click="add">
+                <Icon type="plus"></Icon>创建监控</Button>
         </Row>
         <Row class="margin-top-10">
             <Input v-model="table.query.name" placeholder="监控名称" clearable style="width: 200px" />
@@ -23,12 +24,12 @@
         </Row>
         <Row class="margin-top-10">
             <Col>
-                <Table :columns="table.col" :data="table.data"></Table>
-                <div style="margin: 10px;overflow: hidden">
-                    <div style="float: right;">
-                        <Page :total="table.total" :show-sizer="true" placement="top" @on-page-size-change="changePageSize" @on-change="changePage"></Page>
-                    </div>
+            <Table :columns="table.col" :data="table.data"></Table>
+            <div style="margin: 10px;overflow: hidden">
+                <div style="float: right;">
+                    <Page :total="table.total" :show-sizer="true" placement="top" @on-page-size-change="changePageSize" @on-change="changePage"></Page>
                 </div>
+            </div>
             </Col>
         </Row>
     </div>
@@ -169,7 +170,3 @@
         }
     };
 </script>
-
-<style lang="less">
-    @import '../../../styles/common.less';
-</style>

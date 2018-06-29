@@ -1,7 +1,7 @@
 <template>
     <div>
         <Row class="margin-top-10">
-            <Input v-model="table.query.name" placeholder="规则名称" clearable style="width: 200px"/>
+            <Input v-model="table.query.name" placeholder="规则名称" clearable style="width: 200px" />
             <label class="margin-left-10">景区：</label>
             <Select v-model="table.query.spot" @on-change="doQuery" style="width: 200px">
                 <Option value="">全部</Option>
@@ -18,19 +18,17 @@
                 <Option v-for="item in HistoryStatus" :value="item.id" :key="item.id">{{ item.name }}</Option>
             </Select>
             <label class="margin-left-10">范围：</label>
-            <DatePicker v-model="range" type="datetimerange" :options="dateRangeOpt" format="yyyy-MM-dd HH:mm" placeholder="请选择查询范围"
-                        style="width: 250px"></DatePicker>
+            <DatePicker v-model="range" type="datetimerange" :options="dateRangeOpt" format="yyyy-MM-dd HH:mm" placeholder="请选择查询范围" style="width: 250px"></DatePicker>
             <Button class="margin-left-10" type="primary" @click="doQuery" icon="search">搜索</Button>
         </Row>
         <Row class="margin-top-10">
             <Col>
-                <Table :columns="table.col" :data="table.data"></Table>
-                <div style="margin: 10px;overflow: hidden">
-                    <div style="float: right;">
-                        <Page :total="table.total" :show-sizer="true" placement="top"
-                              @on-page-size-change="changePageSize" @on-change="changePage"></Page>
-                    </div>
+            <Table :columns="table.col" :data="table.data"></Table>
+            <div style="margin: 10px;overflow: hidden">
+                <div style="float: right;">
+                    <Page :total="table.total" :show-sizer="true" placement="top" @on-page-size-change="changePageSize" @on-change="changePage"></Page>
                 </div>
+            </div>
             </Col>
         </Row>
     </div>
@@ -136,7 +134,3 @@
         }
     };
 </script>
-
-<style lang="less">
-    @import '../../../styles/common.less';
-</style>

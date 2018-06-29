@@ -1,6 +1,5 @@
 <style lang="less">
-    @import '../../styles/common.less';
-    @import './error-page.less';
+@import './error-page.less';
 </style>
 
 <template>
@@ -13,19 +12,19 @@
                 </p>
                 <Row>
                     <Col span="10">
-                        <Card dis-hover>
-                            <Row>
-                                <div class="error-page-show">
-                                    <error404></error404>
-                                </div>
-                                <div class="error-page-cover"></div>
-                            </Row>
-                        </Card>
+                    <Card dis-hover>
+                        <Row>
+                            <div class="error-page-show">
+                                <error404></error404>
+                            </div>
+                            <div class="error-page-cover"></div>
+                        </Row>
+                    </Card>
                     </Col>
                     <Col span="14" class="padding-left-10">
-                        <Row type="flex" align="middle" class="error-page-intro-con">
-                            <p>当访问的页面不存在时会跳转到404页面，您可以在浏览器地址栏中修改url为一个不存在的路径，体验一下效果</p>
-                        </Row>
+                    <Row type="flex" align="middle" class="error-page-intro-con">
+                        <p>当访问的页面不存在时会跳转到404页面，您可以在浏览器地址栏中修改url为一个不存在的路径，体验一下效果</p>
+                    </Row>
                     </Col>
                 </Row>
             </Card>
@@ -38,19 +37,19 @@
                 </p>
                 <Row>
                     <Col span="10">
-                        <Card dis-hover>
-                            <Row>
-                                <div class="error-page-show">
-                                    <error403></error403>
-                                </div>
-                                <div class="error-page-cover"></div>
-                            </Row>
-                        </Card>
+                    <Card dis-hover>
+                        <Row>
+                            <div class="error-page-show">
+                                <error403></error403>
+                            </div>
+                            <div class="error-page-cover"></div>
+                        </Row>
+                    </Card>
                     </Col>
                     <Col span="14" class="padding-left-10">
-                        <Row type="flex" align="middle" class="error-page-intro-con">
-                            <p>在当前登录用户不具有执行当前操作的权限时跳转到该页面，您可以在ajax请求方法中判断返回的状态码为403时跳转到该页面</p>
-                        </Row>
+                    <Row type="flex" align="middle" class="error-page-intro-con">
+                        <p>在当前登录用户不具有执行当前操作的权限时跳转到该页面，您可以在ajax请求方法中判断返回的状态码为403时跳转到该页面</p>
+                    </Row>
                     </Col>
                 </Row>
             </Card>
@@ -63,19 +62,19 @@
                 </p>
                 <Row>
                     <Col span="10">
-                        <Card dis-hover>
-                            <Row>
-                                <div class="error-page-show">
-                                    <error500></error500>
-                                </div>
-                                <div class="error-page-cover"></div>
-                            </Row>
-                        </Card>
+                    <Card dis-hover>
+                        <Row>
+                            <div class="error-page-show">
+                                <error500></error500>
+                            </div>
+                            <div class="error-page-cover"></div>
+                        </Row>
+                    </Card>
                     </Col>
                     <Col span="14" class="padding-left-10">
-                        <Row type="flex" align="middle" class="error-page-intro-con">
-                            <p>当请求之后出现服务端错误时跳转到该页面，您可以在ajax请求方法中判断返回的状态码为500时跳转到该页面</p>
-                        </Row>
+                    <Row type="flex" align="middle" class="error-page-intro-con">
+                        <p>当请求之后出现服务端错误时跳转到该页面，您可以在ajax请求方法中判断返回的状态码为500时跳转到该页面</p>
+                    </Row>
                     </Col>
                 </Row>
             </Card>

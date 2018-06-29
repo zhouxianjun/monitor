@@ -1,11 +1,12 @@
 import Vue from 'vue';
 import iView from 'iview';
-import {router} from './router/index';
-import {appRouter} from './router/router';
+import { router } from './router/index';
+import { appRouter } from './router/router';
 import store from './store';
 import App from './app.vue';
 import '@/locale';
 import 'iview/dist/styles/iview.css';
+import '@/styles/common.less';
 import VueI18n from 'vue-i18n';
 import axios from 'axios';
 import VueSlimScroll from 'vue-slimscroll';
@@ -30,13 +31,26 @@ Vue.prototype.fetch = async (url, config, showError = true, error) => {
     let response = null;
     let result = null;
     try {
-        response = await axios(url, Object.assign({
-            baseURL: BASE_URL,
-            withCredentials: true
-        }, config));
+        response = await axios(
+            url,
+            Object.assign(
+                {
+                    baseURL: BASE_URL,
+                    withCredentials: true
+                },
+                config
+            )
+        );
         result = response ? response.data : null;
-        if (!response || response.status !== 200 || !result || !result.success) {
-            throw new Error(`fetch ${url} data ${JSON.stringify(config)} error`);
+        if (
+            !response ||
+            response.status !== 200 ||
+            !result ||
+            !result.success
+        ) {
+            throw new Error(
+                `fetch ${url} data ${JSON.stringify(config)} error`
+            );
         }
         iView['LoadingBar'].finish();
         Common.stringToNumber(result);
@@ -47,7 +61,8 @@ Vue.prototype.fetch = async (url, config, showError = true, error) => {
             app.$router.replace('/login');
             return false;
         }
-        showError && iView['Notice'].error({title: result ? result.msg : '操作失败'});
+        showError &&
+            iView['Notice'].error({ title: result ? result.msg : '操作失败' });
         if (typeof error === 'function') {
             Reflect.apply(error, response, result);
         }
@@ -73,7 +88,7 @@ const app = new Vue({
     },
     created () {
         let tagsList = [];
-        appRouter.map((item) => {
+        appRouter.map(item => {
             if (item.children.length <= 1) {
                 tagsList.push(item.children[0]);
             } else {

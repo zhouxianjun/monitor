@@ -15,7 +15,7 @@
                                 <Option v-for="item in ESFilterType" :value="item.id" :key="item.id">{{ item.name }}
                                 </Option>
                             </Select>
-                            <AutoComplete v-model="queryItem.key" :data="fields" placeholder="字段" clearable style="width: 200px"/>
+                            <AutoComplete v-model="queryItem.key" :data="fields" placeholder="字段" clearable style="width: 200px" />
                             <span v-if="queryItem.type === 'range'">
                                 <label>&gt;=</label>
                                 <InputNumber v-model="queryItem.gte" style="width: 90px"></InputNumber>
@@ -24,13 +24,13 @@
                             </span>
                             <span v-if="queryItem.type === 'match'">
                                 ==
-                                <Input v-model="queryItem.value" placeholder="值" clearable style="width: 200px"/>
+                                <Input v-model="queryItem.value" placeholder="值" clearable style="width: 200px" />
                             </span>
                             <Button type="ghost" @click="remove(typeItem.key, index)">删除一项</Button>
                         </Row>
                         <Row>
                             <Col span="8">
-                                <Button type="dashed" long @click="add(typeItem.key)" icon="plus-round">新增一项</Button>
+                            <Button type="dashed" long @click="add(typeItem.key)" icon="plus-round">新增一项</Button>
                             </Col>
                         </Row>
                     </div>
@@ -38,7 +38,7 @@
             </Collapse>
         </Row>
         <GridKeepaliveTable ref="table" :columns="table.col" :data="table.data" class="margin-top-10">
-            <Detail v-highlight="{keyword: highlight}" slot="expand" slot-scope="{record}" :trace_id="record.traceId" :load="true"/>
+            <Detail v-highlight="{keyword: highlight}" slot="expand" slot-scope="{record}" :trace_id="record.traceId" :load="true" />
             <Icon slot="col-expand" slot-scope="{record}" :type="record.expand ? 'ios-arrow-down' : 'ios-arrow-right'" size="14"></Icon>
         </GridKeepaliveTable>
         <Row>
@@ -243,6 +243,5 @@
 </script>
 
 <style lang="less">
-    @import '../../styles/common.less';
-    @import '~animate.css';
+@import '~animate.css';
 </style>

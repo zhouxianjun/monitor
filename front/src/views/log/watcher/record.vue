@@ -7,7 +7,7 @@
         </div>
         <div class="margin-top-10">
             <Button v-show="total > query.pageNum * query.pageSize" type="text" long @click="pull">加载更多</Button>
-            <div style="width: 100%;text-align: center;color: gray;" v-show="total <= query.pageNum * query.pageSize" >我是有底线的</div>
+            <div style="width: 100%;text-align: center;color: gray;" v-show="total <= query.pageNum * query.pageSize">我是有底线的</div>
         </div>
     </div>
 </template>
@@ -54,7 +54,3 @@
         }
     };
 </script>
-
-<style lang="less">
-    @import '../../../styles/common.less';
-</style>
