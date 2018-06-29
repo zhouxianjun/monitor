@@ -10,28 +10,32 @@
         <result column="name" jdbcType="VARCHAR" property="name"/>
         <result column="hosts" jdbcType="VARCHAR" property="hosts"/>
         <result column="alarm" jdbcType="BIT" property="alarm"/>
+        <result column="app_id" jdbcType="VARCHAR" property="authId"/>
+        <result column="app_key" jdbcType="VARCHAR" property="authKey"/>
+        <result column="service" jdbcType="VARCHAR" property="service"/>
+        <result column="type" jdbcType="INTEGER" property="type"/>
         <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
     </resultMap>
 
     <select id="search" resultType="map">
         SELECT
-        ts.`name` spot_name,
-        ta.*,
-        t.alert_count
+            ts.`name` spot_name,
+            ta.*,
+            t.alert_count
         FROM
-        tab_app ta
+            tab_app ta
         LEFT JOIN tab_spot ts ON ts.id = ta.spot_id
         LEFT JOIN (
-        SELECT
-        tar.app_id,
-        count( * ) alert_count
-        FROM
-        tab_alarm_rule tar
-        LEFT JOIN tab_alarm_history tah ON tah.id = tar.last_history
-        WHERE
-        tah.`status` in(1, 2)
-        GROUP BY
-        tar.app_id
+            SELECT
+                tar.app_id,
+                count( * ) alert_count
+            FROM
+                tab_alarm_rule tar
+            LEFT JOIN tab_alarm_history tah ON tah.id = tar.last_history
+            WHERE
+                tah.`status` in(1, 2)
+            GROUP BY
+                tar.app_id
         ) t ON t.app_id = ta.id
         WHERE 1=1
         <if test="normal != null">

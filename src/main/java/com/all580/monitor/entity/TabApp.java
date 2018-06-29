@@ -41,6 +41,18 @@ public class TabApp implements Serializable {
     @ApiModelProperty("是否报警")
     private Boolean alarm;
 
+    @ApiModelProperty("应用授权ID")
+    private String authId;
+
+    @ApiModelProperty("应用授权KEY")
+    private String authKey;
+
+    @ApiModelProperty("应用服务接口")
+    private String service;
+
+    @ApiModelProperty("应用类型")
+    private Integer type;
+
     @Column(name = "create_time")
     private Date createTime;
 

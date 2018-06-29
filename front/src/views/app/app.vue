@@ -1,7 +1,8 @@
 <template>
     <div>
         <Row>
-            <Button type="primary" @click="add"><Icon type="plus"></Icon>创建应用</Button>
+            <Button type="primary" @click="add">
+                <Icon type="plus"></Icon>创建应用</Button>
         </Row>
         <Row class="margin-top-10">
             <Input v-model="table.query.name" placeholder="应用名称" clearable style="width: 200px" />
@@ -18,12 +19,12 @@
         </Row>
         <Row class="margin-top-10">
             <Col>
-                <Table :columns="table.col" :data="table.data"></Table>
-                <div style="margin: 10px;overflow: hidden">
-                    <div style="float: right;">
-                        <Page :total="table.total" :show-sizer="true" placement="top" @on-page-size-change="changePageSize" @on-change="changePage"></Page>
-                    </div>
+            <Table :columns="table.col" :data="table.data"></Table>
+            <div style="margin: 10px;overflow: hidden">
+                <div style="float: right;">
+                    <Page :total="table.total" :show-sizer="true" placement="top" @on-page-size-change="changePageSize" @on-change="changePage"></Page>
                 </div>
+            </div>
             </Col>
         </Row>
 
@@ -31,7 +32,7 @@
             <div style="max-height: 400px;" v-slimscroll>
                 <Form ref="form" :model="vo" :label-width="80" :rules="validate">
                     <Form-item label="名称" prop="name">
-                        <Input v-model="vo.name"/>
+                        <Input v-model="vo.name" />
                     </Form-item>
                     <FormItem label="景区" prop="spotId">
                         <Select v-model="vo.spotId">
@@ -47,20 +48,22 @@
                     <FormItem label="主机" prop="hosts" class="no-line-height-form">
                         <vue-tags-input :tags="hosts" v-model="host" @tags-changed="tagChanged"></vue-tags-input>
                     </FormItem>
+                    <FormItem label="扩展信息">
+                        <i-switch v-model="expand" />
+                    </FormItem>
+                    <FormItem label="授权ID" prop="authId" v-show="expand">
+                        <Input v-model="vo.authId" />
+                    </FormItem>
+                    <FormItem label="授权KEY" prop="authKey" v-show="expand">
+                        <Input v-model="vo.authKey" />
+                    </FormItem>
+                    <FormItem label="服务URL" prop="service" v-show="expand">
+                        <Input v-model="vo.service" />
+                    </FormItem>
+                    <FormItem label="应用类型" prop="type" v-show="expand">
+                        <InputNumber v-model="vo.type" min="1" />
+                    </FormItem>
                 </Form>
-            </div>
-        </Modal>
-        <Modal v-model="removeModal" width="360" @on-cancel="cancel">
-            <p slot="header" style="color:#f60;text-align:center">
-                <Icon type="information-circled"></Icon>
-                <span>删除确认</span>
-            </p>
-            <div style="text-align:center">
-                <p>确定删除 {{removeItem ? removeItem.name : ''}} 吗?，删除后将无法恢复。</p>
-                <p>是否继续删除？</p>
-            </div>
-            <div slot="footer">
-                <Button type="error" size="large" @click="remove">删除</Button>
             </div>
         </Modal>
     </div>
@@ -77,6 +80,7 @@
         },
         data () {
             return {
+                expand: false,
                 normalStatus: StatusDiy('正常', '异常'),
                 table: {
                     col: [{
@@ -130,20 +134,7 @@
                                         }
                                     }
                                 }, '修改'),
-                                h('Button', {
-                                    props: {
-                                        type: 'error',
-                                        size: 'small',
-                                        loading: this.loadingBtn
-                                    },
-                                    on: {
-                                        click: async () => {
-                                            this.removeModal = true;
-                                            this.removeItem = params.row;
-                                            this.loadingBtn = true;
-                                        }
-                                    }
-                                }, '删除')
+                                Common.tableBtnPop(h, '您确定要删除这条数据吗?', '删除', 'error', () => this.remove(params.row))
                             ]);
                         }
                     }],
@@ -159,20 +150,24 @@
                 spots: [],
                 model: false,
                 modelTitle: '',
-                removeModal: false,
-                removeItem: null,
                 loadingBtn: false,
                 vo: {
                     id: null,
                     name: null,
                     spotId: null,
                     alarm: true,
-                    hosts: ''
+                    hosts: '',
+                    authId: null,
+                    authKey: null,
+                    service: null,
+                    type: null
                 },
                 validate: {
                     name: [{required: true, trigger: 'blur'}],
                     spotId: [{type: 'number', required: true, trigger: 'change'}],
-                    alarm: [{type: 'boolean', required: true, trigger: 'blur'}]
+                    alarm: [{type: 'boolean', required: true, trigger: 'blur'}],
+                    service: [{type: 'url', required: false, trigger: 'blur'}],
+                    type: [{type: 'number', required: false, trigger: 'blur'}]
                 },
                 hosts: [],
                 host: ''
@@ -218,15 +213,13 @@
                     }
                 });
             },
-            async remove () {
-                if (!this.removeItem) return;
-                let success = await this.fetch('/api/app/remove', {method: 'post', data: {id: this.removeItem.id}});
+            async remove (item) {
+                if (!item) return;
+                let success = await this.fetch('/api/app/remove', {method: 'post', data: {id: item.id}});
                 if (success === false) {
                     this.resetLoadingBtn();
                     return;
                 }
-                this.removeItem = null;
-                this.removeModal = false;
                 setTimeout(() => this.doQuery(), 500);
             },
             add () {
@@ -252,5 +245,5 @@
 </script>
 
 <style lang="less">
-    @import '../../styles/common.less';
+@import '../../styles/common.less';
 </style>
