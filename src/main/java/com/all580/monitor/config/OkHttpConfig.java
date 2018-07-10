@@ -23,4 +23,6 @@ public class OkHttpConfig {
                 .retryOnConnectionFailure(true);
         return builder.build();
     }
+
+    public static final okhttp3.MediaType JSON = okhttp3.MediaType.parse("application/json; charset=utf-8");
 }

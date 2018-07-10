@@ -1,5 +1,5 @@
 'use strict';
-exports.getAttribute = (dic, prop, value, isArray = false) => {
+exports.getAttribute = (dic, prop = 'id', value, isArray = false) => {
     let result = [];
     for (let item of dic) {
         if (item[prop] === value) {
@@ -8,6 +8,10 @@ exports.getAttribute = (dic, prop, value, isArray = false) => {
         }
     }
     return isArray ? result : null;
+};
+exports.calc = (dic, value, valueProp = 'id') => {
+    let v = parseInt(value.toString(2));
+    return dic.filter(r => v & parseInt(r[valueProp].toString(2)));
 };
 exports.Status = [{
     id: 0,
@@ -70,4 +74,24 @@ exports.SortType = [{
 }, {
     id: 'desc',
     name: '倒序'
+}];
+exports.FuncType = [{
+    id: 600,
+    name: '菜单'
+}, {
+    id: 601,
+    name: '功能'
+}, {
+    id: 602,
+    name: '目录'
+}];
+exports.EpType = [{
+    id: 1,
+    name: '平台商'
+}, {
+    id: 2,
+    name: '供应商'
+}, {
+    id: 4,
+    name: '销售商'
 }];

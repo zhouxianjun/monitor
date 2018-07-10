@@ -1,5 +1,5 @@
 import dayjs from 'dayjs';
-import {getAttribute} from './dic';
+import { getAttribute } from './dic';
 
 const Common = {
     valid: {
@@ -75,6 +75,12 @@ const Common = {
                 }
             }, getAttribute(dic, 'id', status).name);
         },
+        DIC (h, params) {
+            return (dic, prop = 'id') => {
+                let val = getAttribute(dic, prop, params.row[params.column.key]);
+                return h('span', val ? val.name : '');
+            };
+        },
         POPTIP (h, params) {
             return h('Poptip', {
                 props: {
@@ -117,6 +123,34 @@ const Common = {
             return (...args) => h('span', args.map(arg => params.row[arg]).join('/'));
         }
     },
+    renderTree (data, fn) {
+        if (Array.isArray(data)) {
+            data.forEach(item => {
+                Reflect.apply(fn, data, [item]);
+                if (item.children && Array.isArray(item.children)) {
+                    this.renderTree(item.children, fn);
+                }
+            });
+        }
+    },
+    makeTree (array, pid = 0, parentProp = 'pid', idProp = 'id', childProp = 'children', renderer) {
+        let result = [];
+        let temp = [];
+        for (let item of array) {
+            if (item[parentProp] === pid) {
+                let clone = Object.assign({}, item);
+                result.push(clone);
+                temp = this.makeTree(array, item[idProp], parentProp, idProp, childProp);
+                if (temp.length > 0) {
+                    clone[childProp] = temp;
+                }
+                if (typeof renderer === 'function') {
+                    renderer(clone);
+                }
+            }
+        }
+        return result;
+    },
     tableSplitCount (params) {
         let val = params.row[params.column.key] || '';
         return val ? val.split(',').length : 0;
@@ -124,9 +158,7 @@ const Common = {
     stringToNumber (vo) {
         if (!vo) return vo;
         if (Array.isArray(vo)) {
-            vo.forEach(item => {
-                Common.stringToNumber(item);
-            });
+            vo.forEach((item, index) => vo[index] = Common.stringToNumber(item));
         } else {
             if (typeof vo === 'object') {
                 Reflect.ownKeys(vo).forEach(key => {
@@ -140,6 +172,10 @@ const Common = {
                         vo[key] = Number(value);
                     }
                 });
+            } else {
+                if (!isNaN(vo) && vo.length < 13) {
+                    vo = Number(vo);
+                }
             }
         }
         return vo;
@@ -176,6 +212,60 @@ const Common = {
             }, config), text)
         ]);
     },
-    switchTableBtnPop: (h, bool, fn, config) => Common.tableBtnPop(h, `您确定要${bool ? '禁用' : '启用'}这条数据吗?`, bool ? '禁用' : '启用', bool ? 'warning' : 'success', fn, config)
+    switchTableBtnPop: (h, bool, fn, config) => Common.tableBtnPop(h, `您确定要${bool ? '禁用' : '启用'}这条数据吗?`, bool ? '禁用' : '启用', bool ? 'warning' : 'success', fn, config),
+    toUnderScoreCase (str) {
+        return str.replace(/([A-Z])/g, '_$1').toLowerCase();
+    },
+    toUnderScoreCaseKeys (vo) {
+        if (!vo) return vo;
+        if (Array.isArray(vo)) {
+            return vo.map(v => Common.toUnderScoreCaseKeys(v));
+        }
+        if (typeof vo === 'object') {
+            return Object.keys(vo).reduce((result, key) => {
+                let value = vo[key];
+                if (typeof value === 'object' || Array.isArray(value)) {
+                    value = Common.toUnderScoreCaseKeys(value);
+                }
+
+                result[Common.toUnderScoreCase(key)] = value;
+                return result;
+            }, {});
+        }
+        return vo;
+    },
+    toCamelCase (str) {
+        return str.replace(/_([a-z])/g, function ($1) { return $1.toUpperCase().replace('_', ''); });
+    },
+    toCamelCaseKeys (vo) {
+        if (!vo) return vo;
+        if (Array.isArray(vo)) {
+            return vo.map(v => Common.toCamelCaseKeys(v));
+        }
+        if (typeof vo === 'object') {
+            return Object.keys(vo).reduce((result, key) => {
+                let value = vo[key];
+                if (typeof value === 'object' || Array.isArray(value)) {
+                    value = Common.toCamelCaseKeys(value);
+                }
+
+                result[Common.toCamelCase(key)] = value;
+                return result;
+            }, {});
+        }
+        return vo;
+    },
+    diffVo (a, b, keys = '*', fn) {
+        Object.keys(a).forEach(k => {
+            if (Reflect.has(b, k) && a[k] !== b[k] && (keys === '*' || keys.includes(k))) {
+                a._diff = a._diff || {};
+                a._diff[k] = b[k];
+                if (typeof fn === 'function') {
+                    fn(a, k, [a[k], b[k]]);
+                }
+            }
+        });
+        return a;
+    }
 };
 export default Common;

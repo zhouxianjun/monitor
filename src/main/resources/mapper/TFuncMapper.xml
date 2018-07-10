@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.all580.monitor.mapper.TFuncMapper">
+  <resultMap id="BaseResultMap" type="com.all580.monitor.entity.TFunc">
+    <!--
+      WARNING - @mbg.generated
+    -->
+    <id column="id" jdbcType="INTEGER" property="id" />
+    <result column="pid" jdbcType="INTEGER" property="pid" />
+    <result column="name" jdbcType="VARCHAR" property="name" />
+    <result column="alias" jdbcType="VARCHAR" property="alias" />
+    <result column="description" jdbcType="VARCHAR" property="description" />
+    <result column="seq" jdbcType="INTEGER" property="seq" />
+    <result column="isdelete" jdbcType="INTEGER" property="isdelete" />
+    <result column="status" jdbcType="INTEGER" property="status" />
+    <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+    <result column="type" jdbcType="INTEGER" property="type" />
+    <result column="path" jdbcType="VARCHAR" property="path" />
+    <result column="funcId" jdbcType="VARCHAR" property="funcid" />
+    <result column="target" jdbcType="VARCHAR" property="target" />
+    <result column="icon" jdbcType="VARCHAR" property="icon" />
+    <result column="update_time" jdbcType="TIMESTAMP" property="updateTime" />
+    <result column="ep_type" jdbcType="INTEGER" property="epType" />
+  </resultMap>
+</mapper>

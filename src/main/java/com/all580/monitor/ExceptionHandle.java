@@ -24,7 +24,7 @@ public class ExceptionHandle {
         log.error("未捕获的异常", e);
         return Result.builder()
                 .code(Result.FAIL)
-                .msg("操作失败")
+                .msg(e.getMessage())
                 .build()
                 .put("timestamp", System.currentTimeMillis())
                 .put("message", ExceptionUtils.getStackTrace(e))
