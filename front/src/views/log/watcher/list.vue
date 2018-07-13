@@ -21,7 +21,7 @@
     import Common from '../../../libs/common';
     import Record from './record';
     import GridKeepaliveTable from '../../../components/grid-keepalive-table';
-    import highlight from '../../../components/highlight-directive';
+    import highlight from 'v-highlight';
 
     export default {
         name: 'log-watcher-list',

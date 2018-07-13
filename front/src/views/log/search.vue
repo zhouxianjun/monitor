@@ -53,7 +53,7 @@
     import Common from '../../libs/common';
     import Detail from './detail';
     import GridKeepaliveTable from '../../components/grid-keepalive-table';
-    import highlight from '../../components/highlight-directive';
+    import highlight from 'v-highlight';
 
     export default {
         name: 'log-search',
@@ -138,7 +138,7 @@
                     type: 'match',
                     gte: null,
                     lte: null,
-                    key: null,
+                    key: '',
                     value: null
                 };
             },
