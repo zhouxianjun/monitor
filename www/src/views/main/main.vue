@@ -9,7 +9,7 @@
                 </div>
             </side-menu>
         </Sider>
-        <Layout>
+        <Layout style="background: #fff;">
             <Header class="header-con">
                 <header-bar :collapsed="collapsed" @on-coll-change="handleCollapsedChange">
                     <user :user-avator="userAvator" />
