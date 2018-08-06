@@ -1,4 +1,3 @@
-src/vendors
 src/libs/table2excel.js
-build
+node_modules
 router.js

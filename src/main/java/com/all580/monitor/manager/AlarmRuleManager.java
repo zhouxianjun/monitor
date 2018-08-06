@@ -22,6 +22,7 @@ import org.springframework.util.CollectionUtils;
 
 import java.lang.reflect.Field;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -73,7 +74,12 @@ public class AlarmRuleManager {
         }
         // 执行脚本
         if (StringUtils.isNotEmpty(rule.getScript())) {
-            Map context = MapUtil.builder().put("rule", rule).put("history", history).put("data", data).put("log", log).build();
+            Map<String, Object> context = MapUtil.builder(new HashMap<String, Object>(4))
+                    .put("rule", rule)
+                    .put("history", history)
+                    .put("data", data)
+                    .put("log", log)
+                    .build();
             if (!CollectionUtils.isEmpty(data)) {
                 context.put("dataBatch", data.stream().collect(Collectors.groupingBy(TabMonitorData::getBatch)));
             }
