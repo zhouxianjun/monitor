@@ -34,6 +34,9 @@ filebeat.prospectors:
 java -javaagent:/home/sandbox/lib/sandbox-agent.jar -jar monitor-0.0.1-SNAPSHOT.jar > log 2>&1 &
 ```
 
+### API
+http://domain/swagger-ui.html
+
 # 部署前台
 ## 配置`nginx`
 ```
