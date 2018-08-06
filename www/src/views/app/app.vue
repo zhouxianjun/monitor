@@ -227,6 +227,7 @@ export default {
             this.modelTitle = '创建应用';
             this.loadingBtn = true;
             this.$refs['form'].resetFields();
+            this.vo.id = null;
             this.hosts = [];
         },
         cancel () {

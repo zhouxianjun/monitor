@@ -287,6 +287,7 @@ export default {
             this.model = true;
             this.loading = true;
             this.$refs['form'].resetFields();
+            this.vo.id = null;
             this.vo.pid = row.id;
         },
         update (row) {

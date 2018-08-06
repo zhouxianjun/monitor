@@ -173,6 +173,7 @@ export default {
             this.modelTitle = '创建组';
             this.loadingBtn = true;
             this.$refs['form'].resetFields();
+            this.vo.id = null;
         },
         cancel () {
             this.loadingBtn = false;
