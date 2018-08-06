@@ -61,6 +61,20 @@ npm run build
 2. http://domain/app/index 创建应用
 3. 添加报警联系人
 
+## 站点监控
+### HTTP监控脚本范例
+```
+for(int i = 0; i < data.size(); i++) {
+    item = data.get(i);
+    if (item.key == 'code' && Integer.parseInt(item.value) > 200) {
+        return false;   
+    }
+    if (item.key == 'delay' && Integer.parseInt(item.value) > 3000) {
+        return false;
+    }
+}
+```
+
 ## 报警规则
 每个判定脚本都含有以下信息:
 - rule 为 tab_alarm_rule 表信息
@@ -75,6 +89,72 @@ npm run build
 需要配置filebeat
 
 ## 日志监控
+### 错误日志监控配置范例
+```json
+{
+    "trigger": {
+        "schedule": {
+            "interval": "1m"
+        }
+    },
+    "input": {
+        "search": {
+            "request": {
+                "indices": [
+                    "logstash-*"
+                ],
+                "body": {
+                    "query": {
+                        "bool": {
+                            "must": [
+                                {
+                                    "query_string": {
+                                        "query": "level:ERROR"
+                                    }
+                                },
+                                {
+                                    "range": {
+                                        "@timestamp": {
+                                            "gte": "now-1m"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "_source": [],
+                    "sort": [
+                        {
+                            "@timestamp": {
+                                "order": "desc"
+                            }
+                        }
+                    ]
+                }
+            }
+        }
+    },
+    "condition": {
+        "compare": {
+            "ctx.payload.hits.total": {
+                "gt": 0
+            }
+        }
+    },
+    "actions": {
+        "monitor_webhook": {
+            "webhook": {
+                "method": "POST",              
+                "url": "http://192.168.1.53:8080/api/log/watcher/hook",
+                "body": "{{#toJson}}ctx.payload{{/toJson}}",
+                "params": {
+                    "watcher": "{{ctx.watch_id}}"
+                }
+            }
+        }
+    }
+}
+```
 https://www.elastic.co/guide/en/x-pack/5.6/watcher-getting-started.html
 
 
