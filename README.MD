@@ -48,7 +48,7 @@ server {
 ```
 ## 编译
 ```
-cd front 
+cd www 
 npm i
 npm run build
 ```
