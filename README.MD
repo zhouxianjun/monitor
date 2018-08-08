@@ -46,7 +46,8 @@ server {
     root  /home/wwwroot/monitor;
     
     location / {
-    }                                                                                                                                                                                                                                                                     
+        try_files $uri $uri/ /index.html;
+    }                                                                                                                                                                                                                                                                    
 }
 ```
 ## 编译
