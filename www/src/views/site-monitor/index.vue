@@ -122,8 +122,9 @@ export default {
             this.table.query.spot = this.appCascade[0];
             this.table.query.app = this.appCascade[1];
         },
-        async beforeRemove () {
+        async beforeRemove (item) {
             this.removeUrl = this.table.query.type === 1 ? '/api/monitor/http/remove' : '/api/monitor/reported/remove';
+            this.$super(ModelView).beforeRemove(item);
         },
         addHttp () {
             this.$router.push({

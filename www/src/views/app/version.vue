@@ -106,7 +106,8 @@ export default {
                 appId: [{type: 'number', required: true, trigger: 'change'}],
                 version: [{required: true, trigger: 'blur'}]
             },
-            addUrl: '/api/app/version/add'
+            addUrl: '/api/app/version/add',
+            removeUrl: '/api/app/version/remove'
         };
     },
     computed: {

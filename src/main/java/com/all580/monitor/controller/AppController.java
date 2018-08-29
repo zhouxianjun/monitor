@@ -71,9 +71,9 @@ public class AppController {
     }
 
     @ApiOperation(value = "删除应用", produces = MediaType.APPLICATION_JSON_VALUE)
-    @PostMapping("remove")
-    public Result<?> remove(@ApiParam(required = true) @RequestBody TabApp app) {
-        int ret = appService.delete(app.getId());
+    @PostMapping("remove/{id}")
+    public Result<?> remove(@ApiParam(required = true) @PathVariable int id) {
+        int ret = appService.delete(id);
         if (ret <= 0) {
             return Result.fail();
         }

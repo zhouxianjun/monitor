@@ -37,9 +37,7 @@ export default {
     methods: {
         generateRemove (item) {
             return {
-                method: this.removeMethod,
-                data: this.removeMethod === 'post'.toLocaleLowerCase() ? {id: item.id} : null,
-                params: this.removeMethod === 'get'.toLocaleLowerCase() ? {id: item.id} : null
+                method: this.removeMethod
             };
         },
         async beforeAddOrUpdate () {},
@@ -65,11 +63,13 @@ export default {
                 }
             });
         },
-        async beforeRemove () {},
-        async afterRemove () {},
+        async beforeRemove (item) {
+            this.removeUrl = `${this.removeUrl}/${item.id}`;
+        },
+        async afterRemove (success, item) {},
         async remove (item) {
             if (!item) return;
-            let before = await this.beforeRemove();
+            let before = await this.beforeRemove(item);
             let success = true;
             if (before !== false) {
                 success = await this.fetch(this.removeUrl, this.generateRemove(item));
@@ -79,7 +79,7 @@ export default {
             } else {
                 this._timeoutQuery();
             }
-            await this.afterRemove(success);
+            await this.afterRemove(success, item);
         },
         add () {
             this.model = true;

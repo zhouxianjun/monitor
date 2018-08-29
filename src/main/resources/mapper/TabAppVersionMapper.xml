@@ -13,6 +13,7 @@
     </resultMap>
     <select id="search" resultType="java.util.Map">
         SELECT
+            tav.id,
             ta.`name` app_name,
             tav.version,
             tr.md5,

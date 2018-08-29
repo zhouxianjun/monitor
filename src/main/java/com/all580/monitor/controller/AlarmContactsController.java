@@ -53,9 +53,9 @@ public class AlarmContactsController {
     }
 
     @ApiOperation(value = "删除联系人", produces = MediaType.APPLICATION_JSON_VALUE)
-    @PostMapping("remove")
-    public Result<?> remove(@ApiParam(required = true) @RequestBody TabAlarmContacts contacts) {
-        int ret = contactsService.delete(contacts.getId());
+    @PostMapping("remove/{id}")
+    public Result<?> remove(@ApiParam(required = true) @PathVariable int id) {
+        int ret = contactsService.delete(id);
         return ret > 0 ? Result.ok() : Result.fail();
     }
 }

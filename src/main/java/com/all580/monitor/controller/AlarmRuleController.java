@@ -71,13 +71,13 @@ public class AlarmRuleController {
     }
 
     @ApiOperation(value = "删除警规则", produces = MediaType.APPLICATION_JSON_VALUE)
-    @PostMapping("remove")
-    public Result<?> remove(@ApiParam(required = true) @RequestBody TabAlarmRule rule) {
-        int ret = alarmRuleService.delete(rule.getId());
+    @PostMapping("remove/{id}")
+    public Result<?> remove(@ApiParam(required = true) @PathVariable int id) {
+        int ret = alarmRuleService.delete(id);
         if (ret <= 0) {
             return Result.fail();
         }
-        alarmRuleTimer.update(rule.getId());
+        alarmRuleTimer.update(id);
         return Result.ok();
     }
 }

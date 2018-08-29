@@ -58,9 +58,9 @@ public class HttpMonitorController {
     }
 
     @ApiOperation(value = "删除HTTP监控", produces = MediaType.APPLICATION_JSON_VALUE)
-    @PostMapping("remove")
-    public Result<?> remove(@ApiParam(required = true) @RequestBody TabHttpMonitor monitor) {
-        int ret = httpMonitorService.delete(monitor.getId());
+    @PostMapping("remove/{id}")
+    public Result<?> remove(@ApiParam(required = true) @PathVariable int id) {
+        int ret = httpMonitorService.delete(id);
         if (ret <= 0) {
             return Result.fail();
         }

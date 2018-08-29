@@ -57,9 +57,9 @@ public class AlarmContactsGroupController {
     }
 
     @ApiOperation(value = "删除联系人组", produces = MediaType.APPLICATION_JSON_VALUE)
-    @PostMapping("remove")
-    public Result<?> remove(@ApiParam(required = true) @RequestBody TabAlarmContactsGroup group) {
-        int ret = groupService.delete(group.getId());
+    @PostMapping("remove/{id}")
+    public Result<?> remove(@ApiParam(required = true) @PathVariable int id) {
+        int ret = groupService.delete(id);
         return ret > 0 ? Result.ok() : Result.fail();
     }
 }
