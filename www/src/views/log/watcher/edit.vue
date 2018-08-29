@@ -6,12 +6,7 @@
                     <Input v-model="vo.name"/>
                 </Form-item>
                 <FormItem label="应用" prop="appId">
-                    <Select v-model="vo.spotId" style="width: 200px">
-                        <Option v-for="item in spots" :value="item.id" :key="item.id">{{ item.name }}</Option>
-                    </Select>
-                    <Select v-model="vo.appId" style="width: 200px">
-                        <Option v-for="item in apps" :value="item.id" :key="item.id">{{ item.name }}</Option>
-                    </Select>
+                    <app-select v-model="vo.appId" :spot-all="false" :app-all="false"></app-select>
                 </FormItem>
                 <FormItem label="监控配置" prop="config">
                     <MonacoEditor style="height: 600px;" v-model="vo.config" theme="vs-dark" language="json">
@@ -41,18 +36,19 @@
 
 <script>
 import MonacoEditor from 'vue-monaco';
-import { getTagNavListFromLocalstorage } from '@/libs/util';
-import { mapMutations } from 'vuex';
+import AppSelect from '@/components/app-select.vue';
+import ModelView from '@/components/mixins/model-view';
+import TagNav from '@/components/mixins/tag-nav';
 
 export default {
-    name: 'log-watcher-edit',
+    name: 'LogWatcherEdit',
     components: {
-        MonacoEditor
+        MonacoEditor, AppSelect
     },
+    mixins: [ ModelView, TagNav ],
     data () {
         return {
             vo: {
-                id: null,
                 name: null,
                 appId: null,
                 spotId: null,
@@ -62,8 +58,6 @@ export default {
                 memo: null,
                 status: true
             },
-            spots: [],
-            apps: [],
             validate: {
                 name: [{required: true, trigger: 'blur'}],
                 appId: [{type: 'number', required: true, trigger: 'change'}],
@@ -71,53 +65,21 @@ export default {
                 interval: [{type: 'number', required: true, trigger: 'blur'}],
                 reported: [{type: 'boolean', required: true, trigger: 'blur'}],
                 status: [{type: 'boolean', required: true, trigger: 'blur'}]
-            }
+            },
+            addUrl: '/api/log/watcher/add',
+            updateUrl: '/api/log/watcher/update'
         };
     },
-    watch: {
-        async 'vo.spotId' (val) {
-            this.apps = await this.loadApp(val);
-        }
-    },
-    mounted () {
-        this.initSpots();
+    created () {
         this.vo = Object.assign(this.vo, this.$route.params);
     },
     methods: {
-        ...mapMutations([
-            'setTagNavList'
-        ]),
-        async initSpots () {
-            let list = await this.fetch('/api/spot/list');
-            list && (this.spots = (!list.value || list.value.length === 0) ? [] : list.value);
-        },
-        async loadApp (spot) {
-            let list = await this.fetch('/api/app/list', {params: {spot}});
-            return list.value ? list.value : [];
-        },
-        async addOrUpdate () {
-            this.$refs['form'].validate(async (valid) => {
-                if (valid) {
-                    let url = this.vo.id ? '/api/log/watcher/update' : '/api/log/watcher/add';
-                    let success = await this.fetch(url, {method: 'post', data: this.vo});
-                    if (success === false) {
-                        return;
-                    }
-                    setTimeout(this.back, 500);
-                } else {
-                    this.$Message.error('表单验证失败!');
-                }
-            });
+        afterAddOrUpdate () {
+            setTimeout(this.back, 500);
         },
         back () {
-            let res = getTagNavListFromLocalstorage().filter(item => item.name !== 'log-watcher-edit');
-            this.setTagNavList(res);
-            this.$router.back();
+            this.tagNavBack('log-watcher-edit');
         }
     }
 };
 </script>
-
-<style scoped>
-
-</style>

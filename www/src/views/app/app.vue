@@ -70,14 +70,17 @@
 </template>
 
 <script>
-import Common from '@/libs/common';
 import {StatusDiy} from '@/libs/dic';
 import VueTagsInput from '@johmun/vue-tags-input';
+import TableDataView from '@/components/mixins/table-data-view';
+import TableColRender from '@/components/mixins/table-col-render';
+import ModelView from '@/components/mixins/model-view';
 export default {
     name: 'app',
     components: {
         VueTagsInput
     },
+    mixins: [ TableDataView, TableColRender, ModelView ],
     data () {
         return {
             expand: false,
@@ -92,22 +95,22 @@ export default {
                 }, {
                     title: '主机数量',
                     key: 'hosts',
-                    render: Common.RENDER.SPLIT_COUNT_POP
+                    render: (h, params) => this.renderListPop(h, params, val => val ? String(val).split(',') : [])
                 }, {
                     title: '健康状态',
                     key: 'alertCount',
-                    render (h, params) {
+                    render: (h, params) => {
                         let count = params.row[params.column.key] || 0;
-                        return Common.RENDER.STATUS_DIY(h, params)('健康', `正在报警: ${count}`, count <= 0);
+                        return this.renderStatusDiy(h, params)('健康', `正在报警: ${count}`, val => count <= 0);
                     }
                 }, {
                     title: '是否报警',
                     key: 'alarm',
-                    render: Common.RENDER.STATUS
+                    render: this.renderStatus
                 }, {
                     title: '创建时间',
                     key: 'createTime',
-                    render: Common.RENDER.DATE
+                    render: this.renderDate
                 }, {
                     title: '操作',
                     key: 'action',
@@ -126,33 +129,23 @@ export default {
                                 },
                                 on: {
                                     click: async () => {
-                                        this.model = true;
-                                        this.modelTitle = '修改应用';
-                                        this.loadingBtn = true;
-                                        Object.keys(this.vo).forEach(key => this.vo[key] = params.row[key]);
-                                        this.hosts = this.vo.hosts ? this.vo.hosts.split(',') : [];
+                                        this.update(params.row);
                                     }
                                 }
                             }, '修改'),
-                            Common.tableBtnPop(h, '您确定要删除这条数据吗?', '删除', 'error', () => this.remove(params.row))
+                            this.renderBtnPop(h, '您确定要删除这条数据吗?', '删除', 'error', () => this.remove(params.row))
                         ]);
                     }
                 }],
-                data: [],
+                url: '/api/app/list',
                 query: {
                     spot: null,
                     name: null,
-                    normal: null,
-                    pageNum: 1,
-                    pageSize: 10
+                    normal: null
                 }
             },
             spots: [],
-            model: false,
-            modelTitle: '',
-            loadingBtn: false,
             vo: {
-                id: null,
                 name: null,
                 spotId: null,
                 alarm: true,
@@ -170,72 +163,29 @@ export default {
                 type: [{type: 'number', required: false, trigger: 'blur'}]
             },
             hosts: [],
-            host: ''
+            host: '',
+            addUrl: '/api/app/add',
+            updateUrl: '/api/app/update',
+            removeUrl: '/api/app/remove',
+            addTitle: '创建应用',
+            updateTitle: '修改应用'
         };
     },
     async mounted () {
-        this.doQuery();
         this.initSpots();
     },
     methods: {
-        async doQuery () {
-            let list = await this.fetch('/api/app/list', {params: this.table.query});
-            list && (this.table.data = list.value.size === 0 ? [] : list.value.list);
-            list && (this.table.total = list.value.total);
-            this.loadingBtn = false;
-        },
-        async changePage (page) {
-            this.table.query.pageNum = page;
-            this.doQuery();
-        },
-        async changePageSize (size) {
-            this.table.query.pageSize = size;
-            this.doQuery();
-        },
         async initSpots () {
             let list = await this.fetch('/api/spot/list');
             list && (this.spots = (!list.value || list.value.length === 0) ? [] : list.value);
         },
-        async addOrUpdate () {
-            this.$refs['form'].validate(async (valid) => {
-                if (valid) {
-                    let url = this.vo.id ? '/api/app/update' : '/api/app/add';
-                    let success = await this.fetch(url, {method: 'post', data: this.vo});
-                    if (success === false) {
-                        this.resetLoadingBtn();
-                        return;
-                    }
-                    this.model = false;
-                    setTimeout(() => this.doQuery(), 500);
-                } else {
-                    this.resetLoadingBtn();
-                    this.$Message.error('表单验证失败!');
-                }
-            });
-        },
-        async remove (item) {
-            if (!item) return;
-            let success = await this.fetch('/api/app/remove', {method: 'post', data: {id: item.id}});
-            if (success === false) {
-                this.resetLoadingBtn();
-                return;
-            }
-            setTimeout(() => this.doQuery(), 500);
-        },
         add () {
-            this.model = true;
-            this.modelTitle = '创建应用';
-            this.loadingBtn = true;
-            this.$refs['form'].resetFields();
-            this.vo.id = null;
+            this.$super(ModelView).add();
             this.hosts = [];
         },
-        cancel () {
-            this.loadingBtn = false;
-        },
-        resetLoadingBtn () {
-            this.loadingBtn = false;
-            this.$nextTick(() => this.loadingBtn = true);
+        update (item) {
+            this.$super(ModelView).update(item);
+            this.hosts = this.vo.hosts ? String(this.vo.hosts).split(',').map(v => Object.assign({text: v})) : [];
         },
         tagChanged (newTags) {
             this.hosts = newTags;

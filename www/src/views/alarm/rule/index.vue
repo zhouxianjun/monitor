@@ -5,17 +5,9 @@
             <Icon type="plus"></Icon>创建规则</Button>
         </Row>
         <Row class="margin-top-10">
-            <Input v-model="table.query.name" placeholder="规则名称" clearable style="width: 200px" />
-            <label class="margin-left-10">景区：</label>
-            <Select v-model="table.query.spot" @on-change="doQuery" style="width: 200px">
-                <Option value="">全部</Option>
-                <Option v-for="item in spots" :value="item.id" :key="item.id">{{ item.name }}</Option>
-            </Select>
             <label class="margin-left-10">应用：</label>
-            <Select v-model="table.query.app" @on-change="doQuery" style="width: 200px">
-                <Option value="">全部</Option>
-                <Option v-for="item in apps" :value="item.id" :key="item.id">{{ item.name }}</Option>
-            </Select>
+            <app-select v-model="table.query.app" style="margin-right: 5px;" @change="appSelectChange"></app-select>
+            <Input v-model="table.query.name" placeholder="规则名称" clearable style="width: 200px" />
             <label class="margin-left-10">状态：</label>
             <Select v-model="table.query.status" @on-change="doQuery" style="width: 200px">
                 <Option v-for="item in Status" :value="item.id" :key="item.id">{{ item.name }}</Option>
@@ -34,28 +26,20 @@
             </div>
             </Col>
         </Row>
-
-        <Modal v-model="removeModal" width="360" @on-cancel="cancel">
-            <p slot="header" style="color:#f60;text-align:center">
-                <Icon type="information-circled"></Icon>
-                <span>删除确认</span>
-            </p>
-            <div style="text-align:center">
-                <p>确定删除 {{removeItem ? removeItem.name : ''}} 吗?，删除后将无法恢复。</p>
-                <p>是否继续删除？</p>
-            </div>
-            <div slot="footer">
-                <Button type="error" size="large" @click="remove">删除</Button>
-            </div>
-        </Modal>
     </div>
 </template>
 
 <script>
-import Common from '@/libs/common';
-import {Status} from '@/libs/dic';
+import { Status } from '@/libs/dic';
+import AppSelect from '@/components/app-select.vue';
+import TableDataView from '@/components/mixins/table-data-view';
+import TableColRender from '@/components/mixins/table-col-render';
+import ModelView from '@/components/mixins/model-view';
+
 export default {
-    name: 'alarm-rule-index',
+    name: 'AlarmRuleIndex',
+    components: { AppSelect },
+    mixins: [ TableColRender, TableDataView, ModelView ],
     data () {
         return {
             Status,
@@ -72,10 +56,7 @@ export default {
                 }, {
                     title: '报警状态',
                     key: 'lastStatus',
-                    render (h, params) {
-                        let lastStatus = params.row[params.column.key] || 0;
-                        return Common.RENDER.STATUS_DIY(h, params)('正常', '正在报警', !lastStatus || ![1, 2].includes(lastStatus));
-                    },
+                    render: (h, params) => this.renderStatusDiy(h, params)('正常', '正在报警', status => !status || ![1, 2].includes(status)),
                     width: 140
                 }, {
                     title: '监控项',
@@ -87,23 +68,23 @@ export default {
                 }, {
                     title: '频率',
                     key: 'interval',
-                    render: (h, params) => Common.RENDER.APPEND(h, params)('分钟')
+                    render: (h, params) => this.renderAppend(h, params)('分钟')
                 }, {
                     title: '沉默',
                     key: 'silenceInterval',
-                    render: (h, params) => Common.RENDER.APPEND(h, params)('分钟')
+                    render: (h, params) => this.renderAppend(h, params)('分钟')
                 }, {
                     title: '次数',
                     key: 'count',
-                    render: (h, params) => Common.RENDER.APPEND(h, params)('次')
+                    render: (h, params) => this.renderAppend(h, params)('次')
                 }, {
                     title: '状态',
                     key: 'status',
-                    render: Common.RENDER.STATUS
+                    render: this.renderStatus
                 }, {
                     title: '创建时间',
                     key: 'createTime',
-                    render: Common.RENDER.DATE,
+                    render: this.renderDate,
                     width: 148
                 }, {
                     title: '操作',
@@ -130,96 +111,33 @@ export default {
                                     }
                                 }
                             }, '修改'),
-                            h('Button', {
-                                props: {
-                                    type: 'error',
-                                    size: 'small',
-                                    loading: this.loadingBtn
-                                },
-                                on: {
-                                    click: async () => {
-                                        this.removeModal = true;
-                                        this.removeItem = params.row;
-                                        this.loadingBtn = true;
-                                    }
-                                }
-                            }, '删除')
+                            this.renderBtnPop(h, '您确定要删除这条数据吗?', '删除', 'error', () => this.remove(params.row))
                         ]);
                     }
                 }],
-                data: [],
+                url: '/api/alarm/rule/list',
                 query: {
                     spot: null,
                     app: null,
                     name: null,
                     status: null,
-                    alarm: null,
-                    pageNum: 1,
-                    pageSize: 10
+                    alarm: null
                 }
             },
-            spots: [],
-            apps: [],
-            removeModal: false,
-            removeItem: null,
-            loadingBtn: false
+            removeUrl: '/api/alarm/rule/remove'
         };
     },
-    watch: {
-        async 'table.query.spot' (val) {
-            this.apps = await this.loadApp(val);
-        }
-    },
-    async mounted () {
-        this.doQuery();
-        this.initSpots();
-    },
     methods: {
-        async doQuery () {
-            let list = await this.fetch('/api/alarm/rule/list', {params: this.table.query});
-            list && (this.table.data = list.value.size === 0 ? [] : list.value.list);
-            list && (this.table.total = list.value.total);
-            this.loadingBtn = false;
-        },
-        async changePage (page) {
-            this.table.query.pageNum = page;
-            this.doQuery();
-        },
-        async changePageSize (size) {
-            this.table.query.pageSize = size;
-            this.doQuery();
-        },
-        async initSpots () {
-            let list = await this.fetch('/api/spot/list');
-            list && (this.spots = (!list.value || list.value.length === 0) ? [] : list.value);
-        },
-        async loadApp (spot) {
-            let list = await this.fetch('/api/app/list', {params: {spot}});
-            return list.value ? list.value : [];
-        },
         add () {
             this.$router.push({
                 name: 'alarm-rule-edit',
                 params: {}
             });
         },
-        async remove () {
-            if (!this.removeItem) return;
-            let success = await this.fetch('/api/alarm/rule/remove', {method: 'post', data: {id: this.removeItem.id}});
-            if (success === false) {
-                this.resetLoadingBtn();
-                return;
+        appSelectChange (index, val) {
+            if (index === 0) {
+                this.table.query.spot = val;
             }
-            this.removeItem = null;
-            this.removeModal = false;
-            setTimeout(() => this.doQuery(), 500);
-        },
-        cancel () {
-            this.loadingBtn = false;
-        },
-        resetLoadingBtn () {
-            this.loadingBtn = false;
-            this.$nextTick(() => this.loadingBtn = true);
         }
     }
 };

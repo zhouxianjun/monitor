@@ -8,6 +8,7 @@ import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.CollectionUtils;
+import tk.mybatis.mapper.entity.Example;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -79,6 +80,16 @@ public class BaseService<T> implements IService<T> {
     @Override
     public T selectOne(T entity) {
         return mapper.selectOne(entity);
+    }
+
+    @Override
+    public T selectOneByExample(Object example) {
+        return mapper.selectOneByExample(example);
+    }
+
+    @Override
+    public boolean exists(T entity) {
+        return selectOne(entity) != null;
     }
 
     @Override

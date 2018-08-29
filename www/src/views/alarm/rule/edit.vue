@@ -6,12 +6,7 @@
                     <Input v-model="vo.name" />
                 </Form-item>
                 <FormItem label="应用" prop="appId">
-                    <Select v-model="vo.spotId" style="width: 200px">
-                        <Option v-for="item in spots" :value="item.id" :key="item.id">{{ item.name }}</Option>
-                    </Select>
-                    <Select v-model="vo.appId" style="width: 200px">
-                        <Option v-for="item in apps" :value="item.id" :key="item.id">{{ item.name }}</Option>
-                    </Select>
+                    <app-select v-model="vo.appId" :app-all="false" :spot-all="false"></app-select>
                 </FormItem>
                 <Form-item label="监控项" prop="metric">
                     <Input v-model="vo.metric" />
@@ -64,18 +59,19 @@
 <script>
 import MonacoEditor from 'vue-monaco';
 import QL from '@/libs/ql.editor';
-import { getTagNavListFromLocalstorage } from '@/libs/util';
-import { mapMutations } from 'vuex';
+import AppSelect from '@/components/app-select.vue';
+import ModelView from '@/components/mixins/model-view';
+import TagNav from '@/components/mixins/tag-nav';
 
 export default {
-    name: 'alarm-rule-edit',
+    name: 'AlarmRuleEdit',
     components: {
-        MonacoEditor
+        MonacoEditor, AppSelect
     },
+    mixins: [ ModelView, TagNav ],
     data () {
         return {
             vo: {
-                id: null,
                 name: null,
                 appId: null,
                 spotId: null,
@@ -90,8 +86,6 @@ export default {
                 alarmCallback: null,
                 status: true
             },
-            spots: [],
-            apps: [],
             contactsGroups: [],
             validate: {
                 name: [{required: true, trigger: 'blur'}],
@@ -103,54 +97,26 @@ export default {
                 count: [{type: 'number', required: true, trigger: 'blur'}],
                 silenceInterval: [{type: 'number', required: true, trigger: 'blur'}],
                 status: [{type: 'boolean', required: true, trigger: 'blur'}]
-            }
+            },
+            addUrl: '/api/alarm/rule/add',
+            updateUrl: '/api/alarm/rule/update'
         };
     },
-    watch: {
-        async 'vo.spotId' (val) {
-            this.apps = await this.loadApp(val);
-        }
-    },
     mounted () {
-        this.initSpots();
         this.initContactsGroups();
         this.vo = Object.assign(this.vo, this.$route.params);
         QL();
     },
     methods: {
-        ...mapMutations([
-            'setTagNavList'
-        ]),
-        async initSpots () {
-            let list = await this.fetch('/api/spot/list');
-            list && (this.spots = (!list.value || list.value.length === 0) ? [] : list.value);
-        },
         async initContactsGroups () {
             let list = await this.fetch('/api/contacts/group/list');
             list && (this.contactsGroups = (!list.value || list.value.length === 0) ? [] : list.value);
         },
-        async loadApp (spot) {
-            let list = await this.fetch('/api/app/list', {params: {spot}});
-            return list.value ? list.value : [];
-        },
-        async addOrUpdate () {
-            this.$refs['form'].validate(async (valid) => {
-                if (valid) {
-                    let url = this.vo.id ? '/api/alarm/rule/update' : '/api/alarm/rule/add';
-                    let success = await this.fetch(url, {method: 'post', data: this.vo});
-                    if (success === false) {
-                        return;
-                    }
-                    setTimeout(this.back, 500);
-                } else {
-                    this.$Message.error('表单验证失败!');
-                }
-            });
+        afterAddOrUpdate () {
+            setTimeout(this.back, 500);
         },
         back () {
-            let res = getTagNavListFromLocalstorage().filter(item => item.name !== 'alarm-rule-edit');
-            this.setTagNavList(res);
-            this.$router.back();
+            this.tagNavBack('alarm-rule-edit');
         }
     }
 };

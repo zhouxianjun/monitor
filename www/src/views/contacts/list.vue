@@ -41,10 +41,13 @@
 </template>
 
 <script>
-import Common from '@/libs/common';
+import TableDataView from '@/components/mixins/table-data-view';
+import TableColRender from '@/components/mixins/table-col-render';
+import ModelView from '@/components/mixins/model-view';
 
 export default {
-    name: 'contacts-list',
+    name: 'ContactsList',
+    mixins: [ TableColRender, TableDataView, ModelView ],
     data () {
         return {
             table: {
@@ -81,28 +84,21 @@ export default {
                                 },
                                 on: {
                                     click: async () => {
-                                        this.model = true;
-                                        this.modelTitle = '修改联系人';
-                                        this.loadingBtn = true;
-                                        Object.keys(this.vo).forEach(key => this.vo[key] = params.row[key]);
+                                        this.update(params.row);
                                     }
                                 }
                             }, '修改'),
-                            Common.tableBtnPop(h, '您确定要删除这条数据吗?', '删除', 'error', () => this.remove(params.row))
+                            this.renderBtnPop(h, '您确定要删除这条数据吗?', '删除', 'error', () => this.remove(params.row))
                         ]);
                     }
                 }],
-                data: [],
+                url: '/api/contacts/list',
                 query: {
                     groupId: null,
-                    keyword: null,
-                    pageNum: 1,
-                    pageSize: 10
+                    keyword: null
                 }
             },
-            loadingBtn: false,
             vo: {
-                id: null,
                 name: null,
                 email: null,
                 phone: null,
@@ -115,68 +111,13 @@ export default {
                 phone: [{type: 'regexp', trigger: 'blur'}],
                 ding: [{type: 'url', trigger: 'blur'}]
             },
-            model: false,
-            modelTitle: null
+            addUrl: '/api/contacts/add',
+            updateUrl: '/api/contacts/update',
+            removeUrl: '/api/contacts/remove'
         };
     },
-    mounted () {
+    created () {
         this.table.query['groupId'] = this.$route.query['groupId'];
-        this.doQuery();
-    },
-    methods: {
-        async doQuery () {
-            let list = await this.fetch('/api/contacts/list', {params: this.table.query});
-            list && (this.table.data = list.value.size === 0 ? [] : list.value.list);
-            list && (this.table.total = list.value.total);
-            this.loadingBtn = false;
-        },
-        async changePage (page) {
-            this.table.query.pageNum = page;
-            this.doQuery();
-        },
-        async changePageSize (size) {
-            this.table.query.pageSize = size;
-            this.doQuery();
-        },
-        async addOrUpdate () {
-            this.$refs['form'].validate(async (valid) => {
-                if (valid) {
-                    let url = this.vo.id ? '/api/contacts/update' : '/api/contacts/add';
-                    let success = await this.fetch(url, {method: 'post', data: this.vo});
-                    if (success === false) {
-                        this.resetLoadingBtn();
-                        return;
-                    }
-                    this.model = false;
-                    setTimeout(() => this.doQuery(), 500);
-                } else {
-                    this.resetLoadingBtn();
-                    this.$Message.error('表单验证失败!');
-                }
-            });
-        },
-        async remove (item) {
-            if (!item) return;
-            let success = await this.fetch('/api/contacts/remove', {method: 'post', data: {id: item.id}});
-            if (success === false) {
-                return;
-            }
-            setTimeout(() => this.doQuery(), 500);
-        },
-        add () {
-            this.model = true;
-            this.modelTitle = '创建联系人';
-            this.loadingBtn = true;
-            this.$refs['form'].resetFields();
-            this.vo.id = null;
-        },
-        cancel () {
-            this.loadingBtn = false;
-        },
-        resetLoadingBtn () {
-            this.loadingBtn = false;
-            this.$nextTick(() => this.loadingBtn = true);
-        }
     }
 };
 </script>

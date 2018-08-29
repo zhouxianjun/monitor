@@ -35,20 +35,21 @@
 </template>
 
 <script>
-import Common from '@/libs/common';
+import TableDataView from '@/components/mixins/table-data-view';
+import TableColRender from '@/components/mixins/table-col-render';
+import ModelView from '@/components/mixins/model-view';
+
 export default {
-    name: 'contacts-group-index',
+    name: 'ContactsGroupIndex',
+    mixins: [ TableColRender, TableDataView, ModelView ],
     data () {
         return {
-            model: false,
-            modelTitle: null,
-            loadingBtn: false,
             contacts: [],
             table: {
                 col: [{
                     title: '组名',
                     key: 'name',
-                    render: (h, params) => Common.tableColBtn(h, params, () => {
+                    render: (h, params) => this.renderLink(h, params, () => {
                         this.$router.push({
                             name: 'contacts-list',
                             query: {
@@ -78,25 +79,19 @@ export default {
                                 },
                                 on: {
                                     click: async () => {
-                                        this.model = true;
-                                        this.modelTitle = '修改组';
-                                        this.loadingBtn = true;
-                                        Object.keys(this.vo.group).forEach(key => this.vo.group[key] = params.row[key]);
-                                        await this.loadContactsForUpdate(params.row);
+                                        this.update(params.row);
                                     }
                                 }
                             }, '修改'),
-                            Common.tableBtnPop(h, '您确定要删除这条数据吗?', '删除', 'error', () => this.remove(params.row))
+                            this.renderBtnPop(h, '您确定要删除这条数据吗?', '删除', 'error', () => this.remove(params.row))
                         ]);
                     }
                 }],
-                data: [],
+                url: '/api/contacts/group/list',
                 query: {
                     spot: null,
                     name: null,
-                    normal: null,
-                    pageNum: 1,
-                    pageSize: 10
+                    normal: null
                 }
             },
             vo: {
@@ -109,14 +104,31 @@ export default {
             },
             validate: {
                 'group.name': [{required: true, trigger: 'blur'}]
-            }
+            },
+            addUrl: '/api/contacts/group/add',
+            updateUrl: '/api/contacts/group/update',
+            removeUrl: '/api/contacts/group/remove'
         };
     },
+    computed: {
+        isUpdate () {
+            return this.vo.group.id !== null && this.vo.group.id !== undefined;
+        }
+    },
     mounted () {
-        this.doQuery();
         this.initContacts();
     },
     methods: {
+        add () {
+            this.$super(ModelView).add();
+            this.vo.group.id = null;
+        },
+        async update (item) {
+            this.model = true;
+            this.loadingBtn = true;
+            Object.keys(this.vo.group).forEach(key => this.vo.group[key] = item[key]);
+            await this.loadContactsForUpdate(item);
+        },
         async initContacts () {
             let result = await this.fetch('/api/contacts/list');
             if (result && result.value && result.value.length) {
@@ -128,59 +140,6 @@ export default {
             if (result && result.value && result.value.length) {
                 this.vo.contacts = result.value.map(val => val.id);
             }
-        },
-        async doQuery () {
-            let list = await this.fetch('/api/contacts/group/list', {params: this.table.query});
-            list && (this.table.data = list.value.size === 0 ? [] : list.value.list);
-            list && (this.table.total = list.value.total);
-            this.loadingBtn = false;
-        },
-        async changePage (page) {
-            this.table.query.pageNum = page;
-            this.doQuery();
-        },
-        async changePageSize (size) {
-            this.table.query.pageSize = size;
-            this.doQuery();
-        },
-        async addOrUpdate () {
-            this.$refs['form'].validate(async (valid) => {
-                if (valid) {
-                    let url = this.vo.group.id ? '/api/contacts/group/update' : '/api/contacts/group/add';
-                    let success = await this.fetch(url, {method: 'post', data: this.vo});
-                    if (success === false) {
-                        this.resetLoadingBtn();
-                        return;
-                    }
-                    this.model = false;
-                    setTimeout(() => this.doQuery(), 500);
-                } else {
-                    this.resetLoadingBtn();
-                    this.$Message.error('表单验证失败!');
-                }
-            });
-        },
-        async remove (item) {
-            if (!item) return;
-            let success = await this.fetch('/api/contacts/group/remove', {method: 'post', data: {id: item.id}});
-            if (success === false) {
-                return;
-            }
-            setTimeout(() => this.doQuery(), 500);
-        },
-        add () {
-            this.model = true;
-            this.modelTitle = '创建组';
-            this.loadingBtn = true;
-            this.$refs['form'].resetFields();
-            this.vo.id = null;
-        },
-        cancel () {
-            this.loadingBtn = false;
-        },
-        resetLoadingBtn () {
-            this.loadingBtn = false;
-            this.$nextTick(() => this.loadingBtn = true);
         }
     }
 };

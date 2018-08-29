@@ -1,8 +1,8 @@
 <template>
     <div>
-        <app-business-service v-model="appId" :path="path" @on-change-app="changeAppHandler">
+        <app-business-service v-model="appId" :path="path">
             <div>
-                <tree-table ref="tree" :columns="table.columns" :data="table.data" show-checkbox show-header border bottom-line>
+                <tree-table ref="tree" :columns="table.columns" :data="table.data" arrow-icon-right="md-arrow-dropright" arrow-icon-down="md-arrow-dropdown" show-checkbox show-header border bottom-line>
                     <template slot="actions" slot-scope="{row, column}">
                         <Button v-if="row.type === 602" class="margin-right-5" @click="add(row)" type="primary" size="small">新增</Button>
                         <Button @click="update(row)" type="primary" size="small">修改</Button>
@@ -18,10 +18,10 @@
                 </tree-table>
             </div>
             <div slot="ext" style="float: right">
-                <Button :loading="loading" :disabled="disabled" @click="confirm" type="success">确定</Button>
+                <Button :loading="loadingBtn" :disabled="disabled" @click="confirm" type="success">确定</Button>
             </div>
         </app-business-service>
-        <Modal v-model="model" :scrollable="true" :title="modelTitle" :loading="loading" @on-ok="addOrUpdate" @on-cancel="cancel">
+        <Modal v-model="model" :scrollable="true" :title="modelTitle" :loading="loadingBtn" @on-ok="addOrUpdate" @on-cancel="cancel">
             <Form ref="form" :model="vo" :label-width="80" :rules="validate">
                 <Form-item label="名称" prop="name">
                     <Input v-model="vo.name" />
@@ -50,7 +50,7 @@
                 </FormItem>
             </Form>
         </Modal>
-        <Modal v-model="changeModel" :width="1000" title="确认变更" :loading="loading" @on-ok="apply" @on-cancel="cancel">
+        <Modal v-model="changeModel" :width="1000" title="确认变更" :loading="loadingBtn" @on-ok="apply" @on-cancel="cancel">
             <Table class="margin-bottom-10" size="small" :columns="changeTable.columns" :data="changeTable.add"></Table>
             <Table class="margin-bottom-10" size="small" :columns="changeTable.columns" :data="changeTable.update" :show-header="false"></Table>
             <Table size="small" :columns="changeTable.columns" :data="changeTable.delete" :show-header="false"></Table>
@@ -60,14 +60,18 @@
 <script>
 import AppBusinessService from '@/components/app-business-service';
 import TreeTable from 'iview-tree-table';
-import Common from '@/libs/common';
+import { ToCamelCaseKeys, diffVo, MakeTree, ToUnderScoreCaseKeys } from '@/libs/common';
 import { FuncType, EpType, calc } from '@/libs/dic';
+import TableColRender from '@/components/mixins/table-col-render';
+import ModelView from '@/components/mixins/model-view';
+
 export default {
     name: 'standalone-auth',
     components: {
         AppBusinessService,
         TreeTable
     },
+    mixins: [ TableColRender, ModelView ],
     data () {
         return {
             FuncType,
@@ -76,7 +80,6 @@ export default {
             appId: null,
             allFunc: [],
             appFunc: [],
-            loading: false,
             disabled: true,
             table: {
                 columns: [{
@@ -90,7 +93,7 @@ export default {
                 }, {
                     title: '类型',
                     key: 'type',
-                    render: (h, params) => Common.RENDER.DIC(h, params)(FuncType)
+                    render: (h, params) => this.renderDic(h, params)(FuncType)
                 }, {
                     title: '企业类型',
                     key: 'epTypeText',
@@ -131,7 +134,7 @@ export default {
                     title: '类型',
                     key: 'type',
                     width: 80,
-                    render: (h, params) => Common.RENDER.DIC(h, params)(FuncType)
+                    render: (h, params) => this.renderDic(h, params)(FuncType)
                 }, {
                     title: '企业类型',
                     key: 'epTypeText'
@@ -150,10 +153,7 @@ export default {
                 update: []
             },
             changeModel: false,
-            model: false,
-            modelTitle: '',
             vo: {
-                id: null,
                 pid: null,
                 name: null,
                 type: null,
@@ -170,24 +170,32 @@ export default {
                 type: [{type: 'number', required: true, trigger: 'change'}],
                 seq: [{type: 'number', required: true, trigger: 'blur'}],
                 epType: [{type: 'array', required: true, min: 1, trigger: 'change'}]
-            }
+            },
+            addTitle: '新增权限',
+            updateTitle: '修改权限',
+            addUrl: '/api/business/standalone/auth/add',
+            updateUrl: '/api/business/standalone/auth/update'
         };
     },
+    computed: {
+        generateAddOrUpdate () {
+            return {
+                method: this.method,
+                data: Object.assign({}, this.vo, {epType: this.vo.epType.reduce((value, current) => value + current, 0)}),
+                params: {appId: this.appId}
+            };
+        }
+    },
     watch: {
-
-    },
-    mounted () {
-
-    },
-    methods: {
-        async changeAppHandler (appId) {
+        async appId (val) {
             this.disabled = true;
-            this.appId = appId;
-            if (!this.table.data.length && !isNaN(appId) && appId !== null) {
+            if (!this.table.data.length && !isNaN(val) && val !== null) {
                 await this.loadAllFunc();
             }
             await this.loadAppAuth();
-        },
+        }
+    },
+    methods: {
         async loadAllFunc () {
             let result = await this.fetch(`/${this.path}/list`, {params: {appId: this.appId}});
             this.allFunc = result ? result.value || [] : [];
@@ -202,7 +210,9 @@ export default {
 
             if (result && result.value && result.value.data) {
                 // 应用权限
-                this.appFunc = Common.toCamelCaseKeys(result.value.data) || [];
+                this.appFunc = ToCamelCaseKeys(result.value.data) || [];
+                // 去掉勾
+                this.allFunc.filter(f => f.checked === true).forEach(f => f.checked = false);
                 // 交叉循环
                 this.appFunc.forEach(r => {
                     // 企业类型
@@ -215,15 +225,18 @@ export default {
                             f.checked = true;
                         }
                         // 比对属性差异
-                        Common.diffVo(f, r, ['name', 'seq', 'type', 'path', 'target', 'funcId', 'icon', 'ep_type'], u => this.changeTable.update.push(u));
+                        diffVo(f, r, ['name', 'seq', 'type', 'path', 'target', 'funcId', 'icon', 'ep_type'], u => this.changeTable.update.push(u));
                     } else {
                         // 应用有的权限 这里没有的
                         r._new = true;
+                        if (r.type !== 602) {
+                            r.checked = false;
+                        }
                         this.allFunc.push(r);
                     }
                 });
                 // 转换树形结构
-                let data = Common.makeTree(this.allFunc);
+                let data = MakeTree(this.allFunc);
                 // 默认展开第一个节点
                 if (data.length) {
                     data[0].expand = true;
@@ -235,7 +248,7 @@ export default {
             this.table.data = [];
         },
         confirm () {
-            this.loading = true;
+            this.loadingBtn = true;
             try {
                 let checked = this.$refs.tree.getCheckedNodes(true);
                 // 新增的
@@ -251,7 +264,7 @@ export default {
                 }
 
                 this.changeModel = true;
-            } catch (e) {
+            } finally {
                 this.cancel();
             }
         },
@@ -264,8 +277,8 @@ export default {
                 },
                 method: 'post',
                 data: {
-                    addList: Common.toUnderScoreCaseKeys(this.changeTable.add),
-                    upaList: Common.toUnderScoreCaseKeys(this.changeTable.update),
+                    addList: ToUnderScoreCaseKeys(this.changeTable.add),
+                    upaList: ToUnderScoreCaseKeys(this.changeTable.update),
                     delList: this.changeTable.delete.map(r => r.id)
                 }
             });
@@ -273,7 +286,8 @@ export default {
                 this.$Notice.success({
                     title: '更新权限成功，正在重新加载...'
                 });
-                this.loading = false;
+                this.loadingBtn = false;
+                this.changeModel = false;
                 await this.loadAppAuth();
             } else {
                 this.resetLoadingBtn();
@@ -283,49 +297,17 @@ export default {
             }
         },
         add (row) {
-            this.modelTitle = '新增权限';
-            this.model = true;
-            this.loading = true;
-            this.$refs['form'].resetFields();
-            this.vo.id = null;
+            this.$super(ModelView).add();
             this.vo.pid = row.id;
         },
         update (row) {
-            this.modelTitle = '修改权限';
-            this.model = true;
-            this.loading = true;
-            Object.keys(this.vo).forEach(key => this.vo[key] = row[key]);
+            this.$super(ModelView).update(row);
             this.vo.epType = calc(EpType, row.epType).map(r => r.id);
         },
-        async addOrUpdate () {
-            this.$refs['form'].validate(async (valid) => {
-                if (valid) {
-                    let url = this.vo.id ? `/${this.path}/update` : `/${this.path}/add`;
-                    let epType = this.vo.epType.reduce((value, current) => value + current, 0);
-                    let success = await this.fetch(url, {params: {appId: this.appId}, method: 'post', data: Object.assign({}, this.vo, {epType})});
-                    if (success === false) {
-                        this.resetLoadingBtn();
-                        return;
-                    }
-                    this.model = false;
-                    this.loading = false;
-                    setTimeout(() => this.reload(), 500);
-                } else {
-                    this.resetLoadingBtn();
-                    this.$Message.error('表单验证失败!');
-                }
-            });
-        },
-        async reload () {
+        async doQuery () {
             await this.loadAllFunc();
             await this.loadAppAuth();
-        },
-        cancel () {
-            this.loading = false;
-        },
-        resetLoadingBtn () {
-            this.loading = false;
-            this.$nextTick(() => this.loading = true);
+            this.loadingBtn = false;
         }
     }
 };

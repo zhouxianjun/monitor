@@ -27,8 +27,8 @@ module.exports = {
       'error',
       'always'
     ],
-    'no-console': 'error',
-    'no-debugger': 'off',
+    'no-console': process.env.NODE_ENV === 'production' ? 'error' : 'off',
+    'no-debugger': process.env.NODE_ENV === 'production' ? 'error' : 'off',
     'no-empty': 2,
     'no-eq-null': 2,
     'no-new': 2,

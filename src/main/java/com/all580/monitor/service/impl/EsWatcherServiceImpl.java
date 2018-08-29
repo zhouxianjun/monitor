@@ -10,6 +10,7 @@ import com.all580.monitor.service.EsWatcherService;
 import com.github.stuxuhai.jpinyin.PinyinFormat;
 import com.github.stuxuhai.jpinyin.PinyinHelper;
 import lombok.SneakyThrows;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -48,9 +49,14 @@ public class EsWatcherServiceImpl extends BaseService<TabEsWatch> implements EsW
     @Override
     @SneakyThrows
     public int updateNotNull(TabEsWatch entity) {
-        entity.setWatcherId(PinyinHelper.convertToPinyinString(entity.getName(), "_", PinyinFormat.WITH_TONE_NUMBER));
+        if (StringUtils.isNotBlank(entity.getName())) {
+            entity.setWatcherId(PinyinHelper.convertToPinyinString(entity.getName(), "_", PinyinFormat.WITH_TONE_NUMBER));
+        }
         int ret = super.updateNotNull(entity);
         if (ret > 0) {
+            if (StringUtils.isBlank(entity.getWatcherId())) {
+                entity = selectByKey(entity.getId());
+            }
             executeWatcher(entity.getWatcherId(), entity.getStatus() ? Method.PUT : Method.DELETE, entity.getStatus() ? entity.getConfig() : null);
         }
         return ret;

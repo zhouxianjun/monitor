@@ -9,12 +9,21 @@ import '@/assets/icons/iconfont.css';
 import './common.less';
 
 import VueSlimScroll from 'vue-slimscroll';
-import Common from './libs/common';
+import { StringToNumber } from './libs/common';
 
 Vue.use(VueSlimScroll);
 
 const BASE_URL = process.env.VUE_APP_SERVER_ADDRESS;
 
+Vue.prototype.$super = function (options) {
+    return new Proxy(options, {
+        get: (options, name) => {
+            if (options.methods && name in options.methods) {
+                return options.methods[name].bind(this);
+            }
+        }
+    });
+};
 /**
  * 拉取服务器信息
  * @param url
@@ -28,6 +37,9 @@ Vue.prototype.fetch = async (url, config, showError = true, error) => {
     let response = null;
     let result = null;
     try {
+        if (!url) {
+            throw new Error('url must be not null');
+        }
         response = await axios(
             url,
             Object.assign(
@@ -50,7 +62,7 @@ Vue.prototype.fetch = async (url, config, showError = true, error) => {
             );
         }
         iView['LoadingBar'].finish();
-        Common.stringToNumber(result);
+        StringToNumber(result);
         return result;
     } catch (err) {
         iView['LoadingBar'].error();

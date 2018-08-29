@@ -18,10 +18,10 @@
 
 <script>
 import dayjs from 'dayjs';
-import Common from '@/libs/common';
 import Record from './record';
 import GridKeepaliveTable from '@/components/grid-keepalive-table';
 import highlight from 'v-highlight';
+import TableColRender from '@/components/mixins/table-col-render';
 
 export default {
     name: 'log-watcher-list',
@@ -32,6 +32,7 @@ export default {
     directives: {
         highlight
     },
+    mixins: [ TableColRender ],
     data () {
         return {
             query: {
@@ -60,7 +61,7 @@ export default {
                 }, {
                     title: '记录时间',
                     key: 'logTime',
-                    render: Common.RENDER.DATE
+                    render: this.renderDate
                 }],
                 data: [],
                 total: 0

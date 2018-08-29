@@ -1,271 +1,185 @@
 import dayjs from 'dayjs';
-import { getAttribute } from './dic';
 
-const Common = {
-    valid: {
-        ip (rule, value, callback) {
-            if (rule.required && (value === undefined || value === '' || value.length <= 0)) {
-                callback(new Error('不能为空'));
-                return;
-            }
-            if (value) {
-                value = Array.isArray(value) ? value : value.split(',');
-                for (let val of value) {
-                    let split = val.split('.');
-                    if (split.length < 4 && !val.endsWith('*')) {
-                        callback(new Error(`${val} 不是正确的IP地址`));
-                        return;
-                    }
-                    for (let s of split) {
-                        if (!/1\d{2}|2[0-4]\d|25[0-5]|[1-9]\d|\d\*\d|\*\d|\d\*|\d|\*/.test(s) || s.length > 3) {
-                            callback(new Error(`${val} 不是正确的IP地址`));
-                            return;
-                        }
-                    }
+/**
+ * 把vo对象中的字符串数字转为Number
+ * 当数字>=13位则不处理
+ * @param { * } vo 对象
+ */
+export const StringToNumber = vo => {
+    if (!vo) return vo;
+    if (Array.isArray(vo)) {
+        vo.forEach((item, index) => vo[index] = StringToNumber(item));
+    } else {
+        if (typeof vo === 'object') {
+            Reflect.ownKeys(vo).forEach(key => {
+                let value = vo[key];
+                if (!value || value === '' || value === true || value === false || typeof value === 'function') return;
+                if (Array.isArray(value) || typeof value === 'object') {
+                    vo[key] = StringToNumber(value);
+                    return;
                 }
-            }
-            callback();
-        }
-    },
-    dateFormat (val, format = 'YYYY-MM-DD HH:mm:ss') {
-        return val ? dayjs(Number(val)).format(format) : '-';
-    },
-    statusFormat (val, trueTxt = '启用', falseTxt = '禁用') {
-        return `<span class="${val === true ? 'text-green' : 'text-muted'}">${val === true ? trueTxt : falseTxt}</span>`;
-    },
-    emailFormat (val) {
-        return `<a href="mailto:${val}">${val}</a>`;
-    },
-    RENDER: {
-        DATE (h, params, convert = (val => val)) {
-            return h('span', Common.dateFormat(convert(params.row[params.column.key])));
-        },
-        DATE_RANGE (h, params) {
-            return (start, end) => h('span', `${Common.dateFormat(params.row[start])}~${Common.dateFormat(params.row[end])}`);
-        },
-        APPEND (h, params) {
-            return append => h('span', `${params.row[params.column.key]}${append}`);
-        },
-        STATUS (h, params) {
-            let status = params.row[params.column.key];
-            return h('Tag', {
-                props: {
-                    type: 'dot',
-                    color: status === true ? 'success' : 'error'
-                }
-            }, status === true ? '启用' : '禁用');
-        },
-        STATUS_DIY (h, params) {
-            let status = params.row[params.column.key];
-            return function (trueTxt = '启用', falseTxt = '禁用', value = status) {
-                return h('Tag', {
-                    props: {
-                        type: 'dot',
-                        color: value === true ? 'success' : 'error'
-                    }
-                }, value === true ? trueTxt : falseTxt);
-            };
-        },
-        STATUS_DIC (h, params) {
-            let status = params.row[params.column.key];
-            return (color, dic) => h('Tag', {
-                props: {
-                    type: 'border',
-                    color: color[status]
-                }
-            }, getAttribute(dic, 'id', status).name);
-        },
-        DIC (h, params) {
-            return (dic, prop = 'id') => {
-                let val = getAttribute(dic, prop, params.row[params.column.key]);
-                return h('span', val ? val.name : '');
-            };
-        },
-        POPTIP (h, params) {
-            return h('Poptip', {
-                props: {
-                    trigger: 'hover',
-                    content: params.row[params.column.key],
-                    placement: 'top-start'
-                }
-            }, [
-                h('span', params.row[params.column.key])
-            ]);
-        },
-        SPLIT_COUNT (h, params) {
-            return h('span', Common.tableSplitCount(params));
-        },
-        SPLIT_COUNT_POP (h, params) {
-            let val = params.row[params.column.key] || '';
-            let array = val ? val.split(',') : [];
-            return h('Poptip', {
-                props: {
-                    trigger: 'hover',
-                    placement: 'bottom'
-                }
-            }, [
-                h('Tag', array.length),
-                h('div', {
-                    slot: 'content'
-                }, [
-                    h('ul', array.map(item => {
-                        return h('li', {
-                            style: {
-                                textAlign: 'center',
-                                padding: '4px'
-                            }
-                        }, item);
-                    }))
-                ])
-            ]);
-        },
-        JOIN (h, params) {
-            return (...args) => h('span', args.map(arg => params.row[arg]).join('/'));
-        }
-    },
-    renderTree (data, fn) {
-        if (Array.isArray(data)) {
-            data.forEach(item => {
-                Reflect.apply(fn, data, [item]);
-                if (item.children && Array.isArray(item.children)) {
-                    this.renderTree(item.children, fn);
+                if (!isNaN(value) && value.length < 13) {
+                    vo[key] = Number(value);
                 }
             });
-        }
-    },
-    makeTree (array, pid = 0, parentProp = 'pid', idProp = 'id', childProp = 'children', renderer) {
-        let result = [];
-        let temp = [];
-        for (let item of array) {
-            if (item[parentProp] === pid) {
-                let clone = Object.assign({}, item);
-                result.push(clone);
-                temp = this.makeTree(array, item[idProp], parentProp, idProp, childProp);
-                if (temp.length > 0) {
-                    clone[childProp] = temp;
-                }
-                if (typeof renderer === 'function') {
-                    renderer(clone);
-                }
-            }
-        }
-        return result;
-    },
-    tableSplitCount (params) {
-        let val = params.row[params.column.key] || '';
-        return val ? val.split(',').length : 0;
-    },
-    stringToNumber (vo) {
-        if (!vo) return vo;
-        if (Array.isArray(vo)) {
-            vo.forEach((item, index) => vo[index] = Common.stringToNumber(item));
         } else {
-            if (typeof vo === 'object') {
-                Reflect.ownKeys(vo).forEach(key => {
-                    let value = vo[key];
-                    if (!value || value === '' || value === true || value === false || typeof value === 'function') return;
-                    if (Array.isArray(value) || typeof value === 'object') {
-                        vo[key] = Common.stringToNumber(value);
-                        return;
-                    }
-                    if (!isNaN(value) && value.length < 13) {
-                        vo[key] = Number(value);
-                    }
-                });
-            } else {
-                if (!isNaN(vo) && vo.length < 13) {
-                    vo = Number(vo);
-                }
+            if (!isNaN(vo) && vo.length < 13) {
+                vo = Number(vo);
             }
         }
-        return vo;
-    },
-    dynamicObjKey (obj, key = 'key', value = 'value') {
-        const result = {};
-        result[obj[key]] = obj[value];
-        return result;
-    },
-    tableColBtn (h, params, fn) {
-        return h('a', {
-            on: {
-                click: fn
-            }
-        }, params.row[params.column.key]);
-    },
-    tableBtnPop (h, title, text, type, fn, config) {
-        return h('Poptip', {
-            props: {
-                confirm: true,
-                title,
-                placement: 'top',
-                transfer: true
-            },
-            on: {
-                'on-ok': fn
-            }
-        }, [
-            h('Button', Object.assign({
-                props: {
-                    type: type,
-                    size: 'small'
-                }
-            }, config), text)
-        ]);
-    },
-    switchTableBtnPop: (h, bool, fn, config) => Common.tableBtnPop(h, `您确定要${bool ? '禁用' : '启用'}这条数据吗?`, bool ? '禁用' : '启用', bool ? 'warning' : 'success', fn, config),
-    toUnderScoreCase (str) {
-        return str.replace(/([A-Z])/g, '_$1').toLowerCase();
-    },
-    toUnderScoreCaseKeys (vo) {
-        if (!vo) return vo;
-        if (Array.isArray(vo)) {
-            return vo.map(v => Common.toUnderScoreCaseKeys(v));
-        }
-        if (typeof vo === 'object') {
-            return Object.keys(vo).reduce((result, key) => {
-                let value = vo[key];
-                if (typeof value === 'object' || Array.isArray(value)) {
-                    value = Common.toUnderScoreCaseKeys(value);
-                }
-
-                result[Common.toUnderScoreCase(key)] = value;
-                return result;
-            }, {});
-        }
-        return vo;
-    },
-    toCamelCase (str) {
-        return str.replace(/_([a-z])/g, function ($1) { return $1.toUpperCase().replace('_', ''); });
-    },
-    toCamelCaseKeys (vo) {
-        if (!vo) return vo;
-        if (Array.isArray(vo)) {
-            return vo.map(v => Common.toCamelCaseKeys(v));
-        }
-        if (typeof vo === 'object') {
-            return Object.keys(vo).reduce((result, key) => {
-                let value = vo[key];
-                if (typeof value === 'object' || Array.isArray(value)) {
-                    value = Common.toCamelCaseKeys(value);
-                }
-
-                result[Common.toCamelCase(key)] = value;
-                return result;
-            }, {});
-        }
-        return vo;
-    },
-    diffVo (a, b, keys = '*', fn) {
-        Object.keys(a).forEach(k => {
-            if (Reflect.has(b, k) && a[k] !== b[k] && (keys === '*' || keys.includes(k))) {
-                a._diff = a._diff || {};
-                a._diff[k] = b[k];
-                if (typeof fn === 'function') {
-                    fn(a, k, [a[k], b[k]]);
-                }
-            }
-        });
-        return a;
     }
+    return vo;
 };
-export default Common;
+
+/**
+ * 数字格式化展示 例: 123456 => 123,456
+ * @param {Number | String} num 源数字
+ * @param {Number} count 多少位分隔
+ * @param {String} sp 分隔符
+ */
+export const NumberFormat = (num, count = 3, sp = ',') => {
+    return num.toString().replace(new RegExp(`(\\d)(?=(?:\\d{${count}})+$)`, 'g'), `$1${sp}`);
+};
+
+/**
+ * 强制小数位 例4.5 => 4.50; 1 => 1.00; 1.123 => 1.12
+ * @param {Number | String} num 源数字
+ * @param {Number} count 小数位数
+ */
+export const ForceDecimal = (num, count = 2) => {
+    let str = num.toString();
+    let [ start, end = '' ] = str.split('.');
+    return `${start}.${end.length > count ? end.substring(0, count) : end.padEnd(count, '0')}`;
+};
+
+/**
+ * 手机号码验证
+ * @param {Number | String} mobile 手机号码
+ * @returns Boolean
+ */
+export const ValidateMobile = mobile => {
+    return mobile && mobile.match(/^(13[0-9]|14[579]|15[0-3,5-9]|16[6]|17[0135678]|18[0-9]|19[89])\d{8}$/);
+};
+
+/**
+ * 时间戳格式化
+ * @param {String | Number} val 时间戳
+ * @param {String} format 格式
+ */
+export const DateFormat = (val, format = 'YYYY-MM-DD HH:mm:ss') => {
+    return val ? dayjs(Number(val)).format(format) : '-';
+};
+
+/**
+ * 邮箱链接
+ * @param {String} val 邮箱地址
+ */
+export const EmailLink = (val) => {
+    return `<a href="mailto:${val}">${val}</a>`;
+};
+
+/**
+ * 把数组转换为树形结构
+ * @param {Array} array 源数据
+ * @param {String | Number} pid 根ID 默认:0
+ * @param {String} parentProp 父级属性名称 默认:pid
+ * @param {String} idProp ID属性名称 默认:id
+ * @param {String} childProp 下级属性名称 默认:children
+ * @param {Function} renderer 渲染函数
+ */
+export const MakeTree = (array, pid = 0, parentProp = 'pid', idProp = 'id', childProp = 'children', renderer) => {
+    let result = [];
+    let temp = [];
+    for (let item of array) {
+        if (item[parentProp] === pid) {
+            let clone = Object.assign({}, item);
+            result.push(clone);
+            temp = MakeTree(array, item[idProp], parentProp, idProp, childProp);
+            if (temp.length > 0) {
+                clone[childProp] = temp;
+            }
+            if (typeof renderer === 'function') {
+                renderer(clone);
+            }
+        }
+    }
+    return result;
+};
+
+/**
+ * 驼峰转下划线命名
+ */
+export const ToUnderScoreCase = (str) => {
+    return str.replace(/([A-Z])/g, '_$1').toLowerCase();
+};
+
+/**
+ * 对象属性驼峰转下划线命名
+ */
+export const ToUnderScoreCaseKeys = (vo) => {
+    if (!vo) return vo;
+    if (Array.isArray(vo)) {
+        return vo.map(v => ToUnderScoreCaseKeys(v));
+    }
+    if (typeof vo === 'object') {
+        return Object.keys(vo).reduce((result, key) => {
+            let value = vo[key];
+            if (typeof value === 'object' || Array.isArray(value)) {
+                value = ToUnderScoreCaseKeys(value);
+            }
+
+            result[ToUnderScoreCase(key)] = value;
+            return result;
+        }, {});
+    }
+    return vo;
+};
+
+/**
+ * 下划线转驼峰命名
+ */
+export const ToCamelCase = (str) => {
+    return str.replace(/_([a-z])/g, function ($1) { return $1.toUpperCase().replace('_', ''); });
+};
+
+/**
+ * 对象属性下划线转驼峰命名
+ */
+export const ToCamelCaseKeys = (vo) => {
+    if (!vo) return vo;
+    if (Array.isArray(vo)) {
+        return vo.map(v => ToCamelCaseKeys(v));
+    }
+    if (typeof vo === 'object') {
+        return Object.keys(vo).reduce((result, key) => {
+            let value = vo[key];
+            if (typeof value === 'object' || Array.isArray(value)) {
+                value = ToCamelCaseKeys(value);
+            }
+
+            result[ToCamelCase(key)] = value;
+            return result;
+        }, {});
+    }
+    return vo;
+};
+
+/**
+ * 两个对象
+ * @param {Object} a 对象 A
+ * @param {Object} b 对象 B
+ * @param {Array | String} keys 需要比对的KEY,如果为 * 则所有key
+ * @param {Function} fn 每个属性回调函数
+ */
+export const diffVo = (a, b, keys = '*', fn) => {
+    Object.keys(a).forEach(k => {
+        if (Reflect.has(b, k) && a[k] !== b[k] && (keys === '*' || keys.includes(k))) {
+            a._diff = a._diff || {};
+            a._diff[k] = b[k];
+            if (typeof fn === 'function') {
+                fn(a, k, [a[k], b[k]]);
+            }
+        }
+    });
+    return a;
+};

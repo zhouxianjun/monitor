@@ -9,6 +9,10 @@ export function getAttribute (dic, prop = 'id', value, isArray = false) {
     }
     return isArray ? result : null;
 };
+export function opt (dic, value, defVal = {}, prop = 'id') {
+    let v = getAttribute(dic, prop, value, false);
+    return v || defVal;
+}
 export function calc (dic, value, valueProp = 'id') {
     let v = parseInt(value.toString(2));
     return dic.filter(r => v & parseInt(r[valueProp].toString(2)));

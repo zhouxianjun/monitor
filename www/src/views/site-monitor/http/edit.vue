@@ -6,12 +6,7 @@
                     <Input v-model="vo.monitor.name" />
                 </Form-item>
                 <FormItem label="应用" prop="monitor.appId">
-                    <Select v-model="vo.monitor.spotId" style="width: 200px">
-                        <Option v-for="item in spots" :value="item.id" :key="item.id">{{ item.name }}</Option>
-                    </Select>
-                    <Select v-model="vo.monitor.appId" style="width: 200px">
-                        <Option v-for="item in apps" :value="item.id" :key="item.id">{{ item.name }}</Option>
-                    </Select>
+                    <app-select v-model="vo.monitor.appId" :spot-all="false" :app-all="false"></app-select>
                 </FormItem>
                 <Form-item label="地址" prop="monitor.url">
                     <Input v-model="vo.monitor.url" type="url" />
@@ -76,14 +71,16 @@
 import MonacoEditor from 'vue-monaco';
 import { MethodType } from '@/libs/dic';
 import QL from '@/libs/ql.editor';
-import { getTagNavListFromLocalstorage } from '@/libs/util';
-import { mapMutations } from 'vuex';
+import AppSelect from '@/components/app-select.vue';
+import ModelView from '@/components/mixins/model-view';
+import TagNav from '@/components/mixins/tag-nav';
 
 export default {
-    name: 'monitor-http-edit',
+    name: 'MonitorHttpEdit',
     components: {
-        MonacoEditor
+        MonacoEditor, AppSelect
     },
+    mixins: [ ModelView, TagNav ],
     data () {
         return {
             MethodType,
@@ -112,8 +109,6 @@ export default {
                     alarmCallback: null
                 }
             },
-            spots: [],
-            apps: [],
             contactsGroups: [],
             validate: {
                 'monitor.name': [{required: true, trigger: 'blur'}],
@@ -125,55 +120,38 @@ export default {
                 'rule.count': [{type: 'number', required: true, trigger: 'blur'}],
                 'rule.silenceInterval': [{type: 'number', required: true, trigger: 'blur'}],
                 'monitor.status': [{type: 'boolean', required: true, trigger: 'blur'}]
-            }
+            },
+            addUrl: '/api/monitor/http/add',
+            updateUrl: '/api/monitor/http/update'
         };
     },
-    watch: {
-        async 'vo.monitor.spotId' (val) {
-            this.apps = await this.loadApp(val);
+    computed: {
+        isUpdate () {
+            return this.vo.monitor.id !== null && this.vo.monitor.id !== undefined;
         }
     },
-    mounted () {
-        this.initSpots();
+    created () {
         this.initContactsGroups();
-        Reflect.ownKeys(this.vo.monitor).forEach(key => this.vo.monitor[key] = this.$route.params[key] || this.vo.monitor[key]);
-        Reflect.ownKeys(this.vo.rule).forEach(key => this.vo.rule[key] = this.$route.params[key] || this.vo.rule[key]);
+        Reflect.ownKeys(this.vo.monitor).forEach(key => {
+            const val = this.$route.params[key];
+            this.vo.monitor[key] = (val === undefined || val === null) ? this.vo.monitor[key] : val;
+        });
+        Reflect.ownKeys(this.vo.rule).forEach(key => {
+            const val = this.$route.params[key];
+            this.vo.rule[key] = (val === undefined || val === null) ? this.vo.rule[key] : val;
+        });
         QL();
     },
     methods: {
-        ...mapMutations([
-            'setTagNavList'
-        ]),
-        async initSpots () {
-            let list = await this.fetch('/api/spot/list');
-            list && (this.spots = (!list.value || list.value.length === 0) ? [] : list.value);
-        },
         async initContactsGroups () {
             let list = await this.fetch('/api/contacts/group/list');
             list && (this.contactsGroups = (!list.value || list.value.length === 0) ? [] : list.value);
         },
-        async loadApp (spot) {
-            let list = await this.fetch('/api/app/list', {params: {spot}});
-            return list.value ? list.value : [];
-        },
-        async addOrUpdate () {
-            this.$refs['form'].validate(async (valid) => {
-                if (valid) {
-                    let url = this.vo.monitor.id ? '/api/monitor/http/update' : '/api/monitor/http/add';
-                    let success = await this.fetch(url, {method: 'post', data: this.vo});
-                    if (success === false) {
-                        return;
-                    }
-                    setTimeout(this.back, 500);
-                } else {
-                    this.$Message.error('表单验证失败!');
-                }
-            });
+        afterAddOrUpdate () {
+            setTimeout(this.back, 500);
         },
         back () {
-            let res = getTagNavListFromLocalstorage().filter(item => item.name !== 'monitor-http-edit');
-            this.setTagNavList(res);
-            this.$router.back();
+            this.tagNavBack('monitor-http-edit');
         }
     }
 };

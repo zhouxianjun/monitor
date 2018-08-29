@@ -50,9 +50,9 @@
 <script>
 import dayjs from 'dayjs';
 import { ESFilterType } from '@/libs/dic';
-import Common from '@/libs/common';
 import Detail from './detail';
 import GridKeepaliveTable from '@/components/grid-keepalive-table';
+import TableColRender from '@/components/mixins/table-col-render';
 import highlight from 'v-highlight';
 
 export default {
@@ -64,6 +64,7 @@ export default {
     directives: {
         highlight
     },
+    mixins: [ TableColRender ],
     data () {
         return {
             fields: ['cusmsg', 'trace_id', 'level'],
@@ -108,7 +109,7 @@ export default {
                 }, {
                     title: '记录时间',
                     key: '@timestamp',
-                    render: (h, params) => Common.RENDER.DATE(h, params, (val) => new Date(val))
+                    render: (h, params) => this.renderDate(h, params, (val) => new Date(val))
                 }],
                 data: [],
                 size: 0,

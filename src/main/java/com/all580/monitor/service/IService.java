@@ -38,6 +38,10 @@ public interface IService<T> {
 
     T selectOne(T entity);
 
+    T selectOneByExample(Object example);
+
+    boolean exists(T entity);
+
     List<T> select(T entity);
 
     List<T> selectByIds(String ids);

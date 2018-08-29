@@ -9,6 +9,7 @@ import com.all580.monitor.service.AlarmContactsGroupService;
 import com.all580.monitor.service.BaseService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 
 import javax.annotation.Resource;
 import java.util.List;
@@ -51,6 +52,9 @@ public class AlarmContactsGroupServiceImpl extends BaseService<TabAlarmContactsG
     }
 
     private void saveRelation(TabAlarmContactsGroup group, List<Integer> contacts) {
+        if (CollectionUtils.isEmpty(contacts)) {
+            return;
+        }
         int ret = alarmContactsRelationMapper.insertList(contacts.stream()
                 .map(id -> new TabAlarmContactsRelation().setContactsId(id).setGroupId(group.getId()))
                 .collect(Collectors.toList()));
