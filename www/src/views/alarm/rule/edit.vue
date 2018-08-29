@@ -6,7 +6,7 @@
                     <Input v-model="vo.name" />
                 </Form-item>
                 <FormItem label="应用" prop="appId">
-                    <app-select v-model="vo.appId" :app-all="false" :spot-all="false"></app-select>
+                    <app-select v-model="vo.appId" :single="true" :app-all="false" :spot-all="false"></app-select>
                 </FormItem>
                 <Form-item label="监控项" prop="metric">
                     <Input v-model="vo.metric" />

@@ -3,7 +3,7 @@
         <Row class="margin-bottom-10">
             <Card>
                 <p slot="title">选择应用</p>
-                <app-select v-model="app" :spot="spot" :spot-all="false" :app-all="false" spot-label="景区：" app-label="应用：" :app-filter="filter" @change="handlerChange" @input="$emit('input', $event)"></app-select>
+                <app-select v-model="app" :spot-all="false" :app-all="false" spot-label="景区：" app-label="应用：" :app-filter="filter" @input="handler"></app-select>
                 <slot name="ext"></slot>
             </Card>
         </Row>
@@ -23,15 +23,14 @@ export default {
     data () {
         return {
             service: {},
-            spot: Number(localStorage.getItem('business-spot-id')),
-            app: Number(localStorage.getItem('business-app-id'))
+            app: [Number(localStorage.getItem('business-spot-id')), Number(localStorage.getItem('business-app-id'))]
         };
     },
     async created () {
         this.service = await this.initService();
     },
     mounted () {
-        this.$emit('input', this.app);
+        this.$emit('input', this.app[1]);
     },
     methods: {
         async initService () {
@@ -45,13 +44,10 @@ export default {
             }
             return data;
         },
-        handlerChange (index, val) {
-            if (index === 0) {
-                localStorage.setItem('business-spot-id', val);
-            }
-            if (index === 1) {
-                localStorage.setItem('business-app-id', val);
-            }
+        handler (value) {
+            this.$emit('input', value[1]);
+            localStorage.setItem('business-spot-id', value[0]);
+            localStorage.setItem('business-app-id', value[1]);
         }
     }
 };

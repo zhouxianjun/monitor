@@ -1,5 +1,5 @@
 <template>
-    <iview-cascade-select :selects="selects" v-model="app" @input="$emit('input', $event)" @change="handlerChange"></iview-cascade-select>
+    <iview-cascade-select :selects="selects" v-model="app" @input="handler"></iview-cascade-select>
 </template>
 <script>
 import IviewCascadeSelect from 'iview-cascade-select';
@@ -7,8 +7,7 @@ export default {
     name: 'AppSelect',
     components: { IviewCascadeSelect },
     props: {
-        value: Number,
-        spot: Number,
+        value: [Array, Number],
         spotLabel: String,
         appLabel: String,
         spotFilter: Function,
@@ -20,17 +19,20 @@ export default {
         appAll: {
             type: Boolean,
             default: true
+        },
+        single: {
+            type: Boolean,
+            default: false
         }
     },
     data () {
         return {
-            app: this.value,
+            app: this.single ? [] : this.value,
             selects: [{
                 style: {
                     width: '150px'
                 },
                 label: this.spotLabel,
-                defaultValue: this.spot,
                 filter: this.spotFilter,
                 all: this.spotAll,
                 options: async p => {
@@ -42,7 +44,6 @@ export default {
                     width: '150px'
                 },
                 label: this.appLabel,
-                defaultValue: this.value,
                 filter: this.appFilter,
                 all: this.appAll,
                 options: async p => {
@@ -53,8 +54,8 @@ export default {
         };
     },
     methods: {
-        handlerChange (index, val) {
-            this.$emit('change', index, val);
+        handler (value) {
+            this.$emit('input', this.single ? value[1] : value);
         }
     }
 };

@@ -13,7 +13,7 @@
         "axios": "^0.18.0",
         "dayjs": "^1.7.5",
         "iview": "^3.0.1",
-        "iview-cascade-select": "^0.1.2",
+        "iview-cascade-select": "^0.1.5",
         "iview-tree-table": "^1.0.9",
         "js-cookie": "^2.2.0",
         "merge": "^1.2.0",

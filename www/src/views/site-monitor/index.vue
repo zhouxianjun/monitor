@@ -9,8 +9,8 @@
             </Button>
         </Row>
         <Row class="margin-top-10">
-            <label class="margin-left-10">应用：</label>
-            <app-select v-model="table.query.app" style="margin-right: 5px;" @change="appSelectChange"></app-select>
+            <label>应用：</label>
+            <app-select v-model="appCascade" style="margin-right: 5px;"></app-select>
             <Input v-model="table.query.name" placeholder="站点名称" clearable style="width: 200px" />
             <label class="margin-left-10">类型：</label>
             <Select v-model="table.query.type" @on-change="doQuery" style="width: 200px">
@@ -52,6 +52,7 @@ export default {
         return {
             Status,
             SiteType,
+            appCascade: [],
             table: {
                 col: [{
                     title: '景区',
@@ -118,6 +119,8 @@ export default {
     methods: {
         async beforeQuery () {
             this.table.url = this.table.query.type === 1 ? '/api/monitor/http/list' : '/api/monitor/reported/list';
+            this.table.query.spot = this.appCascade[0];
+            this.table.query.app = this.appCascade[1];
         },
         async beforeRemove () {
             this.removeUrl = this.table.query.type === 1 ? '/api/monitor/http/remove' : '/api/monitor/reported/remove';

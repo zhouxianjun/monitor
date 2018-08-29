@@ -1,8 +1,8 @@
 <template>
     <div>
         <Row class="margin-top-10">
-            <label class="margin-left-10">应用：</label>
-            <app-select v-model="table.query.app" style="margin-right: 5px;" @change="appSelectChange"></app-select>
+            <label>应用：</label>
+            <app-select v-model="appCascade" style="margin-right: 5px;"></app-select>
             <Input v-model="table.query.name" placeholder="规则名称" clearable style="width: 200px" />
             <label class="margin-left-10">状态：</label>
             <Select v-model="table.query.status" @on-change="doQuery" style="width: 200px">
@@ -39,6 +39,7 @@ export default {
     mixins: [ TableColRender, TableDataView ],
     data () {
         return {
+            appCascade: [],
             HistoryStatus,
             table: {
                 col: [{
@@ -92,15 +93,12 @@ export default {
                 this.table.query.start = dayjs(this.range[0]).format('YYYY-MM-DD HH:mm');
                 this.table.query.end = dayjs(this.range[1]).format('YYYY-MM-DD HH:mm');
             }
+            this.table.query.spot = this.appCascade[0];
+            this.table.query.app = this.appCascade[1];
         },
         async afterQuery () {
             this.table.query.start = '';
             this.table.query.end = '';
-        },
-        appSelectChange (index, val) {
-            if (index === 0) {
-                this.table.query.spot = val;
-            }
         }
     }
 };

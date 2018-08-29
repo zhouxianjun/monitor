@@ -47,7 +47,7 @@ export default {
         async addOrUpdate () {
             this.$refs[this.formRef].validate(async (valid) => {
                 if (valid) {
-                    const before = this.beforeAddOrUpdate();
+                    const before = await this.beforeAddOrUpdate();
                     let success = true;
                     if (before !== false) {
                         success = await this.fetch(this.postUrl, this.generateAddOrUpdate);

@@ -6,7 +6,7 @@
                     <Input v-model="vo.name"/>
                 </Form-item>
                 <FormItem label="应用" prop="appId">
-                    <app-select v-model="vo.appId" :spot-all="false" :app-all="false"></app-select>
+                    <app-select v-model="vo.appId" :single="true" :spot-all="false" :app-all="false"></app-select>
                 </FormItem>
                 <FormItem label="监控配置" prop="config">
                     <MonacoEditor style="height: 600px;" v-model="vo.config" theme="vs-dark" language="json">

@@ -6,7 +6,7 @@
                     <Input v-model="vo.monitor.name" />
                 </Form-item>
                 <FormItem label="应用" prop="monitor.appId">
-                    <app-select v-model="vo.monitor.appId" :spot-all="false" :app-all="false"></app-select>
+                    <app-select v-model="vo.monitor.appId" :single="true" :spot-all="false" :app-all="false"></app-select>
                 </FormItem>
                 <Form-item label="地址" prop="monitor.url">
                     <Input v-model="vo.monitor.url" type="url" />

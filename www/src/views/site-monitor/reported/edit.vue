@@ -6,7 +6,7 @@
                     <Input v-model="vo.monitor.name" />
                 </Form-item>
                 <FormItem label="应用" prop="monitor.appId">
-                    <app-select v-model="vo.monitor.appId" :spot-all="false" :app-all="false"></app-select>
+                    <app-select v-model="vo.monitor.appId" :signle="true" :spot-all="false" :app-all="false"></app-select>
                 </FormItem>
                 <Form-item label="频率" prop="rule.interval">
                     <InputNumber v-model="vo.rule.interval" :min="1" :max="1500" :formatter="val => `${val}分钟`" :parser="val => val.replace('分钟', '')" />

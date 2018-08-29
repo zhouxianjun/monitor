@@ -7,7 +7,7 @@
         </Row>
         <Row class="margin-top-10">
             <label>应用：</label>
-            <app-select v-model="table.query.app" style="margin-right: 5px;" @change="appSelectChange"></app-select>
+            <app-select v-model="appCascade" style="margin-right: 5px;"></app-select>
             <Input v-model="table.query.name" placeholder="监控名称" clearable style="width: 200px" />
             <label class="margin-left-10">状态：</label>
             <Select v-model="table.query.status" @on-change="doQuery" style="width: 200px">
@@ -42,6 +42,7 @@ export default {
     data () {
         return {
             Status,
+            appCascade: [],
             table: {
                 col: [{
                     title: '监控名称',
@@ -115,6 +116,10 @@ export default {
                 params: {}
             });
         },
+        async beforeQuery () {
+            this.table.query.spot = this.appCascade[0];
+            this.table.query.app = this.appCascade[1];
+        },
         async status (item) {
             if (!item) return;
             let success = await this.fetch('/api/log/watcher/update', {method: 'post', data: {id: item.id, status: !item.status}});
@@ -122,11 +127,6 @@ export default {
                 return;
             }
             setTimeout(() => this.doQuery(), 500);
-        },
-        appSelectChange (index, val) {
-            if (index === 0) {
-                this.table.query.spot = val;
-            }
         }
     }
 };
