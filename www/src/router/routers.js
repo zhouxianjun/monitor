@@ -55,9 +55,18 @@ export default [
                 name: 'app-index',
                 meta: {
                     icon: 'md-apps',
-                    title: '应用'
+                    title: '应用列表'
                 },
                 component: () => import('@/views/app/app.vue')
+            },
+            {
+                path: 'version',
+                name: 'app-version',
+                meta: {
+                    icon: 'md-apps',
+                    title: '版本列表'
+                },
+                component: () => import('@/views/app/version.vue')
             }
         ]
     },
