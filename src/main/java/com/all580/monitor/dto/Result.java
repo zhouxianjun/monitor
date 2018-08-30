@@ -40,6 +40,7 @@ public class Result<E> implements Serializable {
     public final static int SUCCESS = 200;
     public final static int FAIL = 0;
     public final static int PARAM_FAIL = 400;
+    public final static int NO_LOGIN = 99;
 
     public boolean isSuccess() {
         return code == SUCCESS;

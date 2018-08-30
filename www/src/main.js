@@ -67,6 +67,7 @@ Vue.prototype.fetch = async (url, config, showError = true, error) => {
     } catch (err) {
         iView['LoadingBar'].error();
         if (result && result.code && result.code === 99) {
+            await app.$store.dispatch('handleLogOut');
             app.$router.replace('/login');
             return false;
         }

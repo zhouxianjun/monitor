@@ -23,12 +23,14 @@ export default {
             'handleLogin',
             'getUserInfo'
         ]),
-        async handleSubmit ({ userName, password }) {
-            await this.handleLogin({ userName, password });
-            await this.getUserInfo();
-            this.$router.push({
-                name: 'home'
-            });
+        async handleSubmit ({ username, password }) {
+            let login = await this.handleLogin({ username, password });
+            if (login) {
+                await this.getUserInfo();
+                this.$router.push({
+                    name: 'home'
+                });
+            }
         }
     }
 };

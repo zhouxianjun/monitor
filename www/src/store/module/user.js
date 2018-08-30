@@ -2,7 +2,7 @@ import { setToken, getToken } from '@/libs/util';
 
 export default {
     state: {
-        userName: '',
+        username: '',
         userId: '',
         avatorImgPath: '',
         token: getToken(),
@@ -16,7 +16,7 @@ export default {
             state.userId = id;
         },
         setUserName (state, name) {
-            state.userName = name;
+            state.username = name;
         },
         setAccess (state, access) {
             state.access = access;
@@ -28,12 +28,23 @@ export default {
     },
     actions: {
         // 登录
-        async handleLogin ({ commit }, {userName, password}) {
-            userName = userName.trim();
-            commit('setToken', 'login');
+        async handleLogin ({ commit }, {username, password}) {
+            username = username.trim();
+            const result = await this._vm.fetch('/open/login', {
+                method: 'post',
+                data: {
+                    username,
+                    password
+                }
+            });
+            if (result) {
+                commit('setToken', 'login');
+            }
+            return result;
         },
         // 退出登录
         async handleLogOut ({ state, commit }) {
+            await this._vm.fetch('/open/logout');
             commit('setToken', '');
             commit('setAccess', []);
         },
