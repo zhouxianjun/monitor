@@ -3,6 +3,7 @@ package com.all580.monitor.service;
 import com.all580.monitor.entity.TabAppVersion;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author zhouxianjun(Alone)
@@ -19,4 +20,11 @@ public interface AppVersionService extends IService<TabAppVersion> {
      * @return
      */
     List<?> list(Integer spot, Integer app, String version);
+
+    /**
+     * 获取应用最后一个版本信息
+     * @param app 应用ID
+     * @return
+     */
+    Map<String, Object> last(int app);
 }

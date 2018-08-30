@@ -17,7 +17,6 @@ import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import tk.mybatis.mapper.entity.Example;
 
 import java.io.File;
 import java.nio.file.Files;
@@ -70,12 +69,9 @@ public class AppVersionController {
     }
 
     @ApiOperation(value = "获取应用最后一个版本", produces = MediaType.APPLICATION_JSON_VALUE)
-    @GetMapping("last/{id}")
-    public Result<?> last(@ApiParam(required = true) @PathVariable int id) {
-        Example example = new Example(TabAppVersion.class);
-        example.and().andEqualTo("id", id);
-        example.orderBy("id").desc();
-        return Result.builder().code(Result.SUCCESS).value(appVersionService.selectOneByExample(example)).build();
+    @GetMapping("last/{app}")
+    public Result<?> last(@ApiParam(required = true) @PathVariable int app) {
+        return Result.builder().code(Result.SUCCESS).value(appVersionService.last(app)).build();
     }
 
     @ApiOperation(value = "新增应用版本")

@@ -16,4 +16,11 @@ public interface TabAppVersionMapper extends IMapper<TabAppVersion> {
      * @return {tab_spot.name,tab_app.*,alert_count}
      */
     List<Map> search(@Param("spot") Integer spot, @Param("app") Integer app, @Param("version") String version);
+
+    /**
+     * 获取应用最后一个版本信息
+     * @param app 应用ID
+     * @return
+     */
+    Map<String, Object> last(@Param("app") int app);
 }

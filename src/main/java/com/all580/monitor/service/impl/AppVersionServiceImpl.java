@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author zhouxianjun(Alone)
@@ -23,5 +24,10 @@ public class AppVersionServiceImpl extends BaseService<TabAppVersion> implements
     @Override
     public List<?> list(Integer spot, Integer app, String version) {
         return appVersionMapper.search(spot, app, version);
+    }
+
+    @Override
+    public Map<String, Object> last(int app) {
+        return appVersionMapper.last(app);
     }
 }

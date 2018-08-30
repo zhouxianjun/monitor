@@ -1,7 +1,6 @@
 package com.all580.monitor.task;
 
 import cn.hutool.core.lang.Snowflake;
-import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONUtil;
 import com.all580.monitor.Constant;
@@ -25,6 +24,9 @@ import org.apache.http.HttpStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StopWatch;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -70,85 +72,92 @@ public class HttpHeartbeatTaskClearTrace implements TimerTask {
             log.warn("HTTP心跳任务: {} 报警规则不存在", monitor);
             return;
         }
-        List<TabMonitorData> data = new ArrayList<>(2);
         try {
-            String header = monitor.getHeader();
-            String cookie = monitor.getCookie();
-            String basicAuth = monitor.getBasicAuth();
-            long start = System.currentTimeMillis();
-            String memo;
-            long delayMs;
-            int responseCode;
-
-            Request.Builder builder = new Request.Builder().url(monitor.getUrl()).method(monitor.getMethod(), null);
-            if (JSONUtil.isJsonObj(header)) {
-                JSONUtil.parseObj(header).forEach((key, value) -> builder.addHeader(key, String.valueOf(value)));
-            }
-            if (JSONUtil.isJsonObj(cookie)) {
-                builder.header("Cookie", JSONUtil.parseObj(cookie).entrySet().stream()
-                        .map(entry -> String.format("%s=%s", entry.getKey(), entry.getValue()))
-                        .collect(Collectors.joining(";")));
-            }
-            if (StringUtils.isNotEmpty(basicAuth) && basicAuth.contains(":")) {
-                builder.addHeader("Authorization", "Basic " + new String(Base64.encodeBase64(basicAuth.getBytes(Charsets.UTF_8))));
-            }
-            Request request = builder.build();
+            List<TabMonitorData> data = request(currentRule);
             try {
-                Response response = okHttpClient.newCall(request).execute();
-                try {
-                    if (response.body() != null) {
-                        memo = response.body().string();
-                    } else {
-                        memo = response.toString();
-                    }
-                } catch (Exception ignored) {
-                    memo = response.toString();
-                }
-                responseCode = response.code();
-            } catch (Exception e) {
-                responseCode = HttpStatus.SC_INTERNAL_SERVER_ERROR;
-                memo = e.getMessage();
+                alarmRuleManager.judge(data, currentRule);
+            } catch (Throwable e) {
+                log.warn("HTTP心跳任务: {} 判定异常", monitor, e);
             }
-            delayMs = System.currentTimeMillis() - start;
-            Date uploadTime = new Date();
-            long batch = snowflake.nextId();
-            TabMonitorData delay = new TabMonitorData()
-                    .setHost(request.url().host())
-                    .setMetric(Constant.Metric.HTTP_HEARTBEAT)
-                    .setResource(currentRule.getResource())
-                    .setKey("delay")
-                    .setValue(String.valueOf(delayMs))
-                    .setMemo(StrUtil.maxLength(memo, 5000))
-                    .setUploadTime(uploadTime)
-                    .setBatch(String.valueOf(batch));
-            monitorDataService.save(delay);
-            data.add(delay);
-            TabMonitorData code = new TabMonitorData()
-                    .setHost(request.url().host())
-                    .setMetric(Constant.Metric.HTTP_HEARTBEAT)
-                    .setResource(currentRule.getResource())
-                    .setKey("code")
-                    .setValue(String.valueOf(responseCode))
-                    .setMemo(memo)
-                    .setUploadTime(uploadTime)
-                    .setBatch(String.valueOf(batch));
-            monitorDataService.save(code);
-            data.add(code);
         } catch (Throwable e) {
             log.warn("HTTP心跳任务: {} 执行异常", monitor, e);
         } finally {
-            ThreadUtil.execute(() -> {
-                try {
-                    alarmRuleManager.judge(data, currentRule);
-                } catch (Throwable e) {
-                    log.warn("HTTP心跳任务: {} 判定异常", monitor, e);
-                }
-            });
             log.debug("---结束HTTP心跳任务:{} ---", monitor);
             if (this.run) {
                 this.timeout = timeout.timer().newTimeout(this, currentRule.getInterval(), TimeUnit.MINUTES);
             }
         }
+    }
+
+    private List<TabMonitorData> request(TabAlarmRule currentRule) {
+        String header = monitor.getHeader();
+        String cookie = monitor.getCookie();
+        String basicAuth = monitor.getBasicAuth();
+        StopWatch watch = new StopWatch();
+        String memo;
+        int responseCode;
+
+        Request.Builder builder = new Request.Builder().url(monitor.getUrl()).method(monitor.getMethod(), null);
+        if (JSONUtil.isJsonObj(header)) {
+            JSONUtil.parseObj(header).forEach((key, value) -> builder.addHeader(key, String.valueOf(value)));
+        }
+        if (JSONUtil.isJsonObj(cookie)) {
+            builder.header("Cookie", JSONUtil.parseObj(cookie).entrySet().stream()
+                    .map(entry -> String.format("%s=%s", entry.getKey(), entry.getValue()))
+                    .collect(Collectors.joining(";")));
+        }
+        if (StringUtils.isNotEmpty(basicAuth) && basicAuth.contains(":")) {
+            builder.addHeader("Authorization", "Basic " + new String(Base64.encodeBase64(basicAuth.getBytes(Charsets.UTF_8))));
+        }
+        Request request = builder.build();
+        watch.start();
+        try (Response response = okHttpClient.newCall(request).execute()) {
+            try {
+                if (response.body() != null) {
+                    memo = response.body().string();
+                } else {
+                    memo = response.toString();
+                }
+            } catch (Exception ignored) {
+                memo = response.toString();
+            }
+            responseCode = response.code();
+        } catch (Exception e) {
+            responseCode = HttpStatus.SC_INTERNAL_SERVER_ERROR;
+            memo = e.getMessage();
+        }
+        watch.stop();
+        return save(currentRule, memo, watch.getTotalTimeMillis(), responseCode, request.url().host());
+    }
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW, rollbackFor = {Exception.class, RuntimeException.class})
+    public List<TabMonitorData> save(TabAlarmRule currentRule, String memo, long delayMs, int responseCode, String host) {
+        List<TabMonitorData> data = new ArrayList<>(2);
+        Date uploadTime = new Date();
+        long batch = snowflake.nextId();
+        TabMonitorData delay = new TabMonitorData()
+                .setHost(host)
+                .setMetric(Constant.Metric.HTTP_HEARTBEAT)
+                .setResource(currentRule.getResource())
+                .setKey("delay")
+                .setValue(String.valueOf(delayMs))
+                .setMemo(StrUtil.maxLength(memo, 5000))
+                .setUploadTime(uploadTime)
+                .setBatch(String.valueOf(batch));
+        monitorDataService.save(delay);
+        data.add(delay);
+        TabMonitorData code = new TabMonitorData()
+                .setHost(host)
+                .setMetric(Constant.Metric.HTTP_HEARTBEAT)
+                .setResource(currentRule.getResource())
+                .setKey("code")
+                .setValue(String.valueOf(responseCode))
+                .setMemo(memo)
+                .setUploadTime(uploadTime)
+                .setBatch(String.valueOf(batch));
+        monitorDataService.save(code);
+        data.add(code);
+        return data;
     }
 
     public void stop() {

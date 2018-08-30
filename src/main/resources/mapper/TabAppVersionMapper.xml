@@ -26,6 +26,7 @@
             tab_app_version tav
             JOIN tab_app ta ON ta.id = tav.app_id
             LEFT JOIN tab_resources tr ON tr.id = tav.resource_id
+        WHERE 1 = 1
         <if test="spot != null">
             AND ta.spot_id = #{spot}
         </if>
@@ -36,5 +37,22 @@
             AND tav.`version` like concat(#{version}, '%')
         </if>
         order by tav.create_time desc
+    </select>
+    <select id="last" resultType="java.util.Map">
+        SELECT
+            tav.id,
+            tav.version,
+            tr.md5,
+            tr.`name`,
+            tr.size,
+            tr.suffix,
+            tr.path,
+            tav.create_time
+        FROM
+            tab_app_version tav
+            LEFT JOIN tab_resources tr ON tr.id = tav.resource_id
+        WHERE tav.app_id = #{app}
+        ORDER BY tav.id DESC
+        limit 1
     </select>
 </mapper>
