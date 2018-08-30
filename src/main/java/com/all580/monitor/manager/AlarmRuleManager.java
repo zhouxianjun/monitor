@@ -141,7 +141,7 @@ public class AlarmRuleManager {
                 log.debug("忽略报警任务通知: {}", rule);
                 return;
             }
-            if (StringUtils.isNotEmpty(rule.getAlarmCallback())) {
+            if (StringUtils.isNotBlank(rule.getAlarmCallback())) {
                 doNotice(Constant.NoticeType.URL, rule.getAlarmCallback(), rule, history, curDate);
             }
             if (rule.getAlarmGroupId() != null) {
@@ -160,7 +160,7 @@ public class AlarmRuleManager {
         for (Field field : fields) {
             NoticeType noticeType = field.getAnnotation(NoticeType.class);
             Object value = ReflectUtil.getFieldValue(contacts, field);
-            if (noticeType != null && value != null) {
+            if (noticeType != null && value != null && StringUtils.isNotBlank(value.toString())) {
                 doNotice(noticeType.value(), value, rule, history, curDate);
             }
         }
