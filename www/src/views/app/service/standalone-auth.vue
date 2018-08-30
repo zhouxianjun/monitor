@@ -207,6 +207,7 @@ export default {
                 url: '/func/getAll',
                 method: 'GET'
             }});
+            this.changeTable.update = [];
 
             if (result && result.value && result.value.data) {
                 // 应用权限
