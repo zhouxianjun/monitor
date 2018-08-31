@@ -34,7 +34,7 @@ import TableDataView from '@/components/mixins/table-data-view';
 import TableColRender from '@/components/mixins/table-col-render';
 
 export default {
-    name: 'AlarmHistoryIndex',
+    name: 'AlarmHistory',
     components: { AppSelect },
     mixins: [ TableColRender, TableDataView ],
     data () {

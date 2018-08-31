@@ -103,8 +103,7 @@ export default {
             return this.vo.monitor.id !== null && this.vo.monitor.id !== undefined;
         }
     },
-    created () {
-        this.initContactsGroups();
+    activated () {
         Reflect.ownKeys(this.vo.monitor).forEach(key => {
             const val = this.$route.params[key];
             this.vo.monitor[key] = (val === undefined || val === null) ? this.vo.monitor[key] : val;
@@ -113,6 +112,9 @@ export default {
             const val = this.$route.params[key];
             this.vo.rule[key] = (val === undefined || val === null) ? this.vo.rule[key] : val;
         });
+    },
+    created () {
+        this.initContactsGroups();
         QL();
     },
     methods: {
@@ -124,7 +126,7 @@ export default {
             setTimeout(this.back, 500);
         },
         back () {
-            this.tagNavBack('monitor-reported-edit');
+            this.tagNavBack('SiteMonitorReportedEdit');
         }
     }
 };

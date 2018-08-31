@@ -76,7 +76,7 @@ import ModelView from '@/components/mixins/model-view';
 import TagNav from '@/components/mixins/tag-nav';
 
 export default {
-    name: 'MonitorHttpEdit',
+    name: 'SiteMonitorHttpEdit',
     components: {
         MonacoEditor, AppSelect
     },
@@ -130,8 +130,7 @@ export default {
             return this.vo.monitor.id !== null && this.vo.monitor.id !== undefined;
         }
     },
-    created () {
-        this.initContactsGroups();
+    activated () {
         Reflect.ownKeys(this.vo.monitor).forEach(key => {
             const val = this.$route.params[key];
             this.vo.monitor[key] = (val === undefined || val === null) ? this.vo.monitor[key] : val;
@@ -140,6 +139,9 @@ export default {
             const val = this.$route.params[key];
             this.vo.rule[key] = (val === undefined || val === null) ? this.vo.rule[key] : val;
         });
+    },
+    created () {
+        this.initContactsGroups();
         QL();
     },
     methods: {
@@ -151,7 +153,7 @@ export default {
             setTimeout(this.back, 500);
         },
         back () {
-            this.tagNavBack('monitor-http-edit');
+            this.tagNavBack('SiteMonitorHttpEdit');
         }
     }
 };

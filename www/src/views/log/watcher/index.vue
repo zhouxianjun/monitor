@@ -36,7 +36,7 @@ import TableColRender from '@/components/mixins/table-col-render';
 import ModelView from '@/components/mixins/model-view';
 
 export default {
-    name: 'LogWatcherIndex',
+    name: 'LogWatcher',
     components: { AppSelect },
     mixins: [ TableColRender, TableDataView, ModelView ],
     data () {
@@ -49,7 +49,7 @@ export default {
                     key: 'name',
                     render: (h, params) => this.renderLink(h, params, () => {
                         this.$router.push({
-                            name: 'log-watcher-list',
+                            name: 'LogWatcherList',
                             query: {
                                 watchId: params.row['id']
                             }
@@ -83,7 +83,7 @@ export default {
                                 on: {
                                     click: async () => {
                                         this.$router.push({
-                                            name: 'log-watcher-edit',
+                                            name: 'LogWatcherEdit',
                                             params: params.row
                                         });
                                     }
@@ -112,7 +112,7 @@ export default {
     methods: {
         add () {
             this.$router.push({
-                name: 'log-watcher-edit',
+                name: 'LogWatcherEdit',
                 params: {}
             });
         },

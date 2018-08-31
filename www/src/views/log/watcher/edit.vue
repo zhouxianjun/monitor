@@ -70,15 +70,18 @@ export default {
             updateUrl: '/api/log/watcher/update'
         };
     },
-    created () {
-        this.vo = Object.assign(this.vo, this.$route.params);
+    activated () {
+        Reflect.ownKeys(this.vo).forEach(key => {
+            const val = this.$route.params[key];
+            this.vo[key] = (val === undefined || val === null) ? this.vo[key] : val;
+        });
     },
     methods: {
         afterAddOrUpdate () {
             setTimeout(this.back, 500);
         },
         back () {
-            this.tagNavBack('log-watcher-edit');
+            this.tagNavBack('LogWatcherEdit');
         }
     }
 };

@@ -56,7 +56,7 @@ import TableColRender from '@/components/mixins/table-col-render';
 import highlight from 'v-highlight';
 
 export default {
-    name: 'log-search',
+    name: 'LogSearch',
     components: {
         GridKeepaliveTable,
         Detail

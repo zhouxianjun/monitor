@@ -45,7 +45,7 @@ import TableColRender from '@/components/mixins/table-col-render';
 import ModelView from '@/components/mixins/model-view';
 
 export default {
-    name: 'SiteMonitorIndex',
+    name: 'SiteMonitorList',
     components: { AppSelect },
     mixins: [ TableColRender, TableDataView, ModelView ],
     data () {
@@ -95,7 +95,7 @@ export default {
                                 on: {
                                     click: async () => {
                                         this.$router.push({
-                                            name: this.table.query.type === 1 ? 'monitor-http-edit' : 'monitor-reported-edit',
+                                            name: this.table.query.type === 1 ? 'SiteMonitorHttpEdit' : 'SiteMonitorReportedEdit',
                                             params: params.row
                                         });
                                     }
@@ -128,13 +128,13 @@ export default {
         },
         addHttp () {
             this.$router.push({
-                name: 'monitor-http-edit',
+                name: 'SiteMonitorHttpEdit',
                 params: {}
             });
         },
         addReported () {
             this.$router.push({
-                name: 'monitor-reported-edit',
+                name: 'SiteMonitorReportedEdit',
                 params: {}
             });
         },

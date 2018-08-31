@@ -116,8 +116,8 @@ export default {
             removeUrl: '/api/contacts/remove'
         };
     },
-    created () {
-        this.table.query['groupId'] = this.$route.query['groupId'];
+    activated () {
+        this.table.query.groupId = this.$route.query.groupId || this.table.query.groupId;
     }
 };
 </script>

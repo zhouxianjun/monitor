@@ -66,7 +66,7 @@ import TableColRender from '@/components/mixins/table-col-render';
 import ModelView from '@/components/mixins/model-view';
 
 export default {
-    name: 'standalone-auth',
+    name: 'AppServiceStandaloneAuth',
     components: {
         AppBusinessService,
         TreeTable

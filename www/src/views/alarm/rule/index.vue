@@ -37,7 +37,7 @@ import TableColRender from '@/components/mixins/table-col-render';
 import ModelView from '@/components/mixins/model-view';
 
 export default {
-    name: 'AlarmRuleIndex',
+    name: 'AlarmRule',
     components: { AppSelect },
     mixins: [ TableColRender, TableDataView, ModelView ],
     data () {
@@ -106,7 +106,7 @@ export default {
                                 on: {
                                     click: async () => {
                                         this.$router.push({
-                                            name: 'alarm-rule-edit',
+                                            name: 'AlarmRuleEdit',
                                             params: params.row
                                         });
                                     }
@@ -135,7 +135,7 @@ export default {
         },
         add () {
             this.$router.push({
-                name: 'alarm-rule-edit',
+                name: 'AlarmRuleEdit',
                 params: {}
             });
         }

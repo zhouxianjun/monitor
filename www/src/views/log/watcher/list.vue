@@ -24,7 +24,7 @@ import highlight from 'v-highlight';
 import TableColRender from '@/components/mixins/table-col-render';
 
 export default {
-    name: 'log-watcher-list',
+    name: 'LogWatcherList',
     components: {
         GridKeepaliveTable,
         Record

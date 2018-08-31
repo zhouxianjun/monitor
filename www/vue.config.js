@@ -7,7 +7,9 @@ module.exports = {
     transpileDependencies: [],
     configureWebpack: {
         plugins: [
-            new MonocoEditorPlugin(),
+            new MonocoEditorPlugin({
+                languages: ['java', 'javascript', 'json']
+            }),
             new ZipPlugin({
                 path: path.join(__dirname, 'dist'),
                 filename: 'dist.zip'

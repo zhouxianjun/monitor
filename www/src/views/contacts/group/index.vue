@@ -40,7 +40,7 @@ import TableColRender from '@/components/mixins/table-col-render';
 import ModelView from '@/components/mixins/model-view';
 
 export default {
-    name: 'ContactsGroupIndex',
+    name: 'ContactsGroup',
     mixins: [ TableColRender, TableDataView, ModelView ],
     data () {
         return {
@@ -51,7 +51,7 @@ export default {
                     key: 'name',
                     render: (h, params) => this.renderLink(h, params, () => {
                         this.$router.push({
-                            name: 'contacts-list',
+                            name: 'ContactsList',
                             query: {
                                 groupId: params.row['id']
                             }

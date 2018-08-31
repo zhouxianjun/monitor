@@ -76,7 +76,7 @@ import TableDataView from '@/components/mixins/table-data-view';
 import TableColRender from '@/components/mixins/table-col-render';
 import ModelView from '@/components/mixins/model-view';
 export default {
-    name: 'app',
+    name: 'AppList',
     components: {
         VueTagsInput
     },

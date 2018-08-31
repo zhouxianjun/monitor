@@ -102,9 +102,14 @@ export default {
             updateUrl: '/api/alarm/rule/update'
         };
     },
+    activated () {
+        Reflect.ownKeys(this.vo).forEach(key => {
+            const val = this.$route.params[key];
+            this.vo[key] = (val === undefined || val === null) ? this.vo[key] : val;
+        });
+    },
     mounted () {
         this.initContactsGroups();
-        this.vo = Object.assign(this.vo, this.$route.params);
         QL();
     },
     methods: {
@@ -116,7 +121,7 @@ export default {
             setTimeout(this.back, 500);
         },
         back () {
-            this.tagNavBack('alarm-rule-edit');
+            this.tagNavBack('AlarmRuleEdit');
         }
     }
 };

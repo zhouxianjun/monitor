@@ -51,8 +51,8 @@ export default [
         },
         children: [
             {
-                path: 'index',
-                name: 'app-index',
+                path: 'list',
+                name: 'AppList',
                 meta: {
                     icon: 'md-apps',
                     title: '应用列表'
@@ -61,7 +61,7 @@ export default [
             },
             {
                 path: 'version',
-                name: 'app-version',
+                name: 'AppVersion',
                 meta: {
                     icon: 'md-apps',
                     title: '版本列表'
@@ -84,7 +84,7 @@ export default [
                 meta: {
                     title: '权限配置'
                 },
-                name: 'app-service-standalone-auth',
+                name: 'AppServiceStandaloneAuth',
                 component: () =>
                     import('@/views/app/service/standalone-auth.vue')
             }
@@ -105,17 +105,16 @@ export default [
                     icon: 'ios-cog',
                     title: '报警规则'
                 },
-                name: 'alarm-rule',
+                name: 'AlarmRule',
                 component: () => import('@/views/alarm/rule/index.vue')
             },
             {
                 path: 'rule/edit',
                 meta: {
                     title: '编辑',
-                    hideInMenu: true,
-                    notCache: true
+                    hideInMenu: true
                 },
-                name: 'alarm-rule-edit',
+                name: 'AlarmRuleEdit',
                 component: () => import('@/views/alarm/rule/edit.vue')
             },
             {
@@ -124,7 +123,7 @@ export default [
                     icon: 'ios-list',
                     title: '报警历史'
                 },
-                name: 'alarm-history-list',
+                name: 'AlarmHistory',
                 component: () => import('@/views/alarm/history/index.vue')
             }
         ]
@@ -144,7 +143,7 @@ export default [
                     icon: 'md-contact',
                     title: '联系人'
                 },
-                name: 'contacts-list',
+                name: 'ContactsList',
                 component: () => import('@/views/contacts/list.vue')
             },
             {
@@ -153,7 +152,7 @@ export default [
                     icon: 'md-contacts',
                     title: '联系人组'
                 },
-                name: 'contacts_group',
+                name: 'ContactsGroup',
                 component: () => import('@/views/contacts/group/index.vue')
             }
         ]
@@ -172,27 +171,25 @@ export default [
                 meta: {
                     title: '日志搜索'
                 },
-                name: 'log-service-search',
+                name: 'LogSearch',
                 component: () => import('@/views/log/search.vue')
             },
             {
                 path: 'watcher/edit',
                 meta: {
                     title: '编辑日志监控',
-                    hideInMenu: true,
-                    notCache: true
+                    hideInMenu: true
                 },
-                name: 'log-watcher-edit',
+                name: 'LogWatcherEdit',
                 component: () => import('@/views/log/watcher/edit.vue')
             },
             {
                 path: 'watcher/list',
                 meta: {
                     title: '日志监控记录',
-                    hideInMenu: true,
-                    notCache: true
+                    hideInMenu: true
                 },
-                name: 'log-watcher-list',
+                name: 'LogWatcherList',
                 component: () => import('@/views/log/watcher/list.vue')
             },
             {
@@ -200,7 +197,7 @@ export default [
                 meta: {
                     title: '日志监控'
                 },
-                name: 'log-service-watcher',
+                name: 'LogWatcher',
                 component: () => import('@/views/log/watcher/index.vue')
             }
         ]
@@ -219,27 +216,25 @@ export default [
                     title: '站点列表',
                     icon: 'ios-desktop'
                 },
-                name: 'site-monitor-list',
+                name: 'SiteMonitorList',
                 component: () => import('@/views/site-monitor/index.vue')
             },
             {
                 path: 'http/edit',
                 meta: {
                     title: 'HTTP监控',
-                    hideInMenu: true,
-                    notCache: true
+                    hideInMenu: true
                 },
-                name: 'monitor-http-edit',
+                name: 'SiteMonitorHttpEdit',
                 component: () => import('@/views/site-monitor/http/edit.vue')
             },
             {
                 path: 'reported/edit',
                 meta: {
                     title: '上报监控',
-                    hideInMenu: true,
-                    notCache: true
+                    hideInMenu: true
                 },
-                name: 'monitor-reported-edit',
+                name: 'SiteMonitorReportedEdit',
                 component: () => import('@/views/site-monitor/reported/edit.vue')
             }
         ]
