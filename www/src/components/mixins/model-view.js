@@ -6,12 +6,6 @@ export default {
                 id: null
             },
             loadingBtn: false,
-            formRef: 'form',
-            addUrl: null,
-            updateUrl: null,
-            removeUrl: null,
-            method: 'post',
-            removeMethod: 'post',
             addTitle: '新增',
             updateTitle: '修改'
         };
@@ -32,6 +26,15 @@ export default {
                 data: this.method === 'post'.toLocaleLowerCase() ? this.vo : null,
                 params: this.method === 'get'.toLocaleLowerCase() ? this.vo : null
             };
+        },
+        formRef () {
+            return 'form';
+        },
+        method () {
+            return 'post';
+        },
+        removeMethod () {
+            return 'post';
         }
     },
     methods: {

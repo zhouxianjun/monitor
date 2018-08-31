@@ -2,8 +2,8 @@ package com.all580.monitor.controller.business;
 
 import cn.hutool.json.JSONUtil;
 import com.all580.monitor.annotation.Business;
+import com.all580.monitor.aop.AppBusinessServiceAop;
 import com.all580.monitor.dto.Result;
-import com.all580.monitor.entity.TabApp;
 import com.all580.monitor.manager.BusinessManager;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -49,20 +49,19 @@ public class BusinessController {
     }
 
     @ApiOperation(value = "代理请求")
-    @RequestMapping("proxy")
+    @RequestMapping("proxy/{appId}")
     @SneakyThrows
     public Result<?> proxy(
-            @ApiParam @RequestParam int appId,
-            @ApiParam(hidden = true, readOnly = true) TabApp app,
+            @ApiParam(required = true) @PathVariable int appId,
             @ApiParam @RequestParam String url,
             @ApiParam @RequestParam String method,
             @ApiParam @RequestParam(required = false) String params,
             @ApiParam @RequestBody(required = false) Map body,
             HttpServletRequest request) {
         String m = request.getMethod();
-        if (m.equalsIgnoreCase("POST")) {
+        if (RequestMethod.POST.name().equalsIgnoreCase(m)) {
             params = JSONUtil.toJsonStr(body);
         }
-        return businessManager.proxy(app, url, method, params);
+        return businessManager.proxy(AppBusinessServiceAop.getApp(), url, method, params);
     }
 }

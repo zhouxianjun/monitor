@@ -3,7 +3,6 @@ package com.all580.monitor.controller.business;
 import com.all580.monitor.annotation.Business;
 import com.all580.monitor.dto.Result;
 import com.all580.monitor.entity.TFunc;
-import com.all580.monitor.entity.TabApp;
 import com.all580.monitor.mapper.TFuncMapper;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -31,19 +30,16 @@ public class StandaloneAuthController {
     private TFuncMapper funcMapper;
 
     @ApiOperation(value = "获取所有菜单列表", produces = MediaType.APPLICATION_JSON_VALUE)
-    @GetMapping("list")
-    public Result<?> list(
-            @ApiParam @RequestParam int appId,
-            @ApiParam(hidden = true) TabApp app) {
+    @GetMapping("list/{appId}")
+    public Result<?> list(@ApiParam(required = true) @PathVariable int appId) {
         List<TFunc> funcs = funcMapper.selectAll();
         return Result.builder().code(Result.SUCCESS).value(funcs).build();
     }
 
     @ApiOperation(value = "新增菜单", produces = MediaType.APPLICATION_JSON_VALUE)
-    @PostMapping("add")
+    @PostMapping("add/{appId}")
     public Result<?> add(
-            @ApiParam @RequestParam int appId,
-            @ApiParam(hidden = true) TabApp app,
+            @ApiParam(required = true) @PathVariable int appId,
             @ApiParam(required = true) @RequestBody TFunc func) {
         func.setCreateTime(new Date());
         if (func.getPid() == null) {
@@ -54,10 +50,9 @@ public class StandaloneAuthController {
     }
 
     @ApiOperation(value = "修改菜单", produces = MediaType.APPLICATION_JSON_VALUE)
-    @PostMapping("update")
+    @PostMapping("update/{appId}")
     public Result<?> update(
-            @ApiParam @RequestParam int appId,
-            @ApiParam(hidden = true) TabApp app,
+            @ApiParam(required = true) @PathVariable int appId,
             @ApiParam(required = true) @RequestBody TFunc func) {
         int ret = funcMapper.updateByPrimaryKeySelective(func);
         return ret > 0 ? Result.ok() : Result.fail();

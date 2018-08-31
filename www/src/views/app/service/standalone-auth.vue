@@ -172,24 +172,27 @@ export default {
                 epType: [{type: 'array', required: true, min: 1, trigger: 'change'}]
             },
             addTitle: '新增权限',
-            updateTitle: '修改权限',
-            addUrl: '/api/business/standalone/auth/add',
-            updateUrl: '/api/business/standalone/auth/update'
+            updateTitle: '修改权限'
         };
     },
     computed: {
+        addUrl () {
+            return `/${this.path}/add/${this.appId}`;
+        },
+        updateUrl () {
+            return `/${this.path}/update/${this.appId}`;
+        },
         generateAddOrUpdate () {
             return {
                 method: this.method,
-                data: Object.assign({}, this.vo, {epType: this.vo.epType.reduce((value, current) => value + current, 0)}),
-                params: {appId: this.appId}
+                data: Object.assign({}, this.vo, {epType: this.vo.epType.reduce((value, current) => value + current, 0)})
             };
         }
     },
     watch: {
         async appId (val) {
             this.disabled = true;
-            if (!this.table.data.length && !isNaN(val) && val !== null) {
+            if (!this.table.data.length && !isNaN(val) && val) {
                 await this.loadAllFunc();
             }
             await this.loadAppAuth();
@@ -197,13 +200,12 @@ export default {
     },
     methods: {
         async loadAllFunc () {
-            let result = await this.fetch(`/${this.path}/list`, {params: {appId: this.appId}});
+            let result = await this.fetch(`/${this.path}/list/${this.appId}`);
             this.allFunc = result ? result.value || [] : [];
             this.allFunc.forEach(r => r.epTypeText = calc(EpType, r.epType).map(t => t.name).join(','));
         },
         async loadAppAuth () {
-            let result = !this.appId ? false : await this.fetch('/api/business/proxy', {params: {
-                appId: this.appId,
+            let result = !this.appId ? false : await this.fetch(`/api/business/proxy/${this.appId}`, {params: {
                 url: '/func/getAll',
                 method: 'GET'
             }});
@@ -270,9 +272,8 @@ export default {
             }
         },
         async apply () {
-            let result = await this.fetch('/api/business/proxy', {
+            let result = await this.fetch(`/api/business/proxy/${this.appId}`, {
                 params: {
-                    appId: this.appId,
                     url: '/func/distribution',
                     method: 'POST'
                 },
