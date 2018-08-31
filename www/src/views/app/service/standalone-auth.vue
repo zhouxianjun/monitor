@@ -201,7 +201,9 @@ export default {
     methods: {
         async loadAllFunc () {
             let result = await this.fetch(`/${this.path}/list/${this.appId}`);
-            this.allFunc = result ? result.value || [] : [];
+            result = result ? result.value || [] : [];
+            result = result.sort((a, b) => a.seq - b.seq);
+            this.allFunc = result;
             this.allFunc.forEach(r => r.epTypeText = calc(EpType, r.epType).map(t => t.name).join(','));
         },
         async loadAppAuth () {
