@@ -89,11 +89,10 @@ export default {
                     key: 'action',
                     width: 200,
                     align: 'center',
-                    render: (h, params) => {
-                        return h('div', [
-                            this.renderBtnPop(h, '您确定要删除这条数据吗?', '删除', 'error', () => this.remove(params.row))
-                        ]);
-                    }
+                    render: (h, params) => this.renderActions(h, params, [{
+                        type: 'delete',
+                        click: () => this.remove(params.row)
+                    }])
                 }]
             },
             vo: {

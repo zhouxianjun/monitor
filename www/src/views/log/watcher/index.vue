@@ -70,33 +70,22 @@ export default {
                     key: 'action',
                     width: 200,
                     align: 'center',
-                    render: (h, params) => {
-                        return h('div', [
-                            h('Button', {
-                                props: {
-                                    type: 'primary',
-                                    size: 'small'
-                                },
-                                style: {
-                                    marginRight: '5px'
-                                },
-                                on: {
-                                    click: async () => {
-                                        this.$router.push({
-                                            name: 'LogWatcherEdit',
-                                            params: params.row
-                                        });
-                                    }
-                                }
-                            }, '修改'),
-                            this.renderSwitchBtnPop(h, params.row.status, () => this.status(params.row), {
-                                style: {
-                                    marginRight: '5px'
-                                }
-                            }),
-                            this.renderBtnPop(h, '您确定要删除这条数据吗?', '删除', 'error', () => this.remove(params.row))
-                        ]);
-                    }
+                    render: (h, params) => this.renderActions(h, params, [{
+                        config: { loading: this.loadingBtn, style: {marginRight: '5px'} },
+                        click: () => this.$router.push({
+                            name: 'LogWatcherEdit',
+                            params: params.row
+                        }),
+                        text: '修改'
+                    }, {
+                        type: 'switch',
+                        click: () => this.status(params.row),
+                        bool: params.row.status,
+                        config: { style: {marginRight: '5px'} }
+                    }, {
+                        type: 'delete',
+                        click: () => this.remove(params.row)
+                    }])
                 }],
                 url: '/api/log/watcher/list',
                 removeUrl: '/api/log/watcher/remove',

@@ -116,26 +116,14 @@ export default {
                     key: 'action',
                     width: 200,
                     align: 'center',
-                    render: (h, params) => {
-                        return h('div', [
-                            h('Button', {
-                                props: {
-                                    type: 'primary',
-                                    size: 'small',
-                                    loading: this.loadingBtn
-                                },
-                                style: {
-                                    marginRight: '5px'
-                                },
-                                on: {
-                                    click: async () => {
-                                        this.update(params.row);
-                                    }
-                                }
-                            }, '修改'),
-                            this.renderBtnPop(h, '您确定要删除这条数据吗?', '删除', 'error', () => this.remove(params.row))
-                        ]);
-                    }
+                    render: (h, params) => this.renderActions(h, params, [{
+                        config: { loading: this.loadingBtn, style: {marginRight: '5px'} },
+                        click: () => this.update(params.row),
+                        text: '修改'
+                    }, {
+                        type: 'delete',
+                        click: () => this.remove(params.row)
+                    }])
                 }],
                 url: '/api/app/list',
                 query: {
