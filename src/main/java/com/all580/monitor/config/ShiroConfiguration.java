@@ -81,6 +81,7 @@ public class ShiroConfiguration {
         Map<String, String> map = MapUtil.builder(new LinkedHashMap<String, String>())
                 .put("/api/app/version/list", "anon")
                 .put("/api/app/version/last", "anon")
+                .put("/api/app/version/add", "anon")
                 .put("/api/**", "login")
                 .put("/**", "anon")
                 .build();
