@@ -80,7 +80,7 @@ public class ShiroConfiguration {
         //所以上面的url要苛刻，宽松的url要放在下面，尤其是"/**"要放到最下面，如果放前面的话其后的验证规则就没作用了。
         Map<String, String> map = MapUtil.builder(new LinkedHashMap<String, String>())
                 .put("/api/app/version/list", "anon")
-                .put("/api/app/version/last", "anon")
+                .put("/api/app/version/last/**", "anon")
                 .put("/api/app/version/add", "anon")
                 .put("/api/**", "login")
                 .put("/**", "anon")
