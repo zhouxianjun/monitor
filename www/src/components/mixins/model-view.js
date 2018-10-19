@@ -67,6 +67,11 @@ export default {
             });
         },
         async beforeRemove (item) {
+            if (this.__removeUrl) {
+                this.removeUrl = this.__removeUrl;
+            } else {
+                this.__removeUrl = this.removeUrl;
+            }
             this.removeUrl = `${this.removeUrl}/${item.id}`;
         },
         async afterRemove (success, item) {},

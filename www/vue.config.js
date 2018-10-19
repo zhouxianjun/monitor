@@ -3,7 +3,7 @@ const path = require('path');
 const ZipPlugin = require('zip-webpack-plugin');
 module.exports = {
     lintOnSave: true,
-    productionSourceMap: false,
+    productionSourceMap: true,
     transpileDependencies: [],
     configureWebpack: {
         plugins: [
