@@ -41,7 +41,7 @@ public class HttpHeartbeatTimer implements CommandLineRunner, ApplicationListene
 
     @Override
     public void run(String... args) throws Exception {
-        Example example = new Example(TabAlarmRule.class);
+        Example example = new Example(TabHttpMonitor.class);
         example.and().andEqualTo("status", true);
         List<TabHttpMonitor> list = httpMonitorService.selectByExample(example);
         if (list != null) {

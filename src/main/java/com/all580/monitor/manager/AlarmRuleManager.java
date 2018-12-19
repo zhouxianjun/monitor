@@ -8,6 +8,7 @@ import cn.hutool.core.util.ReflectUtil;
 import cn.hutool.json.JSONUtil;
 import com.all580.monitor.Constant;
 import com.all580.monitor.annotation.NoticeType;
+import com.all580.monitor.dto.Result;
 import com.all580.monitor.entity.*;
 import com.all580.monitor.express.QLExpressMgr;
 import com.all580.monitor.service.*;
@@ -69,8 +70,9 @@ public class AlarmRuleManager {
      */
     @Transactional(rollbackFor = {RuntimeException.class, Exception.class})
     public TabAlarmHistory judge(List<TabMonitorData> data, TabAlarmRule rule, TabAlarmHistory history, Date curDate) throws Throwable {
+        Result<String> res = Result.ok();
         if (CollectionUtils.isEmpty(data) && rule.getNodata()) {
-            return process(rule, history, false, curDate);
+            return process(rule, history, res.setCode(Result.FAIL), curDate);
         }
         // 执行脚本
         if (StringUtils.isNotEmpty(rule.getScript())) {
@@ -79,20 +81,22 @@ public class AlarmRuleManager {
                     .put("history", history)
                     .put("data", data)
                     .put("log", log)
+                    .put("result", res)
                     .build();
             if (!CollectionUtils.isEmpty(data)) {
                 context.put("dataBatch", data.stream().collect(Collectors.groupingBy(TabMonitorData::getBatch)));
             }
             Object result = qlExpressMgr.execute(rule.getScript(), context);
             if (result instanceof Boolean && !(Boolean) result) {
-                return process(rule, history, false, curDate);
+                res.setCode(Result.FAIL);
             }
         }
-        return process(rule, history, true, curDate);
+        log.info("报警规则: {} 判定结果: {}", rule, res);
+        return process(rule, history, res, curDate);
     }
 
-    private TabAlarmHistory process(TabAlarmRule rule, TabAlarmHistory history, boolean success, Date curDate) {
-        if (success) {
+    private TabAlarmHistory process(TabAlarmRule rule, TabAlarmHistory history, Result<String> result, Date curDate) {
+        if (result.isSuccess()) {
             rule.setCurrentCount(0);
             if (history == null || history.getStatus() == Constant.HistoryStatus.NORMAL) {
                 alarmRuleService.updateNotNull(rule);
@@ -130,11 +134,11 @@ public class AlarmRuleManager {
         rule.setLastHistory(history.getId());
         alarmRuleService.updateNotNull(rule);
         TabAlarmHistory finalHistory = history;
-        ThreadUtil.execute(() -> this.notice(rule, finalHistory, curDate));
+        ThreadUtil.execute(() -> this.notice(rule, finalHistory, result, curDate));
         return history;
     }
 
-    private void notice(TabAlarmRule rule, TabAlarmHistory history, Date curDate) {
+    private void notice(TabAlarmRule rule, TabAlarmHistory history, Result<String> result, Date curDate) {
         log.debug("报警规则任务通知: {}", rule);
         try {
             if (!appService.isAlarm(rule.getAppId())) {
@@ -142,12 +146,12 @@ public class AlarmRuleManager {
                 return;
             }
             if (StringUtils.isNotBlank(rule.getAlarmCallback())) {
-                doNotice(Constant.NoticeType.URL, rule.getAlarmCallback(), rule, history, curDate);
+                doNotice(Constant.NoticeType.URL, rule.getAlarmCallback(), rule, history, result, curDate);
             }
             if (rule.getAlarmGroupId() != null) {
                 List<TabAlarmContacts> contacts = alarmContactsService.listByGroup(rule.getAlarmGroupId());
                 if (!CollectionUtils.isEmpty(contacts)) {
-                    contacts.forEach(item -> this.doNotice(item, rule, history, curDate));
+                    contacts.forEach(item -> this.doNotice(item, rule, history, result, curDate));
                 }
             }
         } catch (Exception e) {
@@ -155,18 +159,18 @@ public class AlarmRuleManager {
         }
     }
 
-    private void doNotice(TabAlarmContacts contacts, TabAlarmRule rule, TabAlarmHistory history, Date curDate) {
+    private void doNotice(TabAlarmContacts contacts, TabAlarmRule rule, TabAlarmHistory history, Result<String> result, Date curDate) {
         Field[] fields = ReflectUtil.getFields(TabAlarmContacts.class);
         for (Field field : fields) {
             NoticeType noticeType = field.getAnnotation(NoticeType.class);
             Object value = ReflectUtil.getFieldValue(contacts, field);
             if (noticeType != null && value != null && StringUtils.isNotBlank(value.toString())) {
-                doNotice(noticeType.value(), value, rule, history, curDate);
+                doNotice(noticeType.value(), value, rule, history, result, curDate);
             }
         }
     }
 
-    private void doNotice(int type, Object target, TabAlarmRule rule, TabAlarmHistory history, Date curDate) {
+    private void doNotice(int type, Object target, TabAlarmRule rule, TabAlarmHistory history, Result<String> result, Date curDate) {
         TabAlarmNotice notice = new TabAlarmNotice()
                 .setAlarmHistoryId(history.getId())
                 .setType(type)
@@ -174,11 +178,11 @@ public class AlarmRuleManager {
                 .setCreateTime(curDate);
         alarmNoticeService.save(notice);
         try {
-            Object result = alarmNoticeService.notice(type, target, rule, history);
-            if (result == null || result.getClass().isPrimitive()) {
-                notice.setResponse(String.valueOf(result));
+            Object noticeResult = alarmNoticeService.notice(type, target, rule, history, result);
+            if (noticeResult == null || noticeResult.getClass().isPrimitive()) {
+                notice.setResponse(String.valueOf(noticeResult));
             } else {
-                notice.setResponse(JSONUtil.toJsonStr(result));
+                notice.setResponse(JSONUtil.toJsonStr(noticeResult));
             }
             notice.setUpdateTime(new Date());
             notice.setStatus(true);

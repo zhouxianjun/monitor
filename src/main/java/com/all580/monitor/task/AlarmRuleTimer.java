@@ -50,7 +50,10 @@ public class AlarmRuleTimer implements CommandLineRunner, ApplicationListener<Co
         add(alarmRuleService.selectByKey(id));
     }
 
-    public void update(int id) {
+    public void update(Integer id) {
+        if (id == null) {
+            return;
+        }
         AlarmRuleTaskClearTrace task = taskMap.get(id);
         if (task != null) {
             task.stop(true);

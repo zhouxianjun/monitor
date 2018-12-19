@@ -1,6 +1,7 @@
 package com.all580.monitor.notice;
 
 import com.all580.monitor.Constant;
+import com.all580.monitor.dto.Result;
 import com.all580.monitor.entity.TabAlarmHistory;
 import com.all580.monitor.entity.TabAlarmRule;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,13 +26,13 @@ public class EmailNoticeAdapter extends AbstractNotice implements NoticeAdapter<
     private String sender;
 
     @Override
-    public Object run(String target, TabAlarmRule rule, TabAlarmHistory history) throws Exception {
+    public Object run(String target, TabAlarmRule rule, TabAlarmHistory history, Result<String> result) throws Exception {
         MimeMessage message = mailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(message, true);
         helper.setFrom(sender);
         helper.setTo(target);
-        helper.setSubject(title(rule, history));
-        helper.setText(content(rule, history), true);
+        helper.setSubject(title(rule, history, result));
+        helper.setText(content(rule, history, result), true);
         mailSender.send(message);
         return "ok";
     }

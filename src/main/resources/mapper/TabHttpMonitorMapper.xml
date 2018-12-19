@@ -22,7 +22,7 @@
             ta.`name` app_name,
             tah.`status` last_status,
             thm.*,
-            tar.script,
+            tar.script rule_script,
             tar.nodata,
             tar.count,
             tar.interval,

@@ -1,5 +1,6 @@
 package com.all580.monitor.notice;
 
+import com.all580.monitor.dto.Result;
 import com.all580.monitor.entity.TabAlarmHistory;
 import com.all580.monitor.entity.TabAlarmRule;
 import okhttp3.OkHttpClient;
@@ -22,7 +23,7 @@ public abstract class AbstractHttpNoticeAdapter extends AbstractNotice implement
     protected String method() {
         return "GET";
     }
-    protected RequestBody request(String url, TabAlarmRule rule, TabAlarmHistory history) {
+    protected RequestBody request(String url, TabAlarmRule rule, TabAlarmHistory history, Result<String> result) {
         return null;
     }
     protected Map<String, String> headers(TabAlarmRule rule, TabAlarmHistory history) {
@@ -30,10 +31,10 @@ public abstract class AbstractHttpNoticeAdapter extends AbstractNotice implement
     }
 
     @Override
-    public Object run(String target, TabAlarmRule rule, TabAlarmHistory history) throws Exception {
+    public Object run(String target, TabAlarmRule rule, TabAlarmHistory history, Result<String> result) throws Exception {
         Request.Builder builder = new Request.Builder()
                 .url(target)
-                .method(method(), request(target, rule, history));
+                .method(method(), request(target, rule, history, result));
         Map<String, String> headers = headers(rule, history);
         if (headers != null) {
             headers.forEach(builder::addHeader);

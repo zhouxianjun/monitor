@@ -1,9 +1,11 @@
 package com.all580.monitor.service.impl;
 
+import cn.hutool.core.util.StrUtil;
 import com.all580.monitor.Constant;
 import com.all580.monitor.dto.Result;
 import com.all580.monitor.entity.TabAlarmRule;
 import com.all580.monitor.entity.TabHttpMonitor;
+import com.all580.monitor.express.QLExpressMgr;
 import com.all580.monitor.mapper.TabHttpMonitorMapper;
 import com.all580.monitor.service.AlarmRuleService;
 import com.all580.monitor.service.BaseService;
@@ -31,9 +33,27 @@ public class HttpMonitorServiceImpl extends BaseService<TabHttpMonitor> implemen
     private AlarmRuleService alarmRuleService;
     @Autowired
     private HttpHeartbeatTimer httpHeartbeatTimer;
+    @Autowired
+    private QLExpressMgr qlExpressMgr;
     @Override
     public List<?> list(Integer spot, Integer app, String name, Boolean alarm, Boolean status) {
         return tabHttpMonitorMapper.search(spot, app, name, alarm != null && alarm ? true : null, status);
+    }
+
+    @Override
+    public int save(TabHttpMonitor entity) {
+        if (StrUtil.isNotBlank(entity.getScript()) && !qlExpressMgr.validate(entity.getScript())) {
+            throw new RuntimeException("数据脚本错误");
+        }
+        return super.save(entity);
+    }
+
+    @Override
+    public int updateNotNull(TabHttpMonitor entity) {
+        if (StrUtil.isNotBlank(entity.getScript()) && !qlExpressMgr.validate(entity.getScript())) {
+            throw new RuntimeException("数据脚本错误");
+        }
+        return super.updateNotNull(entity);
     }
 
     @Override

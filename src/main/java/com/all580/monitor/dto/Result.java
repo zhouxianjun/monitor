@@ -65,7 +65,7 @@ public class Result<E> implements Serializable {
 
     public Map<String, Object> getData() {
         if (data == null) {
-            data = new HashMap<>();
+            data = new HashMap<>(1);
         }
         return data;
     }
@@ -76,24 +76,24 @@ public class Result<E> implements Serializable {
         return (T) getData().get(key);
     }
 
-    public static Result ok() {
-        return Result.builder().code(SUCCESS).build();
+    public static <T> Result<T> ok() {
+        return Result.<T>builder().code(SUCCESS).build();
     }
 
-    public static Result ok(String msg) {
-        return Result.builder().code(SUCCESS).msg(msg).build();
+    public static <T> Result<T> ok(String msg) {
+        return Result.<T>builder().code(SUCCESS).msg(msg).build();
     }
 
-    public static Result fail() {
-        return Result.builder().code(FAIL).msg("操作失败").build();
+    public static <T> Result<T> fail() {
+        return Result.<T>builder().code(FAIL).msg("操作失败").build();
     }
-    public static Result fail(int code) {
-        return Result.builder().code(code).msg("操作失败").build();
+    public static <T> Result<T> fail(int code) {
+        return Result.<T>builder().code(code).msg("操作失败").build();
     }
-    public static Result fail(String msg) {
-        return Result.builder().code(FAIL).msg(msg).build();
+    public static <T> Result<T> fail(String msg) {
+        return Result.<T>builder().code(FAIL).msg(msg).build();
     }
-    public static Result fail(int code, String msg) {
-        return Result.builder().code(code).msg(msg).build();
+    public static <T> Result<T> fail(int code, String msg) {
+        return Result.<T>builder().code(code).msg(msg).build();
     }
 }

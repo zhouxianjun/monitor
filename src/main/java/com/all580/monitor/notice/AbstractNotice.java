@@ -1,7 +1,9 @@
 package com.all580.monitor.notice;
 
 import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.util.StrUtil;
 import com.all580.monitor.Constant;
+import com.all580.monitor.dto.Result;
 import com.all580.monitor.entity.TabAlarmHistory;
 import com.all580.monitor.entity.TabAlarmRule;
 
@@ -12,7 +14,10 @@ import com.all580.monitor.entity.TabAlarmRule;
  * @date 2018/5/16 14:25
  */
 public abstract class AbstractNotice {
-    protected String content(TabAlarmRule rule, TabAlarmHistory history) {
+    protected String content(TabAlarmRule rule, TabAlarmHistory history, Result<String> result) {
+        if (StrUtil.isNotBlank(result.getValue())) {
+            return result.getValue();
+        }
         switch (history.getStatus()) {
             case Constant.HistoryStatus.ALARM:
                 return String.format("您监控%s,%s发生告警,请查看", rule.getName(), DateUtil.formatDateTime(history.getCreateTime()));
@@ -23,7 +28,11 @@ public abstract class AbstractNotice {
         }
     }
 
-    protected String title(TabAlarmRule rule, TabAlarmHistory history) {
+    protected String title(TabAlarmRule rule, TabAlarmHistory history, Result<String> result) {
+        Object title = result.get("title");
+        if (title instanceof String && StrUtil.isNotBlank((String) title)) {
+            return (String) title;
+        }
         switch (history.getStatus()) {
             case Constant.HistoryStatus.ALARM:
                 return "发生告警";

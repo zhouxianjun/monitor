@@ -4,6 +4,7 @@ import cn.hutool.core.map.MapUtil;
 import cn.hutool.http.Method;
 import cn.hutool.json.JSONUtil;
 import com.all580.monitor.Constant;
+import com.all580.monitor.dto.Result;
 import com.all580.monitor.entity.TabAlarmHistory;
 import com.all580.monitor.entity.TabAlarmRule;
 import okhttp3.RequestBody;
@@ -30,10 +31,10 @@ public class DingNoticeAdapter extends AbstractHttpNoticeAdapter {
     }
 
     @Override
-    protected RequestBody request(String url, TabAlarmRule rule, TabAlarmHistory history) {
+    protected RequestBody request(String url, TabAlarmRule rule, TabAlarmHistory history, Result<String> result) {
         return RequestBody.create(Constant.JSON, JSONUtil.toJsonStr(MapUtil.builder()
                 .put("msgtype", "text")
-                .put("text", Collections.singletonMap("content", content(rule, history)))
+                .put("text", Collections.singletonMap("content", content(rule, history, result)))
                 .put("at", Collections.singletonMap("isAtAll", true))
                 .build()));
     }

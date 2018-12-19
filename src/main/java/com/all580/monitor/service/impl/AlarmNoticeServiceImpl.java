@@ -1,5 +1,6 @@
 package com.all580.monitor.service.impl;
 
+import com.all580.monitor.dto.Result;
 import com.all580.monitor.entity.TabAlarmHistory;
 import com.all580.monitor.entity.TabAlarmNotice;
 import com.all580.monitor.entity.TabAlarmRule;
@@ -40,9 +41,9 @@ public class AlarmNoticeServiceImpl extends BaseService<TabAlarmNotice> implemen
     @Override
     @SuppressWarnings("unchecked")
     @Retryable(value = Exception.class, backoff = @Backoff(delay = 2000, multiplier = 2))
-    public Object notice(int type, Object target, TabAlarmRule rule, TabAlarmHistory history) throws Exception {
+    public Object notice(int type, Object target, TabAlarmRule rule, TabAlarmHistory history, Result<String> result) throws Exception {
         if (appService.isAlarm(rule.getAppId()) && adapterMap.containsKey(type)) {
-            return adapterMap.get(type).run(target, rule, history);
+            return adapterMap.get(type).run(target, rule, history, result);
         }
         return null;
     }

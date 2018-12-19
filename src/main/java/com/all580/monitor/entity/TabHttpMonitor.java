@@ -65,6 +65,17 @@ public class TabHttpMonitor implements Serializable {
     @Column(name = "alarm_rule_id")
     private Integer alarmRuleId;
 
+    /**
+     * 是否保存请求数据
+     */
+    @Column(name = "save_data")
+    private Boolean saveData;
+
+    /**
+     * 请求数据脚本
+     */
+    private String script;
+
     private static final long serialVersionUID = 1L;
 
 }

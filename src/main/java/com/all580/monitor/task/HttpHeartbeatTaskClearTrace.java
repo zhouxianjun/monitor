@@ -1,12 +1,14 @@
 package com.all580.monitor.task;
 
 import cn.hutool.core.lang.Snowflake;
+import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONUtil;
 import com.all580.monitor.Constant;
 import com.all580.monitor.entity.TabAlarmRule;
 import com.all580.monitor.entity.TabHttpMonitor;
 import com.all580.monitor.entity.TabMonitorData;
+import com.all580.monitor.express.QLExpressMgr;
 import com.all580.monitor.manager.AlarmRuleManager;
 import com.all580.monitor.service.AlarmRuleService;
 import com.all580.monitor.service.MonitorDataService;
@@ -14,6 +16,7 @@ import io.netty.util.Timeout;
 import io.netty.util.TimerTask;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import okhttp3.Headers;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
@@ -28,9 +31,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StopWatch;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -60,6 +61,8 @@ public class HttpHeartbeatTaskClearTrace implements TimerTask {
     private Snowflake snowflake;
     @Autowired
     private OkHttpClient okHttpClient;
+    @Autowired
+    private QLExpressMgr qlExpressMgr;
 
     @Override
     public void run(Timeout timeout) throws Exception {
@@ -93,9 +96,6 @@ public class HttpHeartbeatTaskClearTrace implements TimerTask {
         String header = monitor.getHeader();
         String cookie = monitor.getCookie();
         String basicAuth = monitor.getBasicAuth();
-        StopWatch watch = new StopWatch();
-        String memo;
-        int responseCode;
 
         Request.Builder builder = new Request.Builder().url(monitor.getUrl()).method(monitor.getMethod(), null);
         if (JSONUtil.isJsonObj(header)) {
@@ -110,6 +110,10 @@ public class HttpHeartbeatTaskClearTrace implements TimerTask {
             builder.addHeader("Authorization", "Basic " + new String(Base64.encodeBase64(basicAuth.getBytes(Charsets.UTF_8))));
         }
         Request request = builder.build();
+        String memo;
+        int responseCode;
+        Headers headers = null;
+        StopWatch watch = new StopWatch();
         watch.start();
         try (Response response = okHttpClient.newCall(request).execute()) {
             try {
@@ -121,21 +125,23 @@ public class HttpHeartbeatTaskClearTrace implements TimerTask {
             } catch (Exception ignored) {
                 memo = response.toString();
             }
+            headers = response.headers();
             responseCode = response.code();
         } catch (Exception e) {
             responseCode = HttpStatus.SC_INTERNAL_SERVER_ERROR;
             memo = e.getMessage();
         }
         watch.stop();
-        return save(currentRule, memo, watch.getTotalTimeMillis(), responseCode, request.url().host());
+
+        List<TabMonitorData> data = getData(currentRule, memo, watch.getTotalTimeMillis(), responseCode, request.url().host(), headers);
+        return save(currentRule, data);
     }
 
-    @Transactional(propagation = Propagation.REQUIRES_NEW, rollbackFor = {Exception.class, RuntimeException.class})
-    public List<TabMonitorData> save(TabAlarmRule currentRule, String memo, long delayMs, int responseCode, String host) {
+    private List<TabMonitorData> getData(TabAlarmRule currentRule, String memo, long delayMs, int responseCode, String host, Headers headers) {
         List<TabMonitorData> data = new ArrayList<>(2);
         Date uploadTime = new Date();
-        long batch = snowflake.nextId();
-        TabMonitorData delay = new TabMonitorData()
+        String batch = String.valueOf(snowflake.nextId());
+        data.add(new TabMonitorData()
                 .setHost(host)
                 .setMetric(Constant.Metric.HTTP_HEARTBEAT)
                 .setResource(currentRule.getResource())
@@ -143,10 +149,9 @@ public class HttpHeartbeatTaskClearTrace implements TimerTask {
                 .setValue(String.valueOf(delayMs))
                 .setMemo(StrUtil.maxLength(memo, 5000))
                 .setUploadTime(uploadTime)
-                .setBatch(String.valueOf(batch));
-        monitorDataService.save(delay);
-        data.add(delay);
-        TabMonitorData code = new TabMonitorData()
+                .setBatch(batch));
+
+        data.add(new TabMonitorData()
                 .setHost(host)
                 .setMetric(Constant.Metric.HTTP_HEARTBEAT)
                 .setResource(currentRule.getResource())
@@ -154,9 +159,45 @@ public class HttpHeartbeatTaskClearTrace implements TimerTask {
                 .setValue(String.valueOf(responseCode))
                 .setMemo(memo)
                 .setUploadTime(uploadTime)
-                .setBatch(String.valueOf(batch));
-        monitorDataService.save(code);
-        data.add(code);
+                .setBatch(batch));
+        if (StrUtil.isNotBlank(monitor.getScript())) {
+            try {
+                Map<String, Object> dataMap = new HashMap<>(1);
+                Map<String, Object> context = MapUtil.builder(new HashMap<String, Object>(4))
+                        .put("rule", rule)
+                        .put("monitor", monitor)
+                        .put("delay", delayMs)
+                        .put("code", responseCode)
+                        .put("headers", headers)
+                        .put("response", memo)
+                        .put("data", dataMap)
+                        .put("dataList", data)
+                        .put("log", log)
+                        .build();
+                qlExpressMgr.execute(monitor.getScript(), context);
+                if (!dataMap.isEmpty()) {
+                    dataMap.forEach((key, value) -> data.add(new TabMonitorData()
+                            .setHost(host)
+                            .setMetric(Constant.Metric.HTTP_HEARTBEAT)
+                            .setResource(currentRule.getResource())
+                            .setKey(key)
+                            .setValue(StrUtil.utf8Str(value))
+                            .setUploadTime(uploadTime)
+                            .setBatch(batch)));
+                }
+            } catch (Throwable e) {
+                log.warn("HTTP监控数据脚本异常", e);
+            }
+        }
+
+        return data;
+    }
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW, rollbackFor = {Exception.class, RuntimeException.class})
+    public List<TabMonitorData> save(TabAlarmRule currentRule, List<TabMonitorData> data) {
+        if (monitor.getSaveData()) {
+            monitorDataService.save(data, true);
+        }
         return data;
     }
 
