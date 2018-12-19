@@ -28,6 +28,16 @@
                 <FormItem label="basicAuth" prop="monitor.basicAuth">
                     <Input v-model="vo.monitor.basicAuth" />
                 </FormItem>
+                <FormItem label="是否保存请求数据" prop="monitor.saveData">
+                    <i-switch v-model="vo.monitor.saveData" size="large">
+                        <span slot="open">是</span>
+                        <span slot="close">否</span>
+                    </i-switch>
+                </FormItem>
+                <FormItem label="数据解析脚本" prop="monitor.script">
+                    <MonacoEditor style="height: 600px;" v-model="vo.monitor.script" theme="vs-dark" language="java">
+                    </MonacoEditor>
+                </FormItem>
                 <FormItem label="脚本" prop="rule.script">
                     <MonacoEditor style="height: 600px;" v-model="vo.rule.script" theme="vs-dark" language="java">
                     </MonacoEditor>
@@ -37,16 +47,6 @@
                         <span slot="open">开启</span>
                         <span slot="close">禁用</span>
                     </i-switch>
-                </FormItem>
-                <FormItem label="是否保存请求数据" prop="monitor.saveData">
-                    <i-switch v-model="vo.monitor.saveData" size="large">
-                        <span slot="open">是</span>
-                        <span slot="close">否</span>
-                    </i-switch>
-                </FormItem>
-                <FormItem label="数据解析脚本" prop="monitor.script" v-if="vo.monitor.saveData">
-                    <MonacoEditor style="height: 600px;" v-model="vo.monitor.script" theme="vs-dark" language="java">
-                    </MonacoEditor>
                 </FormItem>
                 <Form-item label="连续几次" prop="rule.count">
                     <InputNumber v-model="vo.rule.count" :min="1" :max="10" :formatter="val => `${val}次后报警`" :parser="val => val.replace('次后报警', '')" />
@@ -143,7 +143,7 @@ export default {
             return this.vo.monitor.id !== null && this.vo.monitor.id !== undefined;
         }
     },
-    /* activated () {
+    activated () {
         Reflect.ownKeys(this.vo.monitor).forEach(key => {
             const val = this.$route.params[key];
             this.vo.monitor[key] = (val === undefined || val === null) ? this.vo.monitor[key] : val;
@@ -151,25 +151,12 @@ export default {
         Reflect.ownKeys(this.vo.rule).forEach(key => {
             const val = this.$route.params[key];
             this.vo.rule[key] = (val === undefined || val === null) ? this.vo.rule[key] : val;
-            if (key === 'script') {
-                this.vo.rule[key] = this.$route.params['ruleScript'];
-            }
         });
-    }, */
+        this.vo.rule.script = this.$route.params.ruleScript || '// code';
+    },
     async created () {
         await this.initContactsGroups();
         QL();
-        Reflect.ownKeys(this.vo.monitor).forEach(key => {
-            const val = this.$route.params[key];
-            this.vo.monitor[key] = (val === undefined || val === null) ? this.vo.monitor[key] : val;
-        });
-        Reflect.ownKeys(this.vo.rule).forEach(key => {
-            const val = this.$route.params[key];
-            this.vo.rule[key] = (val === undefined || val === null) ? this.vo.rule[key] : val;
-            if (key === 'script') {
-                this.vo.rule[key] = this.$route.params['ruleScript'];
-            }
-        });
     },
     methods: {
         async initContactsGroups () {
