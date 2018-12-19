@@ -10,31 +10,33 @@
             <Button class="margin-left-10" type="primary" @click="doQuery" icon="search">搜索</Button>
         </Row>
         <Row class="margin-top-10">
-            <Col>
-            <Table :columns="table.col" :data="table.data"></Table>
-            <div style="margin: 10px;overflow: hidden">
-                <div style="float: right;">
-                    <Page :total="table.total" :show-sizer="true" placement="top" @on-page-size-change="changePageSize" @on-change="changePage"></Page>
+            <i-col>
+                <Table :columns="table.col" :data="table.data"></Table>
+                <div style="margin: 10px;overflow: hidden">
+                    <div style="float: right;">
+                        <Page :total="table.total" :show-sizer="true" placement="top" @on-page-size-change="changePageSize" @on-change="changePage"></Page>
+                    </div>
                 </div>
-            </div>
-            </Col>
+            </i-col>
         </Row>
         <Modal v-model="model" :title="modelTitle" :loading="loadingBtn" @on-ok="addOrUpdate" @on-cancel="cancel">
-            <div style="max-height: 400px;" v-slimscroll>
-                <Form ref="form" :model="vo" :label-width="80" :rules="validate">
-                    <Form-item label="姓名" prop="name">
-                        <Input v-model="vo.name" />
-                    </Form-item>
-                    <FormItem label="邮箱" prop="email">
-                        <Input type="email" v-model="vo.email" />
-                    </FormItem>
-                    <FormItem label="openid" prop="openid">
-                        <Input v-model="vo.openid" />
-                    </FormItem>
-                    <FormItem label="钉钉机器人" prop="dingding">
-                        <Input type="url" v-model="vo.ding" />
-                    </FormItem>
-                </Form>
+            <div style="height: 300px;">
+                <vue-scroll>
+                    <Form ref="form" :model="vo" :label-width="80" :rules="validate">
+                        <Form-item label="姓名" prop="name">
+                            <Input v-model="vo.name" />
+                        </Form-item>
+                        <FormItem label="邮箱" prop="email">
+                            <Input type="email" v-model="vo.email" />
+                        </FormItem>
+                        <FormItem label="openid" prop="openid">
+                            <Input v-model="vo.openid" />
+                        </FormItem>
+                        <FormItem label="钉钉机器人" prop="dingding">
+                            <Input type="url" v-model="vo.ding" />
+                        </FormItem>
+                    </Form>
+                </vue-scroll>
             </div>
         </Modal>
     </div>

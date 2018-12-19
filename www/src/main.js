@@ -7,11 +7,12 @@ import iView from 'iview';
 import 'iview/dist/styles/iview.css';
 import '@/assets/icons/iconfont.css';
 import './common.less';
+import vuescroll from 'vuescroll';
+import 'vuescroll/dist/vuescroll.css';
 
-import VueSlimScroll from 'vue-slimscroll';
 import { StringToNumber } from './libs/common';
 
-Vue.use(VueSlimScroll);
+Vue.use(vuescroll);
 
 const BASE_URL = process.env.VUE_APP_SERVER_ADDRESS;
 

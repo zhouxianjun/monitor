@@ -1,7 +1,7 @@
 <template>
     <div>
         <Card :bordered="false" shadow>
-            <Form ref="form" :model="vo" :label-width="80" :rules="validate">
+            <Form ref="form" :model="vo" :label-width="120" :rules="validate">
                 <Form-item label="名称" prop="monitor.name">
                     <Input v-model="vo.monitor.name" />
                 </Form-item>
@@ -37,6 +37,16 @@
                         <span slot="open">开启</span>
                         <span slot="close">禁用</span>
                     </i-switch>
+                </FormItem>
+                <FormItem label="是否保存请求数据" prop="monitor.saveData">
+                    <i-switch v-model="vo.monitor.saveData" size="large">
+                        <span slot="open">是</span>
+                        <span slot="close">否</span>
+                    </i-switch>
+                </FormItem>
+                <FormItem label="数据解析脚本" prop="monitor.script" v-if="vo.monitor.saveData">
+                    <MonacoEditor style="height: 600px;" v-model="vo.monitor.script" theme="vs-dark" language="java">
+                    </MonacoEditor>
                 </FormItem>
                 <Form-item label="连续几次" prop="rule.count">
                     <InputNumber v-model="vo.rule.count" :min="1" :max="10" :formatter="val => `${val}次后报警`" :parser="val => val.replace('次后报警', '')" />
@@ -92,6 +102,8 @@ export default {
                     appId: null,
                     spotId: null,
                     url: null,
+                    saveData: true,
+                    script: null,
                     method: 'GET',
                     cookie: null,
                     header: null,
@@ -117,6 +129,7 @@ export default {
                 'monitor.method': [{required: true, trigger: 'change'}],
                 'rule.interval': [{type: 'number', required: true, trigger: 'blur'}],
                 'rule.nodata': [{type: 'boolean', required: true, trigger: 'blur'}],
+                'monitor.saveData': [{type: 'boolean', required: true, trigger: 'blur'}],
                 'rule.count': [{type: 'number', required: true, trigger: 'blur'}],
                 'rule.silenceInterval': [{type: 'number', required: true, trigger: 'blur'}],
                 'monitor.status': [{type: 'boolean', required: true, trigger: 'blur'}]
@@ -130,7 +143,7 @@ export default {
             return this.vo.monitor.id !== null && this.vo.monitor.id !== undefined;
         }
     },
-    activated () {
+    /* activated () {
         Reflect.ownKeys(this.vo.monitor).forEach(key => {
             const val = this.$route.params[key];
             this.vo.monitor[key] = (val === undefined || val === null) ? this.vo.monitor[key] : val;
@@ -138,11 +151,25 @@ export default {
         Reflect.ownKeys(this.vo.rule).forEach(key => {
             const val = this.$route.params[key];
             this.vo.rule[key] = (val === undefined || val === null) ? this.vo.rule[key] : val;
+            if (key === 'script') {
+                this.vo.rule[key] = this.$route.params['ruleScript'];
+            }
         });
-    },
-    created () {
-        this.initContactsGroups();
+    }, */
+    async created () {
+        await this.initContactsGroups();
         QL();
+        Reflect.ownKeys(this.vo.monitor).forEach(key => {
+            const val = this.$route.params[key];
+            this.vo.monitor[key] = (val === undefined || val === null) ? this.vo.monitor[key] : val;
+        });
+        Reflect.ownKeys(this.vo.rule).forEach(key => {
+            const val = this.$route.params[key];
+            this.vo.rule[key] = (val === undefined || val === null) ? this.vo.rule[key] : val;
+            if (key === 'script') {
+                this.vo.rule[key] = this.$route.params['ruleScript'];
+            }
+        });
     },
     methods: {
         async initContactsGroups () {

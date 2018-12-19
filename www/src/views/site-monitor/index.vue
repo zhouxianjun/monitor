@@ -25,14 +25,14 @@
             <Button class="margin-left-10" type="primary" @click="doQuery" icon="search">搜索</Button>
         </Row>
         <Row class="margin-top-10">
-            <Col>
-            <Table :columns="table.col" :data="table.data"></Table>
-            <div style="margin: 10px;overflow: hidden">
-                <div style="float: right;">
-                    <Page :total="table.total" :show-sizer="true" placement="top" @on-page-size-change="changePageSize" @on-change="changePage"></Page>
+            <i-col>
+                <Table :columns="table.col" :data="table.data"></Table>
+                <div style="margin: 10px;overflow: hidden">
+                    <div style="float: right;">
+                        <Page :total="table.total" :show-sizer="true" placement="top" @on-page-size-change="changePageSize" @on-change="changePage"></Page>
+                    </div>
                 </div>
-            </div>
-            </Col>
+            </i-col>
         </Row>
     </div>
 </template>

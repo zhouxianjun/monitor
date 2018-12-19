@@ -20,22 +20,24 @@
         </Row>
 
         <Modal v-model="model" :title="modelTitle" :loading="loadingBtn" @on-ok="addOrUpdate" @on-cancel="cancel">
-            <div style="max-height: 400px;" v-slimscroll>
-                <Form ref="form" :model="vo" :label-width="80" :rules="validate">
-                    <FormItem label="应用" prop="appId">
-                        <app-select v-model="vo.appId" :single="true" :spot-all="false" :app-all="false"></app-select>
-                    </FormItem>
-                    <FormItem label="版本号" prop="version">
-                        <Input v-model="vo.version" />
-                    </FormItem>
-                    <Upload action="" type="drag" :max-size="512000" :before-upload="handleUpload">
-                        <div style="padding: 20px 0">
-                            <Icon type="ios-cloud-upload" size="52" style="color: #3399ff"></Icon>
-                            <p>点击 或者 拖拽文件上传</p>
-                        </div>
-                    </Upload>
-                    <div v-if="file">{{ file.name }}</div>
-                </Form>
+            <div style="height: 300px;">
+                <vue-scroll>
+                    <Form ref="form" :model="vo" :label-width="80" :rules="validate">
+                        <FormItem label="应用" prop="appId">
+                            <app-select v-model="vo.appId" :single="true" :spot-all="false" :app-all="false"></app-select>
+                        </FormItem>
+                        <FormItem label="版本号" prop="version">
+                            <Input v-model="vo.version" />
+                        </FormItem>
+                        <Upload action="" type="drag" :max-size="512000" :before-upload="handleUpload">
+                            <div style="padding: 20px 0">
+                                <Icon type="ios-cloud-upload" size="52" style="color: #3399ff"></Icon>
+                                <p>点击 或者 拖拽文件上传</p>
+                            </div>
+                        </Upload>
+                        <div v-if="file">{{ file.name }}</div>
+                    </Form>
+                </vue-scroll>
             </div>
         </Modal>
     </div>
